@@ -1,0 +1,40 @@
+site_name: Text2Everything SDK
+site_description: Practical, concise Python SDK docs for Text2Everything
+repo_url: https://github.com/h2oai/text-2-everything
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+    - content.code.annotate
+    - toc.integrate
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.superfences
+nav:
+  - Overview: index.md
+  - Quickstart: quickstart.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Guides:
+      - Projects: guides/projects.md
+      - Contexts: guides/contexts.md
+      - Schema Metadata: guides/schema_metadata.md
+      - Golden Examples: guides/golden_examples.md
+      - Chat Sessions: guides/chat_sessions.md
+      - Chat: guides/chat.md
+      - Connectors: guides/connectors.md
+      - Custom Tools: guides/custom_tools.md
+      - Executions: guides/executions.md
+      - Feedback: guides/feedback.md
+  - How To:
+      - Bulk Operations: how-to/bulk_operations.md
+      - Validation: how-to/validation.md
+      - Jupyter: how-to/jupyter.md
