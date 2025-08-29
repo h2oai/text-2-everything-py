@@ -393,9 +393,17 @@ class SchemaMetadataResource(BaseResource):
                 results.append(result)
             return results
         
-        # Parallel execution
+        # Create the first item sequentially to avoid race conditions when creating collections
+        first_result = self.create(
+            project_id=project_id,
+            validate=False,
+            **schema_metadata_list[0]
+        )
+        
+        # Parallel execution for remaining items
+        remaining = schema_metadata_list[1:]
         if max_workers is None:
-            max_workers = min(32, len(schema_metadata_list))
+            max_workers = min(32, len(remaining))
         
         def create_single_schema(indexed_data):
             """Helper function to create a single schema with error handling."""
@@ -411,11 +419,12 @@ class SchemaMetadataResource(BaseResource):
         
         # Execute in parallel with ThreadPoolExecutor
         results = [None] * len(schema_metadata_list)
+        results[0] = first_result
         errors = []
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all tasks with their original indices
-            indexed_data = list(enumerate(schema_metadata_list))
+            # Submit tasks for remaining items with their original indices starting at 1
+            indexed_data = list(enumerate(remaining, start=1))
             future_to_index = {
                 executor.submit(create_single_schema, item): item[0] 
                 for item in indexed_data

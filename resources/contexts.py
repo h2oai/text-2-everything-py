@@ -246,9 +246,16 @@ class ContextsResource(BaseResource):
                 results.append(result)
             return results
         
-        # Parallel execution
+        # Create the first item sequentially to avoid race conditions when creating collections
+        first_result = self.create(
+            project_id=project_id,
+            **contexts[0]
+        )
+        
+        # Parallel execution for the remaining items
+        remaining = contexts[1:]
         if max_workers is None:
-            max_workers = min(32, len(contexts))
+            max_workers = min(32, len(remaining))
         
         def create_single_context(indexed_data):
             """Helper function to create a single context with error handling."""
@@ -263,11 +270,12 @@ class ContextsResource(BaseResource):
         
         # Execute in parallel with ThreadPoolExecutor
         results = [None] * len(contexts)
+        results[0] = first_result
         errors = []
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all tasks with their original indices
-            indexed_data = list(enumerate(contexts))
+            # Submit tasks for remaining items with their original indices starting at 1
+            indexed_data = list(enumerate(remaining, start=1))
             future_to_index = {
                 executor.submit(create_single_context, item): item[0] 
                 for item in indexed_data

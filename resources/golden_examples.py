@@ -320,9 +320,16 @@ class GoldenExamplesResource(BaseResource):
                 results.append(result)
             return results
         
-        # Parallel execution
+        # Create the first item sequentially to avoid race conditions when creating collections
+        first_result = self.create(
+            project_id=project_id,
+            **golden_examples[0]
+        )
+        
+        # Parallel execution for remaining items
+        remaining = golden_examples[1:]
         if max_workers is None:
-            max_workers = min(32, len(golden_examples))
+            max_workers = min(32, len(remaining))
         
         def create_single_example(indexed_data):
             """Helper function to create a single golden example with error handling."""
@@ -337,11 +344,12 @@ class GoldenExamplesResource(BaseResource):
         
         # Execute in parallel with ThreadPoolExecutor
         results = [None] * len(golden_examples)
+        results[0] = first_result
         errors = []
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all tasks with their original indices
-            indexed_data = list(enumerate(golden_examples))
+            # Submit tasks for remaining items with their original indices starting at 1
+            indexed_data = list(enumerate(remaining, start=1))
             future_to_index = {
                 executor.submit(create_single_example, item): item[0] 
                 for item in indexed_data
