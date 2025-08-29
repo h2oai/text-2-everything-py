@@ -571,6 +571,26 @@ isort text2everything_sdk/
 mypy text2everything_sdk/
 ```
 
+## Documentation
+
+### Serve docs locally
+
+```bash
+make docs
+```
+
+Then open http://127.0.0.1:8000
+
+### Build static site
+
+```bash
+make docs-build
+```
+
+Notes:
+- The Makefile uses `.venv` and installs from `requirements-dev.txt` automatically.
+- If needed, activate manually: `source .venv/bin/activate`.
+
 ## Contributing
 
 1. Fork the repository
