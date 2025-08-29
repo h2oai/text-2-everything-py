@@ -1,0 +1,320 @@
+"""
+Main client class for the Text2Everything SDK.
+"""
+
+import httpx
+import time
+from typing import Optional, Dict, Any, Union
+from urllib.parse import urljoin
+
+from .exceptions import (
+    Text2EverythingError,
+    AuthenticationError,
+    ValidationError,
+    NotFoundError,
+    RateLimitError,
+    ServerError,
+    ConnectionError,
+    TimeoutError,
+    InvalidConfigurationError
+)
+from .resources.projects import ProjectsResource
+from .resources.contexts import ContextsResource
+from .resources.golden_examples import GoldenExamplesResource
+from .resources.schema_metadata import SchemaMetadataResource
+from .resources.connectors import ConnectorsResource
+from .resources.executions import ExecutionsResource
+from .resources.chat import ChatResource
+from .resources.chat_sessions import ChatSessionsResource
+from .resources.feedback import FeedbackResource
+from .resources.custom_tools import CustomToolsResource
+
+
+class Text2EverythingClient:
+    """
+    Main client for the Text2Everything API.
+    
+    This client provides access to all Text2Everything API resources through
+    a unified interface with automatic authentication, error handling, and retry logic.
+    
+    Args:
+        base_url: The base URL of the Text2Everything API
+        api_key: Your API key for authentication
+        timeout: Request timeout in seconds (default: 30)
+        max_retries: Maximum number of retries for failed requests (default: 3)
+        retry_delay: Initial delay between retries in seconds (default: 1)
+        
+    Example:
+        >>> client = Text2EverythingClient(
+        ...     base_url="https://api.text2everything.com",
+        ...     api_key="your-api-key"
+        ... )
+        >>> projects = client.projects.list()
+        >>> project = client.projects.create(name="My Project")
+    """
+    
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        timeout: int = 30,
+        max_retries: int = 3,
+        retry_delay: float = 1.0,
+        **kwargs
+    ):
+        if not base_url:
+            raise InvalidConfigurationError("base_url is required")
+        if not api_key:
+            raise InvalidConfigurationError("api_key is required")
+            
+        self.base_url = base_url.rstrip('/')
+        self.api_key = api_key
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
+        
+        # Initialize HTTP client without default headers to avoid conflicts
+        self._client = httpx.Client(
+            timeout=timeout,
+            **kwargs
+        )
+        
+        # Initialize resource clients
+        self.projects = ProjectsResource(self)
+        self.contexts = ContextsResource(self)
+        self.golden_examples = GoldenExamplesResource(self)
+        self.schema_metadata = SchemaMetadataResource(self)
+        self.connectors = ConnectorsResource(self)
+        self.executions = ExecutionsResource(self)
+        self.chat = ChatResource(self)
+        self.chat_sessions = ChatSessionsResource(self)
+        self.feedback = FeedbackResource(self)
+        self.custom_tools = CustomToolsResource(self)
+    
+    def _get_default_headers(self) -> Dict[str, str]:
+        """Get default headers for API requests."""
+        return {
+            "X-API-Key": self.api_key,
+            "Content-Type": "application/json",
+            "User-Agent": "text2everything-sdk/1.0.0"
+        }
+    
+    def _build_url(self, endpoint: str) -> str:
+        """Build full URL from endpoint."""
+        return urljoin(self.base_url + "/api/", endpoint.lstrip("/"))
+    
+    def _handle_response(self, response: httpx.Response) -> Dict[str, Any]:
+        """Handle HTTP response and raise appropriate exceptions."""
+        try:
+            data = response.json() if response.content else {}
+        except ValueError:
+            data = {"error": "Invalid JSON response"}
+        
+        if response.status_code == 200 or response.status_code == 201:
+            return data
+        elif response.status_code == 400:
+            raise ValidationError(
+                data.get("error", "Validation error"),
+                status_code=response.status_code,
+                response_data=data
+            )
+        elif response.status_code == 401:
+            raise AuthenticationError(
+                data.get("error", "Authentication failed"),
+                status_code=response.status_code,
+                response_data=data
+            )
+        elif response.status_code == 404:
+            raise NotFoundError(
+                data.get("error", "Resource not found"),
+                status_code=response.status_code,
+                response_data=data
+            )
+        elif response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+            raise RateLimitError(
+                data.get("error", "Rate limit exceeded"),
+                retry_after=int(retry_after) if retry_after else None,
+                status_code=response.status_code,
+                response_data=data
+            )
+        elif response.status_code >= 500:
+            raise ServerError(
+                data.get("error", "Server error"),
+                status_code=response.status_code,
+                response_data=data
+            )
+        else:
+            raise Text2EverythingError(
+                data.get("error", f"HTTP {response.status_code}"),
+                status_code=response.status_code,
+                response_data=data
+            )
+    
+    def _make_request(
+        self,
+        method: str,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, str]] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Make HTTP request with retry logic.
+        
+        Args:
+            method: HTTP method (GET, POST, PUT, DELETE)
+            endpoint: API endpoint
+            data: Request body data
+            params: Query parameters
+            headers: Additional headers
+            **kwargs: Additional arguments for httpx
+            
+        Returns:
+            Response data as dictionary
+            
+        Raises:
+            Text2EverythingError: For API errors
+            ConnectionError: For connection issues
+            TimeoutError: For request timeouts
+        """
+        url = self._build_url(endpoint)
+        request_headers = self._get_default_headers()
+        if headers:
+            request_headers.update(headers)
+        
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = self._client.request(
+                    method=method,
+                    url=url,
+                    json=data,
+                    params=params,
+                    headers=request_headers,
+                    **kwargs
+                )
+                return self._handle_response(response)
+                
+            except httpx.ConnectError as e:
+                if attempt == self.max_retries:
+                    raise ConnectionError(f"Failed to connect to API: {e}")
+                time.sleep(self.retry_delay * (2 ** attempt))
+                
+            except httpx.TimeoutException as e:
+                if attempt == self.max_retries:
+                    raise TimeoutError(f"Request timed out: {e}")
+                time.sleep(self.retry_delay * (2 ** attempt))
+                
+            except RateLimitError as e:
+                if attempt == self.max_retries:
+                    raise
+                # Use retry_after if provided, otherwise exponential backoff
+                delay = e.retry_after or (self.retry_delay * (2 ** attempt))
+                time.sleep(delay)
+                
+            except (ServerError, Text2EverythingError) as e:
+                if attempt == self.max_retries or e.status_code < 500:
+                    raise
+                time.sleep(self.retry_delay * (2 ** attempt))
+    
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> Dict[str, Any]:
+        """Make GET request."""
+        return self._make_request("GET", endpoint, params=params, **kwargs)
+    
+    def post(self, endpoint: str, data: Optional[Dict[str, Any]] = None, **kwargs) -> Dict[str, Any]:
+        """Make POST request."""
+        return self._make_request("POST", endpoint, data=data, **kwargs)
+    
+    def put(self, endpoint: str, data: Optional[Dict[str, Any]] = None, **kwargs) -> Dict[str, Any]:
+        """Make PUT request."""
+        return self._make_request("PUT", endpoint, data=data, **kwargs)
+    
+    def delete(self, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """Make DELETE request."""
+        return self._make_request("DELETE", endpoint, **kwargs)
+    
+    def post_multipart(self, endpoint: str, data: Optional[Dict[str, Any]] = None, 
+                      files: Optional[list] = None, **kwargs) -> Dict[str, Any]:
+        """Make POST request with multipart form data."""
+        return self._make_multipart_request("POST", endpoint, data=data, files=files, **kwargs)
+    
+    def put_multipart(self, endpoint: str, data: Optional[Dict[str, Any]] = None, 
+                     files: Optional[list] = None, **kwargs) -> Dict[str, Any]:
+        """Make PUT request with multipart form data."""
+        return self._make_multipart_request("PUT", endpoint, data=data, files=files, **kwargs)
+    
+    def _make_multipart_request(
+        self,
+        method: str,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        files: Optional[list] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Make HTTP request with multipart form data.
+        
+        Args:
+            method: HTTP method (POST, PUT)
+            endpoint: API endpoint
+            data: Form data
+            files: List of file tuples (field_name, (filename, file_obj, content_type))
+            **kwargs: Additional arguments for httpx
+            
+        Returns:
+            Response data as dictionary
+        """
+        url = self._build_url(endpoint)
+        # Start with default headers but remove Content-Type for multipart
+        request_headers = {
+            "X-API-Key": self.api_key,
+            "User-Agent": "text2everything-sdk/1.0.0"
+            # Don't set Content-Type for multipart, let httpx handle it
+        }
+        
+        # Use list of tuples format which works with FastAPI
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = self._client.request(
+                    method=method,
+                    url=url,
+                    data=data,
+                    files=files,
+                    headers=request_headers,
+                    **kwargs
+                )
+                return self._handle_response(response)
+                
+            except httpx.ConnectError as e:
+                if attempt == self.max_retries:
+                    raise ConnectionError(f"Failed to connect to API: {e}")
+                time.sleep(self.retry_delay * (2 ** attempt))
+                
+            except httpx.TimeoutException as e:
+                if attempt == self.max_retries:
+                    raise TimeoutError(f"Request timed out: {e}")
+                time.sleep(self.retry_delay * (2 ** attempt))
+                
+            except RateLimitError as e:
+                if attempt == self.max_retries:
+                    raise
+                delay = e.retry_after or (self.retry_delay * (2 ** attempt))
+                time.sleep(delay)
+                
+            except (ServerError, Text2EverythingError) as e:
+                if attempt == self.max_retries or e.status_code < 500:
+                    raise
+                time.sleep(self.retry_delay * (2 ** attempt))
+    
+    def close(self):
+        """Close the HTTP client."""
+        self._client.close()
+    
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.close()
