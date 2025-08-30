@@ -5,21 +5,23 @@ title: Quickstart
 This Quickstart gets you from zero to a generated SQL query in ~5 minutes.
 
 Prereqs:
-- Have a Text2Everything API endpoint and API key
+- Have a Text2Everything API endpoint and h2oGPTe API key
 - Python 3.9+
 
-Install (local dev):
+## Installation
+
 ```bash
-pip install -e .
+pip install text2everything_sdk-0.1.x-py3-none-any.whl
 ```
 
-Minimal setup and first query:
+## Minimal setup and first query
+
 ```python
 from text2everything_sdk import Text2EverythingClient
 
+# Simple initialization
 client = Text2EverythingClient(
-    base_url="https://your-api-endpoint.com",
-    api_key="your-api-key",
+    api_key="your-h2ogpte-api-key",
 )
 
 # 1) Create a project
@@ -49,10 +51,19 @@ schema = client.schema_metadata.create(
     },
 )
 
-# 4) Start a chat session
+# 4) Add a golden example for better SQL quality
+client.golden_examples.create(
+    project_id=project.id,
+    user_query="How many active customers do we have?",
+    sql_query="SELECT COUNT(*) FROM customers WHERE status = 'active';",
+    description="Count of active customers",
+    is_always_displayed=True,
+)
+
+# 5) Start a chat session
 session = client.chat_sessions.create(project_id=project.id)
 
-# 5) Ask a question to generate SQL
+# 6) Ask a question to generate SQL
 resp = client.chat.chat_to_sql(
     project_id=project.id,
     query="Count active customers",

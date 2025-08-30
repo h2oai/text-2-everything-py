@@ -4,7 +4,9 @@ Contexts resource for the Text2Everything SDK.
 
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
+import httpx
 from .base import BaseResource
+from .rate_limited_executor import RateLimitedExecutor
 from ..models.contexts import Context, ContextCreate, ContextUpdate, ContextResponse
 from ..exceptions import ValidationError
 
@@ -190,16 +192,20 @@ class ContextsResource(BaseResource):
         project_id: str,
         contexts: List[Dict[str, Any]],
         parallel: bool = True,
-        max_workers: Optional[int] = None
+        max_workers: Optional[int] = None,
+        max_concurrent: int = 8,
+        use_connection_isolation: bool = True
     ) -> List[Context]:
         """
-        Create multiple contexts with optional parallel execution.
+        Create multiple contexts with optional parallel execution and rate limiting.
         
         Args:
             project_id: The project ID
             contexts: List of context data dictionaries
             parallel: Whether to execute requests in parallel (default: True)
-            max_workers: Maximum number of parallel workers (default: min(32, len(items)))
+            max_workers: Maximum number of parallel workers (default: min(16, len(items)))
+            max_concurrent: Maximum number of concurrent requests to prevent server overload (default: 8)
+            use_connection_isolation: Use isolated HTTP clients for each request to prevent connection conflicts (default: True)
             
         Returns:
             List of created Context instances in the same order as input
@@ -212,11 +218,17 @@ class ContextsResource(BaseResource):
             ...     {"name": "Rule 1", "content": "Business rule 1"},
             ...     {"name": "Rule 2", "content": "Business rule 2"}
             ... ]
-            >>> # Parallel execution (default)
+            >>> # Parallel execution with rate limiting (default)
             >>> contexts = client.contexts.bulk_create("proj_123", contexts_data)
             >>> 
             >>> # Sequential execution
             >>> contexts = client.contexts.bulk_create("proj_123", contexts_data, parallel=False)
+            >>> 
+            >>> # Custom rate limiting
+            >>> contexts = client.contexts.bulk_create("proj_123", contexts_data, max_concurrent=4)
+            >>> 
+            >>> # Disable connection isolation for shared connection pool
+            >>> contexts = client.contexts.bulk_create("proj_123", contexts_data, use_connection_isolation=False)
         """
         if not contexts:
             return []
@@ -255,29 +267,37 @@ class ContextsResource(BaseResource):
         # Parallel execution for the remaining items
         remaining = contexts[1:]
         if max_workers is None:
-            max_workers = min(32, len(remaining))
+            max_workers = min(16, len(remaining))
         
         def create_single_context(indexed_data):
             """Helper function to create a single context with error handling."""
             index, context_data = indexed_data
             try:
-                return index, self.create(
-                    project_id=project_id,
-                    **context_data
-                ), None
+                if use_connection_isolation:
+                    # Create isolated HTTP client for this request to avoid connection conflicts
+                    return index, self._create_with_isolated_client(
+                        project_id=project_id,
+                        context_data=context_data
+                    ), None
+                else:
+                    # Use shared connection pool
+                    return index, self.create(
+                        project_id=project_id,
+                        **context_data
+                    ), None
             except Exception as e:
                 return index, None, f"Item {index} ({context_data.get('name', 'unnamed')}): {str(e)}"
         
-        # Execute in parallel with ThreadPoolExecutor
+        # Execute in parallel with RateLimitedExecutor
         results = [None] * len(contexts)
         results[0] = first_result
         errors = []
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with RateLimitedExecutor(max_workers=max_workers, max_concurrent=max_concurrent) as executor:
             # Submit tasks for remaining items with their original indices starting at 1
             indexed_data = list(enumerate(remaining, start=1))
             future_to_index = {
-                executor.submit(create_single_context, item): item[0] 
+                executor.submit_rate_limited(create_single_context, item): item[0] 
                 for item in indexed_data
             }
             
@@ -298,6 +318,56 @@ class ContextsResource(BaseResource):
             )
         
         return results
+    
+    def _create_with_isolated_client(self, project_id: str, context_data: Dict[str, Any]) -> Context:
+        """
+        Create a context using an isolated HTTP client to avoid connection conflicts.
+        
+        Args:
+            project_id: The project ID
+            context_data: Context data dictionary
+            
+        Returns:
+            Created Context instance
+        """
+        # Create isolated HTTP client with same configuration as main client
+        timeout_config = httpx.Timeout(
+            connect=30,      # Connection timeout
+            read=180,        # Read timeout for long requests
+            write=30,        # Write timeout
+            pool=300         # Pool timeout
+        )
+        
+        limits_config = httpx.Limits(
+            max_connections=1,           # Single connection for isolation
+            max_keepalive_connections=0, # No keep-alive to avoid state issues
+            keepalive_expiry=0           # Immediate expiry
+        )
+        
+        with httpx.Client(
+            timeout=timeout_config,
+            limits=limits_config,
+            http2=False  # Use HTTP/1.1 for better compatibility
+        ) as isolated_client:
+            # Prepare context data
+            data = ContextCreate(
+                name=context_data["name"],
+                content=context_data["content"],
+                description=context_data.get("description"),
+                is_always_displayed=context_data.get("is_always_displayed", False),
+                **{k: v for k, v in context_data.items() if k not in ["name", "content", "description", "is_always_displayed"]}
+            ).model_dump(exclude_none=True)
+            
+            # Build endpoint and headers
+            endpoint = self._build_endpoint("projects", project_id, "contexts")
+            url = self._client._build_url(endpoint)
+            headers = self._client._get_default_headers()
+            
+            # Make isolated request
+            response = isolated_client.post(url, json=data, headers=headers)
+            response_data = self._client._handle_response(response)
+            
+            return self._create_model_instance(response_data, Context)
     
     def get_by_name(self, project_id: str, name: str) -> Optional[Context]:
         """

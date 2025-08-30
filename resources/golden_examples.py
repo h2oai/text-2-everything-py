@@ -5,6 +5,7 @@ Golden examples resource for the Text2Everything SDK.
 from __future__ import annotations
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
+import httpx
 from ..models.golden_examples import (
     GoldenExample,
     GoldenExampleCreate,
@@ -13,6 +14,7 @@ from ..models.golden_examples import (
 )
 from ..exceptions import ValidationError
 from .base import BaseResource
+from .rate_limited_executor import RateLimitedExecutor
 
 if TYPE_CHECKING:
     from ..client import Text2EverythingClient
@@ -255,15 +257,19 @@ class GoldenExamplesResource(BaseResource):
         project_id: str, 
         golden_examples: List[Dict[str, Any]], 
         parallel: bool = True,
-        max_workers: Optional[int] = None
+        max_workers: Optional[int] = None,
+        max_concurrent: int = 8,
+        use_connection_isolation: bool = True
     ) -> List[GoldenExampleResponse]:
-        """Create multiple golden examples with optional parallel execution.
+        """Create multiple golden examples with optional parallel execution and rate limiting.
         
         Args:
             project_id: The project ID
             golden_examples: List of golden example dictionaries to create
             parallel: Whether to execute requests in parallel (default: True)
-            max_workers: Maximum number of parallel workers (default: min(32, len(items)))
+            max_workers: Maximum number of parallel workers (default: min(16, len(items)))
+            max_concurrent: Maximum number of concurrent requests to prevent server overload (default: 8)
+            use_connection_isolation: Use isolated HTTP clients for each request to prevent connection conflicts (default: True)
             
         Returns:
             List of created golden examples in the same order as input
@@ -285,11 +291,17 @@ class GoldenExamplesResource(BaseResource):
                     "is_always_displayed": True
                 }
             ]
-            # Parallel execution (default)
+            # Parallel execution with rate limiting (default)
             results = client.golden_examples.bulk_create(project_id, examples)
             
             # Sequential execution
             results = client.golden_examples.bulk_create(project_id, examples, parallel=False)
+            
+            # Custom rate limiting
+            results = client.golden_examples.bulk_create(project_id, examples, max_concurrent=4)
+            
+            # Disable connection isolation for shared connection pool
+            results = client.golden_examples.bulk_create(project_id, examples, use_connection_isolation=False)
             ```
         """
         if not golden_examples:
@@ -329,29 +341,37 @@ class GoldenExamplesResource(BaseResource):
         # Parallel execution for remaining items
         remaining = golden_examples[1:]
         if max_workers is None:
-            max_workers = min(32, len(remaining))
+            max_workers = min(16, len(remaining))
         
         def create_single_example(indexed_data):
             """Helper function to create a single golden example with error handling."""
             index, example_data = indexed_data
             try:
-                return index, self.create(
-                    project_id=project_id,
-                    **example_data
-                ), None
+                if use_connection_isolation:
+                    # Create isolated HTTP client for this request to avoid connection conflicts
+                    return index, self._create_with_isolated_client(
+                        project_id=project_id,
+                        example_data=example_data
+                    ), None
+                else:
+                    # Use shared connection pool
+                    return index, self.create(
+                        project_id=project_id,
+                        **example_data
+                    ), None
             except Exception as e:
                 return index, None, f"Item {index} ({example_data.get('user_query', 'unnamed')}): {str(e)}"
         
-        # Execute in parallel with ThreadPoolExecutor
+        # Execute in parallel with RateLimitedExecutor
         results = [None] * len(golden_examples)
         results[0] = first_result
         errors = []
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with RateLimitedExecutor(max_workers=max_workers, max_concurrent=max_concurrent) as executor:
             # Submit tasks for remaining items with their original indices starting at 1
             indexed_data = list(enumerate(remaining, start=1))
             future_to_index = {
-                executor.submit(create_single_example, item): item[0] 
+                executor.submit_rate_limited(create_single_example, item): item[0] 
                 for item in indexed_data
             }
             
@@ -372,6 +392,62 @@ class GoldenExamplesResource(BaseResource):
             )
         
         return results
+    
+    def _create_with_isolated_client(self, project_id: str, example_data: Dict[str, Any]) -> GoldenExampleResponse:
+        """
+        Create a golden example using an isolated HTTP client to avoid connection conflicts.
+        
+        Args:
+            project_id: The project ID
+            example_data: Golden example data dictionary
+            
+        Returns:
+            Created GoldenExampleResponse instance
+        """
+        # Create isolated HTTP client with same configuration as main client
+        timeout_config = httpx.Timeout(
+            connect=30,      # Connection timeout
+            read=180,        # Read timeout for long requests
+            write=30,        # Write timeout
+            pool=300         # Pool timeout
+        )
+        
+        limits_config = httpx.Limits(
+            max_connections=1,           # Single connection for isolation
+            max_keepalive_connections=0, # No keep-alive to avoid state issues
+            keepalive_expiry=0           # Immediate expiry
+        )
+        
+        with httpx.Client(
+            timeout=timeout_config,
+            limits=limits_config,
+            http2=False  # Use HTTP/1.1 for better compatibility
+        ) as isolated_client:
+            # Prepare golden example
+            golden_example = GoldenExampleCreate(
+                user_query=example_data["user_query"],
+                sql_query=example_data["sql_query"],
+                description=example_data.get("description"),
+                is_always_displayed=example_data.get("is_always_displayed", False),
+                **{k: v for k, v in example_data.items() if k not in ["user_query", "sql_query", "description", "is_always_displayed"]}
+            )
+            
+            # Build endpoint and headers
+            url = self._client._build_url(f"/projects/{project_id}/golden-examples")
+            headers = self._client._get_default_headers()
+            
+            # Make isolated request
+            response = isolated_client.post(url, json=golden_example.model_dump(), headers=headers)
+            response_data = self._client._handle_response(response)
+            
+            # Handle both list and single object responses
+            if isinstance(response_data, list):
+                if response_data:
+                    response_data = response_data[0]  # Take first item from list
+                else:
+                    raise ValidationError("API returned empty list")
+            
+            return GoldenExampleResponse(**response_data)
     
     def list_always_displayed(self, project_id: str) -> List[GoldenExampleResponse]:
         """List golden examples that are marked as always displayed.

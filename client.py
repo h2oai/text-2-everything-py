@@ -36,18 +36,35 @@ class Text2EverythingClient:
     
     This client provides access to all Text2Everything API resources through
     a unified interface with automatic authentication, error handling, and retry logic.
+    Optimized for high-concurrency scenarios and long-running requests.
     
     Args:
         base_url: The base URL of the Text2Everything API
         api_key: Your API key for authentication
-        timeout: Request timeout in seconds (default: 30)
+        timeout: Connection timeout in seconds (default: 30)
         max_retries: Maximum number of retries for failed requests (default: 3)
         retry_delay: Initial delay between retries in seconds (default: 1)
+        read_timeout: Read timeout for long-running requests in seconds (default: 180)
+        pool_timeout: Connection pool timeout in seconds (default: 300)
+        max_connections: Maximum total connections in pool (default: 50)
+        max_keepalive_connections: Maximum keep-alive connections (default: 10)
+        keepalive_expiry: Keep-alive connection expiry in seconds (default: 300)
+        http2: Enable HTTP/2 support (default: False)
         
     Example:
+        >>> # Standard usage
         >>> client = Text2EverythingClient(
         ...     base_url="https://api.text2everything.com",
         ...     api_key="your-api-key"
+        ... )
+        >>> 
+        >>> # High-concurrency configuration
+        >>> client = Text2EverythingClient(
+        ...     base_url="https://api.text2everything.com",
+        ...     api_key="your-api-key",
+        ...     read_timeout=300,  # 5 minutes for long requests
+        ...     max_connections=100,
+        ...     max_keepalive_connections=20
         ... )
         >>> projects = client.projects.list()
         >>> project = client.projects.create(name="My Project")
@@ -55,11 +72,17 @@ class Text2EverythingClient:
     
     def __init__(
         self,
-        base_url: str,
         api_key: str,
+        base_url: str = "http://text2everything.text2everything.svc.cluster.local:8000",
         timeout: int = 30,
         max_retries: int = 3,
         retry_delay: float = 1.0,
+        read_timeout: int = 180,
+        pool_timeout: int = 300,
+        max_connections: int = 50,
+        max_keepalive_connections: int = 10,
+        keepalive_expiry: float = 300.0,
+        http2: bool = False,
         **kwargs
     ):
         if not base_url:
@@ -73,9 +96,26 @@ class Text2EverythingClient:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         
-        # Initialize HTTP client without default headers to avoid conflicts
+        # Configure timeouts for long-running requests
+        timeout_config = httpx.Timeout(
+            connect=timeout,           # Connection establishment timeout
+            read=read_timeout,         # Read timeout for long-running requests
+            write=timeout,             # Write timeout
+            pool=pool_timeout          # Pool timeout
+        )
+        
+        # Configure connection limits for high concurrency
+        limits_config = httpx.Limits(
+            max_connections=max_connections,
+            max_keepalive_connections=max_keepalive_connections,
+            keepalive_expiry=keepalive_expiry
+        )
+        
+        # Initialize HTTP client with optimized settings for high concurrency and long requests
         self._client = httpx.Client(
-            timeout=timeout,
+            timeout=timeout_config,
+            limits=limits_config,
+            http2=http2,
             **kwargs
         )
         
@@ -204,6 +244,18 @@ class Text2EverythingClient:
             except httpx.TimeoutException as e:
                 if attempt == self.max_retries:
                     raise TimeoutError(f"Request timed out: {e}")
+                time.sleep(self.retry_delay * (2 ** attempt))
+                
+            except httpx.RemoteProtocolError as e:
+                # Handle HTTP protocol errors (like connection drops during high concurrency)
+                if attempt == self.max_retries:
+                    raise ConnectionError(f"HTTP protocol error: {e}")
+                time.sleep(self.retry_delay * (2 ** attempt))
+                
+            except httpx.ReadError as e:
+                # Handle connection read errors
+                if attempt == self.max_retries:
+                    raise ConnectionError(f"Connection read error: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except RateLimitError as e:

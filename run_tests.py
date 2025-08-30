@@ -43,7 +43,11 @@ from text2everything_sdk.tests import (
     ChatSessionsTestRunner,
     FeedbackTestRunner,
     CustomToolsTestRunner,
-    ValidationErrorsTestRunner
+    ValidationErrorsTestRunner,
+    HighConcurrencyTestRunner,
+    HighConcurrencySchemaMetadataTestRunner,
+    HighConcurrencyContextsTestRunner,
+    HighConcurrencyGoldenExamplesTestRunner
 )
 
 
@@ -67,15 +71,22 @@ class TestSuiteRunner:
             'chat_sessions': ChatSessionsTestRunner,
             'feedback': FeedbackTestRunner,
             'custom_tools': CustomToolsTestRunner,
-            'validation_errors': ValidationErrorsTestRunner
+            'validation_errors': ValidationErrorsTestRunner,
+            'high_concurrency': HighConcurrencyTestRunner,  # High load stress test (all resources)
+            'high_concurrency_schema_metadata': HighConcurrencySchemaMetadataTestRunner,  # 32 schema requests only
+            'high_concurrency_contexts': HighConcurrencyContextsTestRunner,  # 32 context requests only
+            'high_concurrency_golden_examples': HighConcurrencyGoldenExamplesTestRunner  # 32 golden example requests only
         }
         
         # Define the recommended test execution order
         # Fixed dependency chain: connectors → chat_sessions → chat → executions
+        # High concurrency tests run last as they are stress tests
         self.recommended_order = [
             'projects', 'contexts', 'schema_metadata', 'golden_examples',
             'connectors', 'chat_sessions', 'chat', 'executions', 
-            'feedback', 'custom_tools', 'validation_errors'
+            'feedback', 'custom_tools', 'validation_errors', 'high_concurrency',
+            'high_concurrency_schema_metadata', 'high_concurrency_contexts', 
+            'high_concurrency_golden_examples'
         ]
     
     def run_tests(self, include_tests: List[str] = None, exclude_tests: List[str] = None) -> bool:

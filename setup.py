@@ -23,7 +23,7 @@ def read_requirements():
 
 setup(
     name="text2everything-sdk",
-    version="0.1.2",
+    version="0.1.3",
     author="Text2Everything Team",
     author_email="support@text2everything.com",
     description="Official Python SDK for the Text2Everything API",

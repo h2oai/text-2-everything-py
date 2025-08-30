@@ -5,6 +5,7 @@ Schema metadata resource for the Text2Everything SDK.
 from __future__ import annotations
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
+import httpx
 from ..models.schema_metadata import (
     SchemaMetadata,
     SchemaMetadataCreate,
@@ -17,6 +18,7 @@ from ..models.schema_metadata import (
 )
 from ..exceptions import ValidationError
 from .base import BaseResource
+from .rate_limited_executor import RateLimitedExecutor
 
 if TYPE_CHECKING:
     from ..client import Text2EverythingClient
@@ -324,7 +326,9 @@ class SchemaMetadataResource(BaseResource):
         schema_metadata_list: List[Dict[str, Any]], 
         validate: bool = True,
         parallel: bool = True,
-        max_workers: Optional[int] = None
+        max_workers: Optional[int] = None,
+        max_concurrent: int = 8,
+        use_connection_isolation: bool = True
     ) -> List[SchemaMetadataResponse]:
         """Create multiple schema metadata items with validation and optional parallel execution.
         
@@ -333,7 +337,9 @@ class SchemaMetadataResource(BaseResource):
             schema_metadata_list: List of schema metadata dictionaries to create
             validate: Whether to perform nested field validation (default: True)
             parallel: Whether to execute requests in parallel (default: True)
-            max_workers: Maximum number of parallel workers (default: min(32, len(items)))
+            max_workers: Maximum number of parallel workers (default: min(16, len(items)))
+            max_concurrent: Maximum number of concurrent requests (default: 8, rate limiting)
+            use_connection_isolation: Use isolated HTTP clients for each request to prevent connection conflicts (default: True)
             
         Returns:
             List of created schema metadata in the same order as input
@@ -360,6 +366,9 @@ class SchemaMetadataResource(BaseResource):
             
             # Sequential execution
             results = client.schema_metadata.bulk_create(project_id, schemas, parallel=False)
+            
+            # Disable connection isolation for shared connection pool
+            results = client.schema_metadata.bulk_create(project_id, schemas, use_connection_isolation=False)
             ```
         """
         if not schema_metadata_list:
@@ -400,33 +409,41 @@ class SchemaMetadataResource(BaseResource):
             **schema_metadata_list[0]
         )
         
-        # Parallel execution for remaining items
+        # Parallel execution for remaining items with rate limiting
         remaining = schema_metadata_list[1:]
         if max_workers is None:
-            max_workers = min(32, len(remaining))
+            max_workers = min(16, len(remaining))
         
         def create_single_schema(indexed_data):
             """Helper function to create a single schema with error handling."""
             index, schema_data = indexed_data
             try:
-                return index, self.create(
-                    project_id=project_id,
-                    validate=False,  # Already validated
-                    **schema_data
-                ), None
+                if use_connection_isolation:
+                    # Create isolated HTTP client for this request to avoid connection conflicts
+                    return index, self._create_with_isolated_client(
+                        project_id=project_id,
+                        schema_data=schema_data
+                    ), None
+                else:
+                    # Use shared connection pool
+                    return index, self.create(
+                        project_id=project_id,
+                        validate=False,  # Already validated
+                        **schema_data
+                    ), None
             except Exception as e:
                 return index, None, f"Item {index} ({schema_data.get('name', 'unnamed')}): {str(e)}"
         
-        # Execute in parallel with ThreadPoolExecutor
+        # Execute in parallel with rate-limited executor
         results = [None] * len(schema_metadata_list)
         results[0] = first_result
         errors = []
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with RateLimitedExecutor(max_workers=max_workers, max_concurrent=max_concurrent) as executor:
             # Submit tasks for remaining items with their original indices starting at 1
             indexed_data = list(enumerate(remaining, start=1))
             future_to_index = {
-                executor.submit(create_single_schema, item): item[0] 
+                executor.submit_rate_limited(create_single_schema, item): item[0] 
                 for item in indexed_data
             }
             
@@ -447,6 +464,62 @@ class SchemaMetadataResource(BaseResource):
             )
         
         return results
+    
+    def _create_with_isolated_client(self, project_id: str, schema_data: Dict[str, Any]) -> SchemaMetadataResponse:
+        """
+        Create schema metadata using an isolated HTTP client to avoid connection conflicts.
+        
+        Args:
+            project_id: The project ID
+            schema_data: Schema metadata data dictionary
+            
+        Returns:
+            Created SchemaMetadataResponse instance
+        """
+        # Create isolated HTTP client with same configuration as main client
+        timeout_config = httpx.Timeout(
+            connect=30,      # Connection timeout
+            read=180,        # Read timeout for long requests
+            write=30,        # Write timeout
+            pool=300         # Pool timeout
+        )
+        
+        limits_config = httpx.Limits(
+            max_connections=1,           # Single connection for isolation
+            max_keepalive_connections=0, # No keep-alive to avoid state issues
+            keepalive_expiry=0           # Immediate expiry
+        )
+        
+        with httpx.Client(
+            timeout=timeout_config,
+            limits=limits_config,
+            http2=False  # Use HTTP/1.1 for better compatibility
+        ) as isolated_client:
+            # Prepare schema metadata
+            schema_metadata = SchemaMetadataCreate(
+                name=schema_data["name"],
+                schema_data=schema_data["schema_data"],
+                description=schema_data.get("description"),
+                is_always_displayed=schema_data.get("is_always_displayed", False),
+                **{k: v for k, v in schema_data.items() if k not in ["name", "schema_data", "description", "is_always_displayed"]}
+            )
+            
+            # Build endpoint and headers
+            url = self._client._build_url(f"/projects/{project_id}/schema-metadata")
+            headers = self._client._get_default_headers()
+            
+            # Make isolated request
+            response = isolated_client.post(url, json=schema_metadata.model_dump(), headers=headers)
+            response_data = self._client._handle_response(response)
+            
+            # Handle both list and single object responses
+            if isinstance(response_data, list):
+                if response_data:
+                    response_data = response_data[0]  # Take first item from list
+                else:
+                    raise ValidationError("API returned empty list")
+            
+            return SchemaMetadataResponse(**response_data)
     
     def list_always_displayed(self, project_id: str) -> List[SchemaMetadataResponse]:
         """List schema metadata that are marked as always displayed.

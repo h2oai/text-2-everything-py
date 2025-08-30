@@ -17,6 +17,10 @@ from .test_chat_sessions import ChatSessionsTestRunner
 from .test_feedback import FeedbackTestRunner
 from .test_custom_tools import CustomToolsTestRunner
 from .test_validation_errors import ValidationErrorsTestRunner
+from .test_high_concurrency import HighConcurrencyTestRunner
+from .test_high_concurrency_schema_metadata import HighConcurrencySchemaMetadataTestRunner
+from .test_high_concurrency_contexts import HighConcurrencyContextsTestRunner
+from .test_high_concurrency_golden_examples import HighConcurrencyGoldenExamplesTestRunner
 
 __all__ = [
     'BaseTestRunner',
@@ -30,5 +34,9 @@ __all__ = [
     'ChatSessionsTestRunner',
     'FeedbackTestRunner',
     'CustomToolsTestRunner',
-    'ValidationErrorsTestRunner'
+    'ValidationErrorsTestRunner',
+    'HighConcurrencyTestRunner',
+    'HighConcurrencySchemaMetadataTestRunner',
+    'HighConcurrencyContextsTestRunner',
+    'HighConcurrencyGoldenExamplesTestRunner'
 ]
