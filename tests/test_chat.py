@@ -104,7 +104,7 @@ class ChatTestRunner(BaseTestRunner):
                     answer_response = self.client.chat.chat_to_answer(
                         project_id=self.test_project_id,
                         chat_session_id=h2ogpte_session_id,
-                        query="Count all users",
+                        query="What tables are available in the database?",
                         connector_id=connector_id,
                         auto_add_feedback={"positive": True, "negative": False}
                     )

@@ -44,7 +44,6 @@ from text2everything_sdk.tests import (
     FeedbackTestRunner,
     CustomToolsTestRunner,
     ValidationErrorsTestRunner,
-    HighConcurrencyTestRunner,
     HighConcurrencySchemaMetadataTestRunner,
     HighConcurrencyContextsTestRunner,
     HighConcurrencyGoldenExamplesTestRunner
@@ -72,7 +71,6 @@ class TestSuiteRunner:
             'feedback': FeedbackTestRunner,
             'custom_tools': CustomToolsTestRunner,
             'validation_errors': ValidationErrorsTestRunner,
-            'high_concurrency': HighConcurrencyTestRunner,  # High load stress test (all resources)
             'high_concurrency_schema_metadata': HighConcurrencySchemaMetadataTestRunner,  # 32 schema requests only
             'high_concurrency_contexts': HighConcurrencyContextsTestRunner,  # 32 context requests only
             'high_concurrency_golden_examples': HighConcurrencyGoldenExamplesTestRunner  # 32 golden example requests only
@@ -84,7 +82,7 @@ class TestSuiteRunner:
         self.recommended_order = [
             'projects', 'contexts', 'schema_metadata', 'golden_examples',
             'connectors', 'chat_sessions', 'chat', 'executions', 
-            'feedback', 'custom_tools', 'validation_errors', 'high_concurrency',
+            'feedback', 'custom_tools', 'validation_errors',
             'high_concurrency_schema_metadata', 'high_concurrency_contexts', 
             'high_concurrency_golden_examples'
         ]

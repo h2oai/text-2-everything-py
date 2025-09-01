@@ -92,7 +92,7 @@ class ExecutionsTestRunner(BaseTestRunner):
                 )
                 print(f"✅ SQL execution completed (execution_id: {execution_result.execution_id})")
             except Exception as e:
-                print(f"⚠️  SQL execution failed as expected with test connector: {e}")
+                print(f"⚠️  SQL execution failed with test connector: {e}")
             
             # Test chat-based execution with real chat session and message
             try:
