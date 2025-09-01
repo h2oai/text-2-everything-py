@@ -27,7 +27,7 @@ class ExecutionsResource(BaseResource):
         connector_id: str,
         chat_message_id: str = None,
         sql_query: str = None,
-        h2ogpte_session_id: str = None,
+        chat_session_id: str = None,
         **kwargs
     ) -> SQLExecuteResponse:
         """Execute a SQL query using the specified connector.
@@ -36,7 +36,7 @@ class ExecutionsResource(BaseResource):
             connector_id: The database connector ID
             chat_message_id: Optional chat message ID containing SQL query
             sql_query: Optional SQL query to execute directly
-            h2ogpte_session_id: Optional H2OGPTE session ID for context
+            chat_session_id: Optional chat session ID for context
             **kwargs: Additional execution request fields
         
         Returns:
@@ -71,7 +71,7 @@ class ExecutionsResource(BaseResource):
             connector_id=connector_id,
             chat_message_id=chat_message_id,
             sql_query=sql_query,
-            h2ogpte_session_id=h2ogpte_session_id,
+            chat_session_id=chat_session_id,
             **kwargs
         )
         
@@ -82,13 +82,13 @@ class ExecutionsResource(BaseResource):
         return SQLExecuteResponse(**response)
     
     def execute_from_chat(self, connector_id: str, chat_message_id: str, 
-                         h2ogpte_session_id: str = None) -> SQLExecuteResponse:
+                         chat_session_id: str = None) -> SQLExecuteResponse:
         """Execute SQL from a chat message.
         
         Args:
             connector_id: The database connector ID
             chat_message_id: The chat message containing the SQL query
-            h2ogpte_session_id: Optional H2OGPTE session ID for context
+            chat_session_id: Optional chat session ID for context
         
         Returns:
             SQL execution response
@@ -104,17 +104,17 @@ class ExecutionsResource(BaseResource):
         return self.execute_sql(
             connector_id=connector_id,
             chat_message_id=chat_message_id,
-            h2ogpte_session_id=h2ogpte_session_id
+            chat_session_id=chat_session_id
         )
     
     def execute_query(self, connector_id: str, sql_query: str,
-                     h2ogpte_session_id: str = None) -> SQLExecuteResponse:
+                     chat_session_id: str = None) -> SQLExecuteResponse:
         """Execute a SQL query directly.
         
         Args:
             connector_id: The database connector ID
             sql_query: The SQL query to execute
-            h2ogpte_session_id: Optional H2OGPTE session ID for context
+            chat_session_id: Optional chat session ID for context
         
         Returns:
             SQL execution response
@@ -134,7 +134,7 @@ class ExecutionsResource(BaseResource):
         return self.execute_sql(
             connector_id=connector_id,
             sql_query=sql_query,
-            h2ogpte_session_id=h2ogpte_session_id
+            chat_session_id=chat_session_id
         )
     
     def get_execution(self, execution_id: str) -> Execution:

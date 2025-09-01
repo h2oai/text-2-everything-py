@@ -12,7 +12,7 @@ class SQLExecuteRequest(BaseModel):
     connector_id: str
     chat_message_id: Optional[str] = None
     sql_query: Optional[str] = None
-    h2ogpte_session_id: Optional[str] = None
+    chat_session_id: Optional[str] = None
 
 
 class SQLExecuteResponse(BaseModel):
