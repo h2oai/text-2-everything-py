@@ -77,7 +77,7 @@ class ExecutionsResource(BaseResource):
         
         response = self._client.post(
             "/sql/execute",
-            data=request.model_dump()
+            data=request.model_dump(by_alias=True)
         )
         return SQLExecuteResponse(**response)
     
