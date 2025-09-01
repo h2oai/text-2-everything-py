@@ -92,7 +92,7 @@ class ExecutionsTestRunner(BaseTestRunner):
                 )
                 print(f"✅ SQL execution completed (execution_id: {execution_result.execution_id})")
             except Exception as e:
-                print(f"⚠️  SQL execution failed as expected with test connector: {e}")
+                print(f"⚠️  SQL execution failed with test connector: {e}")
             
             # Test chat-based execution with real chat session and message
             try:
@@ -111,8 +111,8 @@ class ExecutionsTestRunner(BaseTestRunner):
                 # Send chat message to generate SQL and get a real message ID
                 chat_response = self.client.chat.chat_to_sql(
                     self.test_project_id,
+                    chat_session_id=h2ogpte_session_id,
                     query="SELECT 1 as test_column;",
-                    h2ogpte_session_id=h2ogpte_session_id,
                     connector_id=connector_id
                 )
                 real_message_id = chat_response.id

@@ -18,7 +18,6 @@ class ChatRequest(BaseModel):
     """Model for chat request."""
     
     query: str
-    h2ogpte_session_id: str
     llm: Optional[str] = None
     context_id: Optional[str] = None
     schema_metadata_id: Optional[str] = None
@@ -39,6 +38,7 @@ class ChatResponseBase(BaseModel):
     
     id: str
     project_id: str
+    chat_session_id: Optional[str] = None
     user_query: str
     sql_query: Optional[str] = None
     explanation: Optional[str] = None
