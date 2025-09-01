@@ -10,7 +10,7 @@ from text2everything_sdk import Text2EverythingClient
 client = Text2EverythingClient(base_url="https://...", api_key="...")
 project = client.projects.create(name="Notebook Demo")
 session = client.chat_sessions.create(project_id=project.id)
-resp = client.chat.chat_to_sql(project_id=project.id, query="Count users", h2ogpte_session_id=session.id)
+resp = client.chat.chat_to_sql(project_id=project.id, query="Count users")
 resp.sql_query
 ```
 

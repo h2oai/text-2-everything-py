@@ -96,7 +96,6 @@ response = client.chat.chat_to_sql(
     project_id=project.id,
     chat_session_id=session.id,
     query="Show me all customers from California",
-    h2ogpte_session_id=session.id
 )
 print(f"Generated SQL: {response.sql_query}")
 ```
@@ -188,7 +187,6 @@ resp = client.chat.chat_to_sql(
     project_id="project_id",
     chat_session_id=session.id,
     query="Your natural language query here",
-    h2ogpte_session_id=session.id
 )
 
 # Or convert and execute
@@ -196,7 +194,6 @@ ans = client.chat.chat_to_answer(
     project_id="project_id",
     chat_session_id=session.id,
     query="Top 10 customers by revenue",
-    h2ogpte_session_id=session.id,
     connector_id="your-connector-id"
 )
 ```

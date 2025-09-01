@@ -113,7 +113,6 @@ class ExecutionsTestRunner(BaseTestRunner):
                     self.test_project_id,
                     chat_session_id=h2ogpte_session_id,
                     query="SELECT 1 as test_column;",
-                    h2ogpte_session_id=h2ogpte_session_id,
                     connector_id=connector_id
                 )
                 real_message_id = chat_response.id

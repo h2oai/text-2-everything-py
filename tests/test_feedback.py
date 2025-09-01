@@ -68,7 +68,6 @@ class FeedbackTestRunner(BaseTestRunner):
                 self.test_project_id,
                 chat_session_id=h2ogpte_session_id,
                 query="What tables are available?",
-                h2ogpte_session_id=h2ogpte_session_id,
                 connector_id=connector_id
             )
             chat_message_id = chat_response.id

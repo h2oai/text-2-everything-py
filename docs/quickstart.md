@@ -67,7 +67,6 @@ session = client.chat_sessions.create(project_id=project.id)
 resp = client.chat.chat_to_sql(
     project_id=project.id,
     query="Count active customers",
-    h2ogpte_session_id=session.id,
 )
 
 print("Generated SQL:", resp.sql_query)

@@ -83,7 +83,6 @@ class ChatTestRunner(BaseTestRunner):
                         self.test_project_id,
                         chat_session_id=h2ogpte_session_id,
                         query="What tables are available in the database?",
-                        h2ogpte_session_id=h2ogpte_session_id,
                         connector_id=connector_id
                     )
                 else:
@@ -91,7 +90,6 @@ class ChatTestRunner(BaseTestRunner):
                         self.test_project_id,
                         chat_session_id=h2ogpte_session_id,
                         query="What tables are available in the database?",
-                        h2ogpte_session_id=h2ogpte_session_id
                     )
                 print(f"✅ Chat message sent successfully")
                 if hasattr(chat_response, 'response'):
@@ -107,7 +105,6 @@ class ChatTestRunner(BaseTestRunner):
                         project_id=self.test_project_id,
                         chat_session_id=h2ogpte_session_id,
                         query="Count all users",
-                        h2ogpte_session_id=h2ogpte_session_id,
                         connector_id=connector_id,
                         auto_add_feedback={"positive": True, "negative": False}
                     )
