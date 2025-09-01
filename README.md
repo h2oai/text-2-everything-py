@@ -91,13 +91,13 @@ schema = client.schema_metadata.create(
 # Create a chat session
 session = client.chat_sessions.create(project_id=project.id)
 
-# Send a query
-response = client.chat.send_message(
+# Generate SQL for a query
+response = client.chat.chat_to_sql(
     project_id=project.id,
-    session_id=session.id,
-    query="Show me all customers from California"
+    chat_session_id=session.id,
+    query="Show me all customers from California",
+    h2ogpte_session_id=session.id
 )
-
 print(f"Generated SQL: {response.sql_query}")
 ```
 
@@ -178,16 +178,26 @@ example = client.golden_examples.create(
 )
 ```
 
-### Chat Sessions
+### Chat Sessions and Chat
 ```python
 # Create chat session
 session = client.chat_sessions.create(project_id="project_id")
 
-# Send message
-response = client.chat.send_message(
+# Convert natural language to SQL
+resp = client.chat.chat_to_sql(
     project_id="project_id",
-    session_id=session.id,
-    query="Your natural language query here"
+    chat_session_id=session.id,
+    query="Your natural language query here",
+    h2ogpte_session_id=session.id
+)
+
+# Or convert and execute
+ans = client.chat.chat_to_answer(
+    project_id="project_id",
+    chat_session_id=session.id,
+    query="Top 10 customers by revenue",
+    h2ogpte_session_id=session.id,
+    connector_id="your-connector-id"
 )
 ```
 

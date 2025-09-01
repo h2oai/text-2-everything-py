@@ -66,6 +66,7 @@ class FeedbackTestRunner(BaseTestRunner):
             # Create a chat message to get a real chat_message_id
             chat_response = self.client.chat.chat_to_sql(
                 self.test_project_id,
+                chat_session_id=h2ogpte_session_id,
                 query="What tables are available?",
                 h2ogpte_session_id=h2ogpte_session_id,
                 connector_id=connector_id

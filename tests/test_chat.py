@@ -81,6 +81,7 @@ class ChatTestRunner(BaseTestRunner):
                     print(f"🔗 Using connector {connector_id} for chat tests")
                     chat_response = self.client.chat.chat_to_sql(
                         self.test_project_id,
+                        chat_session_id=h2ogpte_session_id,
                         query="What tables are available in the database?",
                         h2ogpte_session_id=h2ogpte_session_id,
                         connector_id=connector_id
@@ -88,6 +89,7 @@ class ChatTestRunner(BaseTestRunner):
                 else:
                     chat_response = self.client.chat.chat_to_sql(
                         self.test_project_id,
+                        chat_session_id=h2ogpte_session_id,
                         query="What tables are available in the database?",
                         h2ogpte_session_id=h2ogpte_session_id
                     )
@@ -103,6 +105,7 @@ class ChatTestRunner(BaseTestRunner):
                     # 🆕 NEW: Use keyword arguments instead of ChatToAnswerRequest object
                     answer_response = self.client.chat.chat_to_answer(
                         project_id=self.test_project_id,
+                        chat_session_id=h2ogpte_session_id,
                         query="Count all users",
                         h2ogpte_session_id=h2ogpte_session_id,
                         connector_id=connector_id,

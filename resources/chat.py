@@ -27,6 +27,7 @@ class ChatResource(BaseResource):
     def chat_to_sql(
         self,
         project_id: str,
+        chat_session_id: str,
         query: str,
         h2ogpte_session_id: str,
         schema_metadata_id: str = None,
@@ -38,6 +39,7 @@ class ChatResource(BaseResource):
         
         Args:
             project_id: The project ID
+            chat_session_id: Target chat session for history/summary context
             query: Natural language query
             h2ogpte_session_id: H2OGPTE session ID
             schema_metadata_id: Optional schema metadata ID
@@ -52,6 +54,7 @@ class ChatResource(BaseResource):
             ```python
             response = client.chat.chat_to_sql(
                 project_id=project_id,
+                chat_session_id=chat_session_id,
                 query="How many active users do we have?",
                 h2ogpte_session_id="session-123",
                 schema_metadata_id="schema-456",
@@ -68,10 +71,13 @@ class ChatResource(BaseResource):
         
         if not h2ogpte_session_id or not h2ogpte_session_id.strip():
             raise ValidationError("H2OGPTE session ID cannot be empty")
+        if not chat_session_id or not chat_session_id.strip():
+            raise ValidationError("chat_session_id cannot be empty")
         
         # Build the ChatRequest object internally
         request = ChatRequest(
             query=query,
+            chat_session_id=chat_session_id,
             h2ogpte_session_id=h2ogpte_session_id,
             schema_metadata_id=schema_metadata_id,
             contexts_limit=contexts_limit,
@@ -80,7 +86,7 @@ class ChatResource(BaseResource):
         )
         
         response = self._client.post(
-            f"/projects/{project_id}/chat-to-sql",
+            f"/projects/{project_id}/chat-sessions/{chat_session_id}/chat-to-sql",
             data=request.model_dump()
         )
         return ChatResponse(**response)
@@ -88,6 +94,7 @@ class ChatResource(BaseResource):
     def chat_to_answer(
         self,
         project_id: str,
+        chat_session_id: str,
         query: str,
         h2ogpte_session_id: str,
         connector_id: str,
@@ -101,6 +108,7 @@ class ChatResource(BaseResource):
         
         Args:
             project_id: The project ID
+            chat_session_id: Target chat session for history/summary context
             query: Natural language query
             h2ogpte_session_id: H2OGPTE session ID
             connector_id: Required connector ID for SQL execution
@@ -141,12 +149,15 @@ class ChatResource(BaseResource):
         
         if not connector_id or not connector_id.strip():
             raise ValidationError("Connector ID cannot be empty")
+        if not chat_session_id or not chat_session_id.strip():
+            raise ValidationError("chat_session_id cannot be empty")
         
         # Build the ChatToAnswerRequest object internally
         # Handle auto_add_feedback parameter - if None, let the model use its default
         request_data = {
             "query": query,
             "h2ogpte_session_id": h2ogpte_session_id,
+            "chat_session_id": chat_session_id,
             "connector_id": connector_id,  # Include connector_id in request body
             "custom_tool_id": custom_tool_id,
             "use_agent": use_agent,
@@ -163,7 +174,7 @@ class ChatResource(BaseResource):
         request = ChatToAnswerRequest(**request_data)
         
         # Send request without query parameters
-        endpoint = f"/projects/{project_id}/chat-to-answer"
+        endpoint = f"/projects/{project_id}/chat-sessions/{chat_session_id}/chat-to-answer"
         
         response = self._client.post(
             endpoint,
@@ -171,7 +182,7 @@ class ChatResource(BaseResource):
         )
         return ChatToAnswerResponse(**response)
     
-    def chat_with_context(self, project_id: str, query: str, h2ogpte_session_id: str,
+    def chat_with_context(self, project_id: str, chat_session_id: str, query: str, h2ogpte_session_id: str,
                          context_id: str = None, schema_metadata_id: str = None,
                          example_id: str = None, **kwargs) -> ChatResponse:
         """Chat with specific context, schema, or example.
@@ -192,6 +203,7 @@ class ChatResource(BaseResource):
             ```python
             response = client.chat.chat_with_context(
                 project_id="proj-123",
+                chat_session_id="chat-abc",
                 query="Count active users",
                 h2ogpte_session_id="session-456",
                 context_id="ctx-789",
@@ -203,6 +215,7 @@ class ChatResource(BaseResource):
         """
         return self.chat_to_sql(
             project_id=project_id,
+            chat_session_id=chat_session_id,
             query=query,
             h2ogpte_session_id=h2ogpte_session_id,
             context_id=context_id,
@@ -211,7 +224,7 @@ class ChatResource(BaseResource):
             **kwargs
         )
     
-    def chat_with_agent(self, project_id: str, query: str, h2ogpte_session_id: str,
+    def chat_with_agent(self, project_id: str, chat_session_id: str, query: str, h2ogpte_session_id: str,
                        connector_id: str, custom_tool_id: str = None, 
                        agent_accuracy: str = "medium", **kwargs) -> ChatToAnswerResponse:
         """Chat using custom tools and agent functionality.
@@ -232,6 +245,7 @@ class ChatResource(BaseResource):
             ```python
             response = client.chat.chat_with_agent(
                 project_id="proj-123",
+                chat_session_id="chat-abc",
                 query="Analyze customer churn patterns",
                 h2ogpte_session_id="session-456",
                 connector_id="conn-123",
@@ -243,6 +257,7 @@ class ChatResource(BaseResource):
         """
         return self.chat_to_answer(
             project_id=project_id,
+            chat_session_id=chat_session_id,
             query=query,
             h2ogpte_session_id=h2ogpte_session_id,
             connector_id=connector_id,

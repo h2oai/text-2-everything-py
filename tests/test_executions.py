@@ -111,6 +111,7 @@ class ExecutionsTestRunner(BaseTestRunner):
                 # Send chat message to generate SQL and get a real message ID
                 chat_response = self.client.chat.chat_to_sql(
                     self.test_project_id,
+                    chat_session_id=h2ogpte_session_id,
                     query="SELECT 1 as test_column;",
                     h2ogpte_session_id=h2ogpte_session_id,
                     connector_id=connector_id
