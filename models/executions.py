@@ -3,16 +3,20 @@ Executions models for the Text2Everything SDK.
 """
 
 from typing import Optional, Dict, Any
+from pydantic import Field
 from .base import BaseModel, BaseResponse
 
 
 class SQLExecuteRequest(BaseModel):
     """Model for SQL execution request."""
     
+    class Config:
+        populate_by_name = True
+    
     connector_id: str
     chat_message_id: Optional[str] = None
     sql_query: Optional[str] = None
-    h2ogpte_session_id: Optional[str] = None
+    chat_session_id: Optional[str] = Field(None, alias="h2ogpte_session_id")
 
 
 class SQLExecuteResponse(BaseModel):

@@ -97,6 +97,29 @@ class SchemaMetadataTestRunner(BaseTestRunner):
             self.created_resources['schema_metadata'].append(relationship_result.id)
             print(f"✅ Created relationship schema: {relationship_result.id}")
             
+            # Test update schema metadata
+            updated_table = self.client.schema_metadata.update(
+                self.test_project_id,
+                table_result.id,
+                name="updated_users_table_schema",
+                description="Updated user table schema for functional test",
+                schema_data={
+                    "table": {
+                        "name": "users",
+                        "description": "Updated user information table",
+                        "columns": [
+                            {"name": "id", "type": "integer", "primary_key": True},
+                            {"name": "email", "type": "string", "unique": True},
+                            {"name": "status", "type": "string"},
+                            {"name": "created_at", "type": "timestamp"},
+                            {"name": "updated_at", "type": "timestamp"}
+                        ]
+                    }
+                },
+                is_always_displayed=True
+            )
+            print("✅ Updated schema metadata")
+            
             # Test list schema metadata
             all_schemas = self.client.schema_metadata.list(self.test_project_id)
             print(f"✅ Listed {len(all_schemas)} schema metadata items")

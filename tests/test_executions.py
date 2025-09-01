@@ -96,7 +96,7 @@ class ExecutionsTestRunner(BaseTestRunner):
             
             # Test chat-based execution with real chat session and message
             try:
-                # First, create a real chat session to get h2ogpte_session_id
+                # First, create a real chat session to get chat_session_id
                 chat_session = self.client.chat_sessions.create(
                     self.test_project_id,
                     name="Execution Test Session"
@@ -104,14 +104,14 @@ class ExecutionsTestRunner(BaseTestRunner):
                 self.created_resources['chat_sessions'].append(chat_session.id)
                 print(f"✅ Created chat session for execution test: {chat_session.id}")
                 
-                # Use the chat session ID as the h2ogpte_session_id
-                h2ogpte_session_id = chat_session.id
+                # Use the chat session ID
+                chat_session_id = chat_session.id
                 
                 # Create a real chat message to get a valid message ID
                 # Send chat message to generate SQL and get a real message ID
                 chat_response = self.client.chat.chat_to_sql(
                     self.test_project_id,
-                    chat_session_id=h2ogpte_session_id,
+                    chat_session_id=chat_session_id,
                     query="SELECT 1 as test_column;",
                     connector_id=connector_id
                 )
@@ -122,7 +122,7 @@ class ExecutionsTestRunner(BaseTestRunner):
                 chat_execution = self.client.executions.execute_from_chat(
                     connector_id=connector_id,
                     chat_message_id=real_message_id,
-                    h2ogpte_session_id=h2ogpte_session_id
+                    chat_session_id=chat_session_id
                 )
                 print(f"✅ Chat-based execution completed with real message ID")
                 
