@@ -2,7 +2,7 @@
 title: Chat Sessions
 ---
 
-Create and manage H2OGPTE chat sessions.
+Create and manage chat sessions.
 
 Create/list/delete:
 ```python
