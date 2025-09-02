@@ -1,0 +1,15 @@
+# Requirements for H2O Drive to Text2Everything integration
+
+# H2O Drive integration
+h2o_drive>=4.1.0
+
+# Text2Everything SDK (install from local wheel file)
+# pip install ./text2everything_sdk-0.1.2-py3-none-any.whl
+
+# Core dependencies
+requests>=2.25.0
+tqdm>=4.60.0
+pydantic>=2.0.0
+
+# Optional: For enhanced async support
+aiofiles>=0.8.0
