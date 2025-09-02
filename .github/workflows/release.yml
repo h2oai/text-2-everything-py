@@ -1,0 +1,120 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on any tag starting with 'v'
+
+permissions:
+  contents: write  # Required for creating releases
+  id-token: write  # Required for trusted publishing
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Extract version from tag
+      id: extract_version
+      run: |
+        # Extract version by removing 'v' prefix from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION"
+        echo "Full tag: ${GITHUB_REF#refs/tags/}"
+        
+    - name: Update version in setup.py
+      run: |
+        # Update the version line in setup.py
+        sed -i 's/version="[^"]*"/version="${{ steps.extract_version.outputs.version }}"/' setup.py
+        echo "Updated setup.py version to: ${{ steps.extract_version.outputs.version }}"
+        # Show the updated line for verification
+        grep 'version=' setup.py
+        
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build wheel setuptools
+        
+    - name: Install package dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Build package
+      run: |
+        python -m build
+        echo "Build completed. Contents of dist/:"
+        ls -la dist/
+        
+    - name: Generate checksums
+      run: |
+        cd dist
+        sha256sum * > checksums.txt
+        echo "Generated checksums:"
+        cat checksums.txt
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.extract_version.outputs.tag }}
+        release_name: Release ${{ steps.extract_version.outputs.tag }}
+        body: |
+          ## Release ${{ steps.extract_version.outputs.tag }}
+          
+          ### Changes
+          This release was automatically generated from tag `${{ steps.extract_version.outputs.tag }}`.
+          
+          ### Package Information
+          - **Version**: `${{ steps.extract_version.outputs.version }}`
+          - **Python Package**: `text2everything-sdk`
+          - **Build Date**: ${{ github.event.head_commit.timestamp }}
+          
+          ### Installation
+          ```bash
+          pip install text2everything-sdk==${{ steps.extract_version.outputs.version }}
+          ```
+          
+          ### Files
+          - Source distribution (`.tar.gz`)
+          - Wheel distribution (`.whl`)
+          - Checksums (`checksums.txt`)
+          
+          See the assets below for downloadable files.
+        draft: false
+        prerelease: ${{ contains(steps.extract_version.outputs.version, '-') }}
+        
+    - name: Upload Release Assets
+      run: |
+        # Upload all files from dist/ directory
+        for file in dist/*; do
+          echo "Uploading $file..."
+          gh release upload ${{ steps.extract_version.outputs.tag }} "$file" --clobber
+        done
+        
+        # Upload checksums
+        gh release upload ${{ steps.extract_version.outputs.tag }} dist/checksums.txt --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Verify release
+      run: |
+        echo "✅ Release ${{ steps.extract_version.outputs.tag }} created successfully!"
+        echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.extract_version.outputs.tag }}"
+        echo "📦 Package version: ${{ steps.extract_version.outputs.version }}"
+        echo "🏷️ Tag: ${{ steps.extract_version.outputs.tag }}"
+        
+        # Show what was uploaded
+        echo "📁 Uploaded files:"
+        ls -la dist/
