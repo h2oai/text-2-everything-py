@@ -9,6 +9,17 @@ theme:
     - content.code.copy
     - content.code.annotate
     - toc.integrate
+extra_css:
+  - css/print.css
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_heading: true
+            show_signature: true
+            docstring_style: google
 markdown_extensions:
   - admonition
   - codehilite
@@ -31,10 +42,21 @@ nav:
       - Chat Sessions: guides/chat_sessions.md
       - Chat: guides/chat.md
       - Connectors: guides/connectors.md
-      - Custom Tools: guides/custom_tools.md
+      # - Custom Tools: guides/custom_tools.md
       - Executions: guides/executions.md
       - Feedback: guides/feedback.md
   - How To:
       - Bulk Operations: how-to/bulk_operations.md
       - Validation: how-to/validation.md
       - Jupyter: how-to/jupyter.md
+  - Performance:
+      - Concurrency & Performance: guides/concurrency.md
+      - High Concurrency Testing: high-concurrency-testing.md
+  - Reference:
+      - Overview: reference/index.md
+      - Client: reference/client.md
+      - Resources: reference/resources.md
+      - Models: reference/models.md
+  - Migrations: migrations.md
+  - Troubleshooting: troubleshooting.md
+  - Examples: examples.md

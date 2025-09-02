@@ -217,7 +217,7 @@ class ChatResource(BaseResource):
             query: Natural language query
             connector_id: Required connector ID for SQL execution
             custom_tool_id: Optional custom tool to use
-            agent_accuracy: Agent accuracy level ("low", "medium", "high")
+            agent_accuracy: Agent accuracy level ("quick", "basic", "standard", "maximum")
             **kwargs: Additional chat parameters
         
         Returns:
@@ -231,7 +231,7 @@ class ChatResource(BaseResource):
                 query="Analyze customer churn patterns",
                 connector_id="conn-123",
                 custom_tool_id="tool-789",
-                agent_accuracy="high"
+                agent_accuracy="quick|basic|standard|maximum"
             )
             print(f"Agent response: {response.agent_tool_response}")
             ```
