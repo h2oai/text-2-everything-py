@@ -13,10 +13,9 @@ Since the SDK is not yet published to PyPI, you can install it locally:
 cd text2everything_sdk
 
 # Install in development mode (editable install)
-pip install -e .
+pip install dist/text2everything_sdk-0.1.2-py3-none-any.whl
 
-# Or install with optional dependencies
-pip install -e ".[dev,integrations]"
+
 ```
 
 This allows you to:
@@ -24,31 +23,7 @@ This allows you to:
 - Run tests and contribute to development
 - Use all the latest features
 
-### Option 2: Install from Git Repository
 
-You can install directly from the GitHub repository:
-
-```bash
-# Install latest version from main branch
-pip install git+https://github.com/h2oai/text-2-everything.git#subdirectory=text2everything_sdk
-
-# Or install a specific branch/tag
-pip install git+https://github.com/h2oai/text-2-everything.git@your-branch#subdirectory=text2everything_sdk
-```
-
-### Option 3: Install from Local Archive
-
-Create a distribution package and install it:
-
-```bash
-# Navigate to the SDK directory
-cd text2everything_sdk
-
-# Build the package
-python setup.py sdist bdist_wheel
-
-# Install from the built package
-pip install dist/text2everything_sdk-0.1.2-py3-none-any.whl
 ```
 
 ## Quick Start After Installation
