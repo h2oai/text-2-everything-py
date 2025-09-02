@@ -23,9 +23,9 @@ def read_requirements():
 
 setup(
     name="text2everything-sdk",
-    version="0.1.3",
+    version="0.1.4",
     author="Text2Everything Team",
-    author_email="support@text2everything.com",
+    author_email="support@h2o.ai",
     description="Official Python SDK for the Text2Everything API",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
