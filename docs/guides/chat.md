@@ -23,8 +23,6 @@ answer = client.chat.chat_to_answer(
     chat_session_id=session.id,
     query="Top 10 customers by revenue",
     connector_id=connector.id,
-    use_agent=True,
-    agent_accuracy="high",
 )
 if answer.execution_result:
     print(answer.execution_result.result)
@@ -38,6 +36,6 @@ answer = client.chat.chat_with_agent(
     query="Analyze churn",
     connector_id=connector.id,
     custom_tool_id=tool.id,
-    agent_accuracy="high",
+    agent_accuracy="basic", # quick | basic | standard | maximum
 )
 ```

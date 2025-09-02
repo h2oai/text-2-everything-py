@@ -5,17 +5,12 @@ title: Installation
 For now, install locally:
 
 ```bash
-pip install -e .
+pip install dist/text2everything_sdk-0.1.2-py3-none-any.whl
 ```
 
 Future (PyPI):
 ```bash
 pip install text2everything-sdk
-```
-
-Optional extras:
-```bash
-pip install -e ".[dev,integrations]"
 ```
 
 Troubleshooting:

@@ -283,7 +283,7 @@ You can configure the SDK using environment variables:
 
 ```bash
 export TEXT2EVERYTHING_BASE_URL="https://your-api-endpoint.com"
-export TEXT2EVERYTHING_API_KEY="your-api-key"
+export H2OGPTE_API_KEY="your-h2ogpte-api-key"
 ```
 
 ```python
@@ -292,7 +292,7 @@ from text2everything_sdk import Text2EverythingClient
 
 client = Text2EverythingClient(
     base_url=os.getenv("TEXT2EVERYTHING_BASE_URL"),
-    api_key=os.getenv("TEXT2EVERYTHING_API_KEY")
+    api_key=os.getenv("H2OGPTE_API_KEY")
 )
 ```
 
@@ -303,7 +303,7 @@ For local development, create a `.env` file in your project root:
 ```bash
 # .env file
 T2E_BASE_URL=https://your-api-endpoint.com
-T2E_API_KEY=your-api-key
+T2E_API_KEY=your-h2ogpte-api-key
 ```
 
 The SDK will automatically load these variables when running tests:
@@ -321,7 +321,7 @@ client = Text2EverythingClient()
 ```python
 client = Text2EverythingClient(
     base_url="https://your-api-endpoint.com",
-    api_key="your-api-key",
+    api_key="your-h2ogpte-api-key",
     timeout=60,  # Request timeout in seconds
     max_retries=5,  # Maximum retry attempts
     retry_delay=2.0  # Initial retry delay in seconds

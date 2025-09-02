@@ -9,10 +9,14 @@ venv:
 	@test -d .venv || python3 -m venv .venv
 	@$(PIP) install --upgrade pip >/dev/null
 	@$(PIP) install -r requirements-dev.txt >/dev/null
+	@$(PIP) install -e . >/dev/null
 
 # Build static site into site/
 docs-build: venv
 	@$(MKDOCS) build
+
+pdfs: venv
+	@$(PY) scripts/build_docs_pdfs.py
 
 # Run local dev server on :8000
 docs: venv

@@ -1,0 +1,33 @@
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  /* Reduce excessive paddings */
+  .md-content, .md-main__inner, .md-typeset {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Tighter spacing for code blocks */
+  .md-typeset pre > code {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .md-typeset pre, .md-typeset code {
+    border-radius: 4px;
+  }
+
+  /* Reduce blockquote and admonition margins */
+  .md-typeset blockquote,
+  .md-typeset .admonition,
+  .md-typeset details {
+    margin: 0.5rem 0 !important;
+  }
+
+  /* Hide print header/footer from plugin if any */
+  header, footer { display: none !important; }
+}
+
+
