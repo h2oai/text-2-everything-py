@@ -2,5 +2,7 @@
 *.egg-info
 __pycache__
 .venv
-site/
 managers/
+jsons_generados_20250828/
+site/
+
