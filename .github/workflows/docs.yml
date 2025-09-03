@@ -33,9 +33,17 @@ jobs:
         pip install mkdocs-material>=9.5.0
         pip install mkdocstrings>=0.24.0
         pip install mkdocstrings-python>=1.10.0
-        pip install mkdocs-with-pdf>=0.9.3
-        pip install mkdocs-pdf-export-plugin>=0.5.10
         pip install mkdocs-print-site-plugin>=2.6.0
+        
+    - name: Install package dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Install package in development mode
+      run: |
+        pip install -e .
+        echo "Package installed successfully. Available modules:"
+        python -c "import text2everything_sdk; print('✅ text2everything_sdk imported successfully')"
         
     - name: Build documentation
       run: |
