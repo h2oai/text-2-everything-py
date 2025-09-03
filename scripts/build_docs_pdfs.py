@@ -5,6 +5,7 @@ import sys
 import shutil
 import yaml
 from pypdf import PdfReader, PdfWriter
+from datetime import datetime
 
 
 def run(cmd: list[str]) -> None:
@@ -37,6 +38,20 @@ def list_pages_with_sections() -> list[dict]:
     nav = cfg.get("nav", [])
     items: list[dict] = []
 
+    # Global document intro at the very beginning
+    items.append({
+        "kind": "doc_intro",
+        "title": "Text2Everything SDK",
+        "subtitle": "Developer Documentation",
+        "intro": (
+            "Comprehensive SDK documentation for building text-to-SQL workflows: quickstart,"
+            " installation, configuration, guides, API reference, performance, and more."
+            " Use the table of contents to navigate, or skim section divider pages inserted"
+            " throughout this document."
+        ),
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+    })
+
     def add_page(path: str, section: str) -> None:
         if path.endswith(".md"):
             parts = path.split("/")
@@ -56,6 +71,22 @@ def list_pages_with_sections() -> list[dict]:
 
     # Simple intros per section
     section_intros = {
+        "Overview": (
+            "What you can build with the SDK and how the docs are organized."
+            " Start here to understand capabilities, major components, and where to go next."
+        ),
+        "Quickstart": (
+            "Five-minute guided setup to generate your first SQL. Minimal steps with copyable"
+            " snippets so you can validate your environment quickly."
+        ),
+        "Installation": (
+            "How to install the SDK locally or via package managers, optional extras, and"
+            " troubleshooting for typical environment issues."
+        ),
+        "Configuration": (
+            "Configure the client using environment variables and constructor options. Covers"
+            " timeouts, retry behavior, connection limits, and context manager usage."
+        ),
         "Guides": (
             "In-depth articles for each SDK resource. Learn capabilities, required parameters,"
             " common patterns, and best practices with end-to-end examples."
@@ -90,7 +121,13 @@ def list_pages_with_sections() -> list[dict]:
         if isinstance(item, dict):
             for title, value in item.items():
                 if isinstance(value, str):
-                    # Top-level single page: its own section
+                    # Top-level single page: insert divider then page
+                    items.append({
+                        "kind": "section",
+                        "title": title,
+                        "slug": slugify(title),
+                        "intro": section_intros.get(title, f"Section: {title}"),
+                    })
                     add_page(value, title)
                 elif isinstance(value, list):
                     # Insert a section divider before grouped pages
@@ -189,6 +226,44 @@ def export_pdfs_playwright(items: list[dict]) -> list[str]:
                 """
                 page.set_content(html)
                 # Divider page: no header needed
+                page.pdf(
+                    path=out_path,
+                    print_background=True,
+                    display_header_footer=False,
+                )
+                pdfs.append(out_path)
+            elif it.get("kind") == "doc_intro":
+                title = it["title"]
+                subtitle = it.get("subtitle", "")
+                intro = it.get("intro", "")
+                ts = it.get("generated_at", "")
+                pdf_name = f"intro_document.pdf"
+                out_path = os.path.join(out_dir, pdf_name)
+                html = f"""
+                <html>
+                <head>
+                  <meta charset=\"utf-8\" />
+                  <style>
+                    html, body {{ height:100%; margin:0; }}
+                    body {{ font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }}
+                    .wrap {{ height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:64px; }}
+                    h1 {{ font-size: 46px; margin: 0 0 4px 0; }}
+                    h2 {{ font-size: 18px; font-weight: 600; color:#666; margin: 0 0 24px 0; }}
+                    p {{ font-size: 16px; color:#444; max-width: 760px; text-align:center; margin: 0 0 12px 0; }}
+                    .meta {{ font-size: 12px; color:#888; margin-top: 24px; }}
+                  </style>
+                </head>
+                <body>
+                  <div class=\"wrap\">
+                    <h1>{title}</h1>
+                    <h2>{subtitle}</h2>
+                    <p>{intro}</p>
+                    <div class=\"meta\">Generated: {ts}</div>
+                  </div>
+                </body>
+                </html>
+                """
+                page.set_content(html)
                 page.pdf(
                     path=out_path,
                     print_background=True,
