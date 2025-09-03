@@ -1,6 +1,6 @@
 site_name: Text2Everything SDK
 site_description: Practical, concise Python SDK docs for Text2Everything
-repo_url: https://github.com/h2oai/text-2-everything
+repo_url: https://github.com/h2oai/text-2-everything-py
 theme:
   name: material
   features:
