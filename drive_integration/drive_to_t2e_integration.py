@@ -15,36 +15,39 @@ import sys
 import json
 import tempfile
 import asyncio
+import argparse
 from typing import Dict, List, Any, Tuple, Optional
 from pathlib import Path
 
-# H2O Drive imports
-try:
-    import h2o_drive
-    from h2o_drive import core
-except ImportError:
-    print("❌ h2o_drive not installed. Install with: pip install h2o_drive")
-    sys.exit(1)
+def check_and_import_dependencies():
+    """Check and import required dependencies"""
+    try:
+        import h2o_drive
+        from h2o_drive import core
+    except ImportError:
+        print("❌ h2o_drive not installed. Install with: pip install h2o_drive")
+        sys.exit(1)
 
-# Text2Everything SDK imports
-try:
-    from text2everything_sdk import Text2EverythingClient
-    from text2everything_sdk.exceptions import (
-        AuthenticationError,
-        ValidationError,
-        NotFoundError,
-        RateLimitError,
-        ServerError
-    )
-except ImportError:
-    print("❌ text2everything_sdk not installed. Install the SDK first.")
-    sys.exit(1)
+    try:
+        from text2everything_sdk import Text2EverythingClient
+        from text2everything_sdk.exceptions import (
+            AuthenticationError,
+            ValidationError,
+            NotFoundError,
+            RateLimitError,
+            ServerError
+        )
+    except ImportError:
+        print("❌ text2everything_sdk not installed. Install the SDK first.")
+        sys.exit(1)
+    
+    return h2o_drive, core, Text2EverythingClient, AuthenticationError, ValidationError, NotFoundError, RateLimitError, ServerError
 
 
 class DriveManager:
     """Drive manager for essential operations"""
     
-    def __init__(self, bucket: core.Bucket):
+    def __init__(self, bucket):
         self.bucket = bucket
     
     async def list_projects_in_drive(self, prefix: str = "") -> List[str]:
@@ -211,18 +214,179 @@ def select_project_interactive(projects: List[str], project_type: str) -> Option
             print("❌ Please enter a valid number or 'q' to quit")
 
 
+def parse_arguments():
+    """Parse command-line arguments"""
+    parser = argparse.ArgumentParser(
+        description="Transfer data from H2O Drive to Text2Everything",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Interactive mode (default)
+  python drive_to_t2e_integration.py
+
+  # Non-interactive mode
+  python drive_to_t2e_integration.py --drive-project-name "home/my_data" --t2e-project-name "MyProject" --non-interactive
+
+  # Create a new T2E project
+  python drive_to_t2e_integration.py --create-t2e-project --t2e-project-name "My New Project"
+
+  # Create project with description
+  python drive_to_t2e_integration.py --create-t2e-project --t2e-project-name "My Project" --t2e-project-description "Data migration project"
+
+  # Non-interactive mode with project creation
+  python drive_to_t2e_integration.py --create-t2e-project --t2e-project-name "AutoProject" --drive-project-name "home/my_data" --non-interactive
+
+  # List available projects
+  python drive_to_t2e_integration.py --list-drive-projects
+  python drive_to_t2e_integration.py --list-t2e-projects
+
+  # Custom configuration
+  python drive_to_t2e_integration.py --t2e-base-url "https://custom.api.com" --timeout 120
+
+Environment Variables:
+  H2OGPTE_API_KEY              Text2Everything API key (required)
+  T2E_BASE_URL                 Text2Everything base URL (optional)
+  H2O_CLOUD_ENVIRONMENT       H2O Cloud environment URL (required for H2O Drive)
+  H2O_CLOUD_CLIENT_PLATFORM_TOKEN  H2O Cloud platform token (required for H2O Drive)
+        """
+    )
+    
+    parser.add_argument(
+        "--t2e-base-url",
+        help="Text2Everything base URL (default: from T2E_BASE_URL env var)"
+    )
+    
+    parser.add_argument(
+        "--t2e-project-name",
+        help="Target Text2Everything project name (interactive selection if not provided, required with --create-t2e-project)"
+    )
+    
+    parser.add_argument(
+        "--drive-project-name",
+        help="Source H2O Drive project name (interactive selection if not provided)"
+    )
+    
+    parser.add_argument(
+        "--create-t2e-project",
+        action="store_true",
+        help="Create a new Text2Everything project if none exist (requires --t2e-project-name)"
+    )
+    
+    parser.add_argument(
+        "--t2e-project-description",
+        help="Description for the new Text2Everything project (used with --create-t2e-project)"
+    )
+    
+    parser.add_argument(
+        "--api-key",
+        help="H2OGPTE API key (default: from H2OGPTE_API_KEY env var)"
+    )
+    
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run in non-interactive mode (requires --drive-project-name and --t2e-project-name)"
+    )
+    
+    parser.add_argument(
+        "--list-drive-projects",
+        action="store_true",
+        help="List available H2O Drive projects and exit"
+    )
+    
+    parser.add_argument(
+        "--list-t2e-projects",
+        action="store_true",
+        help="List available Text2Everything projects and exit"
+    )
+    
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=60,
+        help="SDK timeout in seconds (default: 60)"
+    )
+    
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=3,
+        help="Maximum retry attempts (default: 3)"
+    )
+    
+    return parser.parse_args()
+
+
+async def list_drive_projects_only(drive_manager: DriveManager):
+    """List H2O Drive projects and exit"""
+    print("📋 Available H2O Drive projects:")
+    print("=" * 40)
+    
+    try:
+        projects = await drive_manager.list_projects_in_drive()
+        if projects:
+            for i, project in enumerate(projects, 1):
+                print(f"  {i}. {project}")
+            print(f"\nTotal: {len(projects)} projects found")
+        else:
+            print("  No projects found in H2O Drive")
+    except Exception as e:
+        print(f"❌ Error listing Drive projects: {e}")
+        sys.exit(1)
+
+
+async def list_t2e_projects_only(sdk_client):
+    """List Text2Everything projects and exit"""
+    print("📋 Available Text2Everything projects:")
+    print("=" * 40)
+    
+    try:
+        projects = sdk_client.projects.list()
+        if projects:
+            for i, project in enumerate(projects, 1):
+                print(f"  {i}. {project.name} (ID: {project.id})")
+            print(f"\nTotal: {len(projects)} projects found")
+        else:
+            print("  No projects found in Text2Everything")
+    except Exception as e:
+        print(f"❌ Error listing T2E projects: {e}")
+        sys.exit(1)
+
+
 async def main():
     """Main execution function"""
+    args = parse_arguments()
+    
     print("🚀 H2O Drive to Text2Everything Integration")
     print("=" * 50)
     
+    # Check and import dependencies
+    h2o_drive, core, Text2EverythingClient, AuthenticationError, ValidationError, NotFoundError, RateLimitError, ServerError = check_and_import_dependencies()
+    
     # Configuration
-    BASE_URL = os.getenv("T2E_BASE_URL", "http://text2everything.text2everything.svc.cluster.local:8000")
-    API_KEY = os.getenv("H2OGPTE_API_KEY")
+    BASE_URL = args.t2e_base_url or os.getenv("T2E_BASE_URL", "http://text2everything.text2everything.svc.cluster.local:8000")
+    API_KEY = args.api_key or os.getenv("H2OGPTE_API_KEY")
     
     if not API_KEY:
-        print("❌ API key not found. Set H2OGPTE_API_KEY environment variable")
-        return
+        print("❌ API key not found. Provide via --api-key or set H2OGPTE_API_KEY environment variable")
+        sys.exit(1)
+    
+    # Validate project creation requirements
+    if args.create_t2e_project:
+        if not args.t2e_project_name:
+            print("❌ --create-t2e-project requires --t2e-project-name to be specified")
+            sys.exit(1)
+        print("🆕 Project creation mode enabled")
+    
+    # Validate non-interactive mode requirements
+    if args.non_interactive:
+        if not args.drive_project_name or not args.t2e_project_name:
+            print("❌ Non-interactive mode requires both --drive-project-name and --t2e-project-name")
+            sys.exit(1)
+        print("🤖 Running in non-interactive mode")
+    
+    print(f"🔗 Text2Everything URL: {BASE_URL}")
+    print(f"⏱️  Timeout: {args.timeout}s, Max retries: {args.max_retries}")
     
     # Step 1: Connect to H2O Drive
     print("\n1️⃣ Connecting to H2O Drive...")
@@ -233,6 +397,11 @@ async def main():
         print("✅ H2O Drive connected successfully")
     except Exception as e:
         print(f"❌ H2O Drive connection failed: {e}")
+        sys.exit(1)
+    
+    # Handle list-only modes
+    if args.list_drive_projects:
+        await list_drive_projects_only(drive_manager)
         return
     
     # Step 2: Initialize Text2Everything SDK
@@ -241,53 +410,138 @@ async def main():
         sdk_client = Text2EverythingClient(
             base_url=BASE_URL,
             api_key=API_KEY,
-            timeout=60,
-            max_retries=3
+            timeout=args.timeout,
+            max_retries=args.max_retries
         )
         print("✅ Text2Everything SDK initialized")
     except Exception as e:
         print(f"❌ SDK initialization failed: {e}")
+        sys.exit(1)
+    
+    # Handle T2E list-only mode
+    if args.list_t2e_projects:
+        await list_t2e_projects_only(sdk_client)
+        sdk_client.close()
         return
     
     # Step 3: List and select T2E project
-    print("\n3️⃣ Listing Text2Everything projects...")
+    print("\n3️⃣ Selecting Text2Everything project...")
     try:
         t2e_projects = sdk_client.projects.list()
+        
+        # Handle case when no projects exist
         if not t2e_projects:
-            print("❌ No Text2Everything projects found. Create a project first.")
-            return
-        
-        t2e_project_names = [p.name for p in t2e_projects]
-        selected_t2e_project_name = select_project_interactive(t2e_project_names, "Text2Everything")
-        
-        if not selected_t2e_project_name:
-            print("❌ No Text2Everything project selected")
-            return
-        
-        # Get project ID
-        selected_t2e_project = next(p for p in t2e_projects if p.name == selected_t2e_project_name)
-        project_id = selected_t2e_project.id
-        print(f"✅ Selected T2E project: {selected_t2e_project_name} (ID: {project_id})")
+            if args.create_t2e_project:
+                print("🆕 No Text2Everything projects found. Creating new project...")
+                try:
+                    new_project = sdk_client.projects.create(
+                        name=args.t2e_project_name,
+                        description=args.t2e_project_description
+                    )
+                    print(f"✅ Created new T2E project: {new_project.name} (ID: {new_project.id})")
+                    selected_t2e_project_name = new_project.name
+                    project_id = new_project.id
+                except Exception as e:
+                    print(f"❌ Failed to create T2E project: {e}")
+                    sdk_client.close()
+                    sys.exit(1)
+            else:
+                print("❌ No Text2Everything projects found.")
+                print("Use --create-t2e-project --t2e-project-name 'YourProjectName' to create one")
+                sdk_client.close()
+                sys.exit(1)
+        else:
+            # Projects exist, proceed with selection logic
+            if args.t2e_project_name:
+                # Use specified project name
+                t2e_project_names = [p.name for p in t2e_projects]
+                if args.t2e_project_name not in t2e_project_names:
+                    if args.create_t2e_project:
+                        print(f"🆕 Text2Everything project '{args.t2e_project_name}' not found. Creating new project...")
+                        try:
+                            new_project = sdk_client.projects.create(
+                                name=args.t2e_project_name,
+                                description=args.t2e_project_description
+                            )
+                            print(f"✅ Created new T2E project: {new_project.name} (ID: {new_project.id})")
+                            selected_t2e_project_name = new_project.name
+                            project_id = new_project.id
+                        except Exception as e:
+                            print(f"❌ Failed to create T2E project: {e}")
+                            sdk_client.close()
+                            sys.exit(1)
+                    else:
+                        print(f"❌ Text2Everything project '{args.t2e_project_name}' not found")
+                        print(f"Available projects: {', '.join(t2e_project_names)}")
+                        print("Use --create-t2e-project to create a new project")
+                        sdk_client.close()
+                        sys.exit(1)
+                else:
+                    selected_t2e_project_name = args.t2e_project_name
+                    # Get project ID
+                    selected_t2e_project = next(p for p in t2e_projects if p.name == selected_t2e_project_name)
+                    project_id = selected_t2e_project.id
+                    print(f"✅ Selected T2E project: {selected_t2e_project_name} (ID: {project_id})")
+            else:
+                # Interactive selection
+                if args.non_interactive:
+                    print("❌ Non-interactive mode requires --t2e-project-name")
+                    sdk_client.close()
+                    sys.exit(1)
+                t2e_project_names = [p.name for p in t2e_projects]
+                selected_t2e_project_name = select_project_interactive(t2e_project_names, "Text2Everything")
+                
+                if not selected_t2e_project_name:
+                    print("❌ No Text2Everything project selected")
+                    sdk_client.close()
+                    sys.exit(1)
+                
+                # Get project ID
+                selected_t2e_project = next(p for p in t2e_projects if p.name == selected_t2e_project_name)
+                project_id = selected_t2e_project.id
+                print(f"✅ Selected T2E project: {selected_t2e_project_name} (ID: {project_id})")
         
     except Exception as e:
-        print(f"❌ Error listing T2E projects: {e}")
-        return
+        print(f"❌ Error with T2E projects: {e}")
+        sdk_client.close()
+        sys.exit(1)
     
     # Step 4: List and select Drive project
-    print("\n4️⃣ Listing H2O Drive projects...")
+    print("\n4️⃣ Selecting H2O Drive project...")
     try:
         drive_projects = await drive_manager.list_projects_in_drive()
-        selected_drive_project = select_project_interactive(drive_projects, "H2O Drive")
+        if not drive_projects:
+            print("❌ No H2O Drive projects found")
+            sdk_client.close()
+            sys.exit(1)
         
-        if not selected_drive_project:
-            print("❌ No H2O Drive project selected")
-            return
+        if args.drive_project_name:
+            # Use specified project name
+            if args.drive_project_name not in drive_projects:
+                print(f"❌ H2O Drive project '{args.drive_project_name}' not found")
+                print(f"Available projects: {', '.join(drive_projects)}")
+                sdk_client.close()
+                sys.exit(1)
+            selected_drive_project = args.drive_project_name
+        else:
+            # Interactive selection
+            if args.non_interactive:
+                print("❌ Non-interactive mode requires --drive-project-name")
+                sdk_client.close()
+                sys.exit(1)
+            selected_drive_project = select_project_interactive(drive_projects, "H2O Drive")
+            
+            if not selected_drive_project:
+                print("❌ No H2O Drive project selected")
+                sdk_client.close()
+                sys.exit(1)
         
         print(f"✅ Selected Drive project: {selected_drive_project}")
         
     except Exception as e:
-        print(f"❌ Error listing Drive projects: {e}")
-        return
+        print(f"❌ Error with Drive projects: {e}")
+        sdk_client.close()
+        sys.exit(1)
     
     # Step 5: Load data from Drive
     print("\n5️⃣ Loading data from H2O Drive...")
