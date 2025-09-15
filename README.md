@@ -422,9 +422,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Support
 
-- **Documentation**: [https://docs.text2everything.com](https://docs.text2everything.com)
+- **Documentation**: [https://h2oai.github.io/text-2-everything-py/](https://h2oai.github.io/text-2-everything-py/)
 - **Issues**: [GitHub Issues](https://github.com/h2oai/text-2-everything/issues)
-- **Email**: support@text2everything.com
+- **Email**: support@h2o.ai
 
 ## Changelog
 
