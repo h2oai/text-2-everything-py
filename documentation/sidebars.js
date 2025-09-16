@@ -54,11 +54,6 @@ module.exports = {
     {
       "Python client guide": ["python-client-guide/page-1"],
     },
-    {
-      type: 'category',
-      label: 'Open APIs',
-      items: ['open-apis/open-api-1'],
-    },
     "key-terms",
     "release-notes",
     "third-party-licenses",

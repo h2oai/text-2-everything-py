@@ -10,15 +10,6 @@ module.exports = {
     "@emotion/styled": "^11.11.5",
     "@mui/material": "^5.15.17",
     "react-player": "^2.16.0",
-    "redocusaurus": "^2.0.2"
-  },
-  redocusaurus: {
-    specs: [
-      {
-        id: 'open-api-1',
-        spec: "https://petstore.swagger.io/v2/swagger.json",
-        route: "api/open-api-1",
-      },
-    ],
+    "@docusaurus/theme-mermaid": "3.6.3",
   },
 };
