@@ -1,0 +1,2042 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ai/h2o/engine/v1/constraint.proto",
+    "version": "x.x.x"
+  },
+  "tags": [
+    {
+      "name": "DAIEngineConstraintSetService"
+    },
+    {
+      "name": "DAIEngineService"
+    },
+    {
+      "name": "DAIVersionService"
+    },
+    {
+      "name": "EngineService"
+    },
+    {
+      "name": "H2OEngineConstraintSetService"
+    },
+    {
+      "name": "H2OEngineService"
+    },
+    {
+      "name": "H2OVersionService"
+    }
+  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/v1/daiVersions": {
+      "get": {
+        "summary": "Returns a collection of DAIEngines within a workspace.",
+        "operationId": "DAIVersionService_ListDAIVersions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListDAIVersionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pageSize",
+            "description": "Maximum number of DAIVersions to return in a response.\nIf unspecified (or set to 0), at most 50 DAIVersions will be returned.\nThe maximum value is 1000; values above 1000 will be coerced to 1000.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "description": "Leave unset to receive the initial page.\nTo list any subsequent pages use the value of 'next_page_token'\nreturned from the ListDAIVersionsResponse.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "description": "Used to specify the sorting order.\n\nWhen unset, DAIVersions are ordered by their version name in\ndescending order. This is equivalent to \"version desc\".\n\nWhen specified, the value must be a comma separated list of supported\nfields. The supported fields are:\n- version\n\nThe default sorting order is ascending. For example: \"version\" and\n\"version asc\" are equivalent values.\n\nTo specify descending order for a field, append a \" desc\" suffix. For\nexample: \"version desc\".\n\nRedundant space characters are insignificant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "description": "Used to filter DAIVersions. When unset, no filtering is applied.\n\nFiltering implements specification https://google.aip.dev/160.\n\nSupported filter fields:\n- version (supporting version semantic comparison and version aliases)\n\nExamples:\n- `version \u003e \"latest\" AND version \u003e= \"1.10.3\"`",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": ["DAIVersionService"]
+      }
+    },
+    "/v1/h2oVersions": {
+      "get": {
+        "summary": "Returns a collection of H2OEngines within a workspace.",
+        "operationId": "H2OVersionService_ListH2OVersions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListH2OVersionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pageSize",
+            "description": "Maximum number of H2OVersions to return in a response.\nIf unspecified (or set to 0), at most 50 H2OVersions will be returned.\nThe maximum value is 1000; values above 1000 will be coerced to 1000.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "description": "Leave unset to receive the initial page.\nTo list any subsequent pages use the value of 'next_page_token'\nreturned from the ListH2OVersionsResponse.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "description": "Used to specify the sorting order.\n\nWhen unset, H2OVersions are ordered by their version name in\ndescending order. This is equivalent to \"version desc\".\n\nWhen specified, the value must be a comma separated list of supported\nfields. The supported fields are:\n- version\n\nThe default sorting order is ascending. For example: \"version\" and\n\"version asc\" are equivalent values.\n\nTo specify descending order for a field, append a \" desc\" suffix. For\nexample: \"version desc\".\n\nRedundant space characters are insignificant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "description": "Used to filter H2OVersions. When unset, no filtering is applied.\n\nFiltering implements specification https://google.aip.dev/160.\n\nSupported filter fields:\n- version (supporting version semantic comparison and version aliases)\n\nExamples:\n- `version \u003e \"latest\" AND version \u003e= \"3.38.0.1\"`",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": ["H2OVersionService"]
+      }
+    },
+    "/v1/{daiEngine.name}": {
+      "patch": {
+        "summary": "Updates a DAIEngine.",
+        "operationId": "DAIEngineService_UpdateDAIEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateDAIEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "daiEngine.name",
+            "description": "DAIEngine resource name.",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "daiEngine",
+            "description": "DAIEngine resource.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "uid": {
+                  "type": "string",
+                  "description": "Globally unique identifier of the resource.",
+                  "readOnly": true
+                },
+                "creator": {
+                  "type": "string",
+                  "description": "Name of an entity that created the DAIEngine.",
+                  "readOnly": true
+                },
+                "creatorDisplayName": {
+                  "type": "string",
+                  "description": "Human-readable name of creator.",
+                  "readOnly": true
+                },
+                "state": {
+                  "$ref": "#/definitions/v1DAIEngineState",
+                  "description": "The current state of the DAIEngine."
+                },
+                "reconciling": {
+                  "type": "boolean",
+                  "description": "Indicates whether changes to the resource are in progress.\nIf true, current state of the DAIEngine does not match the intended state.",
+                  "readOnly": true
+                },
+                "createTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Time when the DAIEngine creation was requested.",
+                  "readOnly": true
+                },
+                "deleteTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-nullable": true,
+                  "description": "Time when the DAIEngine was deleted.",
+                  "readOnly": true
+                },
+                "updateTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-nullable": true,
+                  "description": "Time when the DAIEngine was last updated.",
+                  "readOnly": true
+                },
+                "resumeTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-nullable": true,
+                  "description": "Time when the DAIEngine was last resumed (or started for the first time).",
+                  "readOnly": true
+                },
+                "apiUrl": {
+                  "type": "string",
+                  "description": "The URL address to access the engine API.",
+                  "readOnly": true
+                },
+                "loginUrl": {
+                  "type": "string",
+                  "description": "The URL address to initiate login flow.",
+                  "readOnly": true
+                },
+                "annotations": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Additional arbitrary metadata associated with the DAIEngine.\n\nAnnotations are key/value pairs.\nThe key must:\n- be 63 characters or less\n- begin and end with an alphanumeric character ([a-z0-9A-Z])\n- with dashes (-), underscores (_), dots (.), and alphanumerics between\n- regex used for validation is: ^[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "Human-readable name of the DAIEngine. Must contain at most 63 characters. Does not have to be unique."
+                },
+                "version": {
+                  "type": "string",
+                  "x-nullable": true,
+                  "description": "Driverless AI version identifier. Version may be specified during engine creation but cannot be changed later.\nFor example: \"1.10.1\" or \"latest\"."
+                },
+                "cpu": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-nullable": true,
+                  "description": "The amount of CPU units requested by this DAIEngine."
+                },
+                "gpu": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-nullable": true,
+                  "description": "The amount of GPU units requested by this DAIEngine."
+                },
+                "memoryBytes": {
+                  "type": "string",
+                  "format": "int64",
+                  "x-nullable": true,
+                  "description": "The amount of memory in bytes requested by this DAIEngine."
+                },
+                "storageBytes": {
+                  "type": "string",
+                  "format": "int64",
+                  "x-nullable": true,
+                  "description": "The amount of storage requested by this DAIEngine."
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Additional Driverless AI configuration.\n\nTemporary: Some config keys are reserved and their value cannot be changed.\nAttempting to set or override a reserved key will have no effect, no error\nwill be raised.\nEntries with reserved keys will not be available in this field (they are\nhidden)."
+                },
+                "maxIdleDuration": {
+                  "type": "string",
+                  "x-nullable": true,
+                  "title": "Maximum time the DAIEngine can be idle. When exceeded, the DAIEngine will pause.\nThe idle time is reset when any of the following occurs:\n- incoming RPC request from client\n- user login or logout\n- system event like sync message from running or finished experiment\n- initialization of dataset upload\n- custom recipe upload"
+                },
+                "maxRunningDuration": {
+                  "type": "string",
+                  "x-nullable": true,
+                  "description": "Maximum time the DAIEngine can be running. When exceeded, the DAIEngine will pause."
+                },
+                "upgradeAvailable": {
+                  "type": "boolean",
+                  "description": "Indicates, whether the used version can be upgraded to a later one.",
+                  "readOnly": true
+                },
+                "currentIdleDuration": {
+                  "type": "string",
+                  "x-nullable": true,
+                  "description": "Current time the DAIEngine is idle.",
+                  "readOnly": true
+                },
+                "currentRunningDuration": {
+                  "type": "string",
+                  "x-nullable": true,
+                  "description": "Current time the DAIEngine is running.",
+                  "readOnly": true
+                }
+              },
+              "title": "DAIEngine resource."
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "The list of paths referencing which fields to update.\nUpdate mask must be non-empty.\n\nAllowed field paths are: {\"cpu\", \"gpu\", \"memory_bytes\", \"config\", \"annotations\", \"display_name\",\n\"max_idle_duration\", \"max_running_duration\"}.\nPaths are case sensitive (must match exactly).\n\nTo update all allowed fields, specify exactly one path with value \"*\".",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "allowMissing",
+            "description": "When set and the DAIEngine is not found, a new one is created.\nIn this situation, `update_mask` is ignored, i.e. all fields are applied\nregardless of any provided update mask; but the update mask must be still\npresent.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "validateOnly",
+            "description": "When set, request is validated but no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{daiEngine}:downloadLogs": {
+      "post": {
+        "summary": "Download DAIEngine logs.",
+        "operationId": "DAIEngineService_DownloadLogs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DAIEngineServiceDownloadLogsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "daiEngine",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "Request message for downloading DAIEngines log."
+            }
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{daiEngine}:migrateCreator": {
+      "post": {
+        "summary": "Migrate DAIEngine creator. Admin only.",
+        "operationId": "DAIEngineService_MigrateCreator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DAIEngineServiceMigrateCreatorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "daiEngine",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newCreator": {
+                  "type": "string",
+                  "title": "New creator value. Name of an entity that becomes the new creator of the DAIEngine. Format: users/397b8c16-f4cb-41dd-a5e9-5e838edb81ab",
+                  "required": ["newCreator"]
+                }
+              },
+              "description": "Request message for migrating the engine creator.",
+              "required": ["newCreator"]
+            }
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{daiEngine}:upgradeVersion": {
+      "post": {
+        "summary": "Upgrade Driverless AI version.",
+        "operationId": "DAIEngineService_UpgradeVersion",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DAIEngineServiceUpgradeVersionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "daiEngine",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newVersion": {
+                  "type": "string",
+                  "description": "New version value. For example \"1.10.1\" or \"latest\" (alias is also accepted).",
+                  "required": ["newVersion"]
+                }
+              },
+              "description": "Request message for upgrading Driverless AI version.",
+              "required": ["newVersion"]
+            }
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{h2oEngine}:downloadLogs": {
+      "post": {
+        "summary": "Download H2OEngine logs.",
+        "operationId": "H2OEngineService_DownloadLogs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1H2OEngineServiceDownloadLogsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "h2oEngine",
+            "description": "H2OEngine resource name.\nFormat: workspaces/{workspace}/h2oEngines/{h2o_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/h2oEngines/[^/]+"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "Request message for downloading H2OEngines logs."
+            }
+          }
+        ],
+        "tags": ["H2OEngineService"]
+      }
+    },
+    "/v1/{name_1}": {
+      "get": {
+        "summary": "Returns a specific DAIEngine.",
+        "operationId": "DAIEngineService_GetDAIEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetDAIEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name_1",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      },
+      "delete": {
+        "summary": "Deletes a H2OEngine.",
+        "operationId": "H2OEngineService_DeleteH2OEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteH2OEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name_1",
+            "description": "H2OEngine resource name.\nFormat: workspaces/{workspace}/h2oEngines/{h2o_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/h2oEngines/[^/]+"
+          },
+          {
+            "name": "allowMissing",
+            "description": "When set and the H2OEngine is not found, the request will succeed\nbut no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "validateOnly",
+            "description": "When set, request is validated but no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": ["H2OEngineService"]
+      }
+    },
+    "/v1/{name_2}": {
+      "get": {
+        "summary": "Returns the current H2OEngineConstraintSet.",
+        "operationId": "H2OEngineConstraintSetService_GetH2OEngineConstraintSet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetH2OEngineConstraintSetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name_2",
+            "description": "H2OEngineConstraintSet resource name.\nFormat: workspaces/{workspace}/h2oEngineConstraintSet",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/h2oEngineConstraintSet"
+          }
+        ],
+        "tags": ["H2OEngineConstraintSetService"]
+      }
+    },
+    "/v1/{name_3}": {
+      "get": {
+        "summary": "Returns a specific H2OEngine.",
+        "operationId": "H2OEngineService_GetH2OEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetH2OEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name_3",
+            "description": "H2OEngine resource name.\nFormat: workspaces/{workspace}/h2oEngines/{h2o_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/h2oEngines/[^/]+"
+          }
+        ],
+        "tags": ["H2OEngineService"]
+      }
+    },
+    "/v1/{name}": {
+      "get": {
+        "summary": "Returns the current DAIEngineConstraintSet.",
+        "operationId": "DAIEngineConstraintSetService_GetDAIEngineConstraintSet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetDAIEngineConstraintSetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "DAIEngineConstraintSet resource name.\nFormat: workspaces/{workspace}/daiEngineConstraintSet",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngineConstraintSet"
+          }
+        ],
+        "tags": ["DAIEngineConstraintSetService"]
+      },
+      "delete": {
+        "summary": "Deletes a DAIEngine.",
+        "operationId": "DAIEngineService_DeleteDAIEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteDAIEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "allowMissing",
+            "description": "When set and the DAIEngine is not found, the request will succeed\nbut no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "validateOnly",
+            "description": "When set, request is validated but no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{name}:pause": {
+      "post": {
+        "summary": "Pauses a DAIEngine.",
+        "operationId": "DAIEngineService_PauseDAIEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PauseDAIEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "validateOnly": {
+                  "type": "boolean",
+                  "description": "When set, request is validated but no changes are made."
+                }
+              },
+              "description": "Request message for pausing a running DAIEngine."
+            }
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{name}:resume": {
+      "post": {
+        "summary": "Resumes an existing DAIEngine.",
+        "operationId": "DAIEngineService_ResumeDAIEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ResumeDAIEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "DAIEngine resource name.\nFormat: workspaces/{workspace}/daiEngines/{dai_engine}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+/daiEngines/[^/]+"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "validateOnly": {
+                  "type": "boolean",
+                  "description": "When set, request is validated but no changes are made."
+                }
+              },
+              "description": "Request message for resuming an existing DAIEngine."
+            }
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{parent}/daiEngines": {
+      "get": {
+        "summary": "Returns a collection of DAIEngines within a workspace.",
+        "operationId": "DAIEngineService_ListDAIEngines",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListDAIEnginesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent",
+            "description": "Workspace resource name. Format: workspaces/{workspace}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+"
+          },
+          {
+            "name": "pageSize",
+            "description": "Maximum number of DAIEngines to return in a response.\nIf unspecified (or set to 0), at most 50 DAIEngines will be returned.\nThe maximum value is 1000; values above 1000 will be coerced to 1000.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "description": "Leave unset to receive the initial page.\nTo list any subsequent pages use the value of 'next_page_token'\nreturned from the ListDAIEnginesResponse.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "description": "Used to specify the sorting order.\n\nWhen unset, DAIEngines are ordered by their time of creation in\ndescending order. This is equivalent to \"create_time desc\".\n\nWhen specified, the value must be a comma separated list of supported\nfields. The supported fields are:\n- name\n- version\n- cpu\n- gpu\n- memory_bytes\n- storage_bytes\n- creator\n- create_time\n- update_time\n- delete_time\n- resume_time\n- display_name\n- max_idle_duration\n- max_running_duration\n- uid\n\nThe default sorting order is ascending. For example: \"name\" and \"name asc\"\nare equivalent values.\n\nTo specify descending order for a field, append a \" desc\" suffix. For\nexample: \"name desc\".\n\nRedundant space characters are insignificant. For example these values are\nall equal:\n- \"  name, cpu     desc\"\n- \"name, cpu desc\"\n- \"name   , cpu desc   \"\n\nUndefined (empty) time is interpreted as a zero time (0s since epoch, i.e.\n1970-01-01T00:00:00Z).\n\nUndefined (empty) duration is interpreted as a zero duration (0 seconds).",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "description": "Used to filter DAIEngines. When unset, no filtering is applied.\n\nFiltering implements specification https://google.aip.dev/160.\n\nSupported filter fields:\n- name\n- dai_engine_id\n- version (supporting version semantic comparison and version aliases)\n- state\n- cpu\n- gpu\n- memory_bytes\n- storage_bytes\n- creator\n- creator_display_name\n- create_time\n- update_time\n- delete_time\n- resume_time\n- reconciling\n- uid\n- display_name\n- max_idle_duration\n- max_running_duration\n- current_idle_duration\n- current_running_duration\n\nExamples:\n- `cpu \u003e 5`\n- `gpu \u003c 3`\n- `cpu \u003e= 5 AND gpu \u003c= 3`\n- `cpu != 5 OR gpu == 3`\n- `NOT (cpu \u003e 5 OR gpu \u003c 3)`\n- `-(cpu \u003e 5 OR gpu \u003c 3)`\n- `NOT (cpu \u003e 5 OR (gpu \u003c 3))`\n- `(cpu \u003e 5 OR gpu \u003c 3) AND memory_bytes != 1000`\n- `(cpu \u003e 5 OR gpu \u003c 3) AND (NOT ((((memory_bytes = 1000)))))`\n- `state = STATE_RUNNING AND create_time \u003e \"2012-04-21T11:30:00-04:00\"`\n- `max_running_duration \u003e \"1s\" AND max_running_duration != \"5s\"`\n- `version \u003e \"latest\" AND version \u003e= \"1.10.3\"`\n- `reconciling = true OR reconciling = false` (supporting bool literals)\n- `dai_engine_id = \"*e*\" OR display_name = \"*e*\"` (supporting prefix/suffix wildcard `*` for string fields equality comparison)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      },
+      "post": {
+        "summary": "Creates a new DAIEngine within a specified workspace.",
+        "operationId": "DAIEngineService_CreateDAIEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateDAIEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent",
+            "description": "Workspace resource name. Format: workspaces/{workspace}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+"
+          },
+          {
+            "name": "daiEngine",
+            "description": "The DAIEngine resource to create.\nNON_EMPTY_DEFAULT fields that are not set in this request will be set to a default value.\nDefault value is determined by the workspace in which the engine is created. Each workspace has a defined\nconstraint set, which contains the default value for each field.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1DAIEngine"
+            }
+          },
+          {
+            "name": "daiEngineId",
+            "description": "Specify the DAIEngine ID, which will become a part of the DAIEngine\nresource name.\n\nIt must:\n- contain 1-63 characters\n- contain only lowercase alphanumeric characters or hyphen ('-')\n- start with an alphabetic character\n- end with an alphanumeric character\n\nThis matches a regular expression: ^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "validateOnly",
+            "description": "When set, request is only validated but no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": ["DAIEngineService"]
+      }
+    },
+    "/v1/{parent}/engines": {
+      "get": {
+        "summary": "Returns a collection of Engines within a workspace.",
+        "operationId": "EngineService_ListEngines",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListEnginesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent",
+            "description": "Workspace resource name. Format: workspaces/{workspace}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+"
+          },
+          {
+            "name": "pageSize",
+            "description": "Maximum number of Engines to return in a response.\nIf unspecified (or set to 0), at most 50 Engines will be returned.\nThe maximum value is 1000; values above 1000 will be coerced to 1000.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "description": "Leave unset to receive the initial page.\nTo list any subsequent pages use the value of 'next_page_token'\nreturned from the ListEnginesResponse.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "description": "Used to specify the sorting order.\n\nWhen unset, Engines are ordered by their time of creation in\ndescending order. This is equivalent to \"create_time desc\".\n\nWhen specified, the value must be a comma separated list of supported\nfields. The supported fields are: {name, version, cpu, gpu, memory_bytes, storage_bytes,\ncreator, create_time, update_time, delete_time, resume_time, display_name, uid}\n\nThe default sorting order is ascending. For example: \"name\" and \"name asc\"\nare equivalent values.\n\nTo specify descending order for a field, append a \" desc\" suffix. For\nexample: \"name desc\".\n\nRedundant space characters are insignificant. For example these values are\nall equal:\n- \"  name, cpu     desc\"\n- \"name, cpu desc\"\n- \"name   , cpu desc   \"",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "description": "Used to filter Engines. When unset, no filtering is applied.\n\nFiltering implements specification https://google.aip.dev/160.\n\nSupported filter fields:\n- name\n- engine_id\n- version (supporting version semantic comparison, does not support aliases)\n- state\n- cpu\n- gpu\n- memory_bytes\n- storage_bytes\n- creator\n- creator_display_name\n- create_time\n- update_time\n- delete_time\n- resume_time\n- reconciling\n- uid\n- display_name\n- max_idle_duration\n- max_running_duration\n- current_idle_duration\n- current_running_duration\n\nExamples:\n- `cpu \u003e 5`\n- `gpu \u003c 3`\n- `cpu \u003e= 5 AND gpu \u003c= 3`\n- `cpu != 5 OR gpu == 3`\n- `NOT (cpu \u003e 5 OR gpu \u003c 3)`\n- `-(cpu \u003e 5 OR gpu \u003c 3)`\n- `NOT (cpu \u003e 5 OR (gpu \u003c 3))`\n- `(cpu \u003e 5 OR gpu \u003c 3) AND memory_bytes != 1000`\n- `(cpu \u003e 5 OR gpu \u003c 3) AND (NOT ((((memory_bytes = 1000)))))`\n- `state = STATE_RUNNING AND create_time \u003e \"2012-04-21T11:30:00-04:00\"`\n- `version \u003e= \"1.10.3\"`\n- `reconciling = true OR reconciling = false`\n- `engine_id = \"*e*\" OR display_name = \"*e*\"` (supporting prefix/suffix wildcard `*` for string fields equality comparison)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": ["EngineService"]
+      }
+    },
+    "/v1/{parent}/h2oEngines": {
+      "get": {
+        "summary": "Returns a collection of H2OEngines within a workspace.",
+        "operationId": "H2OEngineService_ListH2OEngines",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListH2OEnginesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent",
+            "description": "Workspace resource name. Format: workspaces/{workspace}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+"
+          },
+          {
+            "name": "pageSize",
+            "description": "Maximum number of H2OEngines to return in a response.\nIf unspecified (or set to 0), at most 50 H2OEngines will be returned.\nThe maximum value is 1000; values above 1000 will be coerced to 1000.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "description": "Leave unset to receive the initial page.\nTo list any subsequent pages use the value of 'next_page_token'\nreturned from the ListH2OEnginesResponse.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "description": "Used to specify the sorting order.\n\nWhen unset, H2OEngines are ordered by their time of creation in\ndescending order. This is equivalent to \"create_time desc\".\n\nWhen specified, the value must be a comma separated list of supported\nfields. The supported fields are:\n - name\n - version\n - cpu\n - gpu\n - memoryBytes\n - creator\n - createTime\n - updateTime\n - deleteTime\n - displayName\n - maxIdleDuration\n - maxRunningDuration\n - uid\n - nodeCount\n\nThe default sorting order is ascending. For example: \"name\" and \"name asc\"\nare equivalent values.\n\nTo specify descending order for a field, append a \" desc\" suffix. For\nexample: \"name desc\".\n\nRedundant space characters are insignificant. For example these values are\nall equal:\n- \"  name, cpu     desc\"\n- \"name, cpu desc\"\n- \"name   , cpu desc   \"\n\nUndefined (empty) time is interpreted as a zero time (0s since epoch, i.e.\n1970-01-01T00:00:00Z).\n\nUndefined (empty) duration is interpreted as a zero duration (0 seconds).",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "description": "Used to filter H2OEngines. When unset, no filtering is applied.\n\nFiltering implements specification https://google.aip.dev/160.\n\nSupported filter fields:\n- name\n- h2o_engine_id\n- version (supporting version semantic comparison and version aliases)\n- state\n- cpu\n- gpu\n- memory_bytes\n- creator\n- creator_display_name\n- create_time\n- update_time\n- delete_time\n- reconciling\n- uid\n- display_name\n- max_idle_duration\n- max_running_duration\n- current_idle_duration\n- current_running_duration\n- node_count\n\nExamples:\n- `cpu \u003e 5`\n- `gpu \u003c 3`\n- `cpu \u003e= 5 AND gpu \u003c= 3`\n- `cpu != 5 OR gpu == 3`\n- `NOT (cpu \u003e 5 OR gpu \u003c 3)`\n- `-(cpu \u003e 5 OR gpu \u003c 3)`\n- `NOT (cpu \u003e 5 OR (gpu \u003c 3))`\n- `(cpu \u003e 5 OR gpu \u003c 3) AND memory_bytes != 1000`\n- `(cpu \u003e 5 OR gpu \u003c 3) AND (NOT ((((memory_bytes = 1000)))))`\n- `state = STATE_RUNNING AND create_time \u003e \"2012-04-21T11:30:00-04:00\"`\n- `max_running_duration \u003e \"1s\" AND max_running_duration != \"5s\"`\n- `version \u003c \"latest\" AND version \u003e= \"3.38.0.1\"`\n- `reconciling = true OR reconciling = false` (supporting bool literals)\n- `h2o_engine_id = \"*e*\" OR display_name = \"*e*\"` (supporting prefix/suffix wildcard `*` for string fields equality comparison)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": ["H2OEngineService"]
+      },
+      "post": {
+        "summary": "Creates and starts a new H2OEngine within a specified workspace.",
+        "operationId": "H2OEngineService_CreateH2OEngine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateH2OEngineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent",
+            "description": "workspace resource name. Format: workspaces/{workspace}",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "workspaces/[^/]+"
+          },
+          {
+            "name": "h2oEngine",
+            "description": "The H2OEngine resource to create.\nNON_EMPTY_DEFAULT fields that are not set in this request will be set to a default value.\nDefault value is determined by the workspace in which the engine is created. Each workspace has a defined\nconstraint set, which contains the default value for each field.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1H2OEngine"
+            }
+          },
+          {
+            "name": "h2oEngineId",
+            "description": "Specify the H2OEngine ID, which will become a part of the H2OEngine\nresource name.\n\nIt must:\n- contain 1-63 characters\n- contain only lowercase alphanumeric characters or hyphen ('-')\n- start with an alphabetic character\n- end with an alphanumeric character\n\nThis matches a regular expression: ^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "validateOnly",
+            "description": "When set, request is only validated but no changes are made.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": ["H2OEngineService"]
+      }
+    }
+  },
+  "definitions": {
+    "apiHttpBody": {
+      "type": "object",
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "description": "The HTTP Content-Type header value specifying the content type of the body."
+        },
+        "data": {
+          "type": "string",
+          "format": "byte",
+          "description": "The HTTP request/response body as raw binary."
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          },
+          "description": "Application specific response metadata. Must be set in the first response\nfor streaming APIs."
+        }
+      },
+      "description": "Message that represents an arbitrary HTTP body. It should only be used for\npayload formats that can't be represented as JSON, such as raw binary or\nan HTML page.\n\n\nThis message can be used both in streaming and non-streaming API methods in\nthe request as well as the response.\n\nIt can be used as a top-level request field, which is convenient if one\nwants to extract parameters from either the URL or HTTP template into the\nrequest fields and also want access to the raw HTTP body.\n\nExample:\n\n    message GetResourceRequest {\n      // A unique request id.\n      string request_id = 1;\n\n      // The raw HTTP body is bound to this field.\n      google.api.HttpBody http_body = 2;\n\n    }\n\n    service ResourceService {\n      rpc GetResource(GetResourceRequest)\n        returns (google.api.HttpBody);\n      rpc UpdateResource(google.api.HttpBody)\n        returns (google.protobuf.Empty);\n\n    }\n\nExample with streaming methods:\n\n    service CaldavService {\n      rpc GetCalendar(stream google.api.HttpBody)\n        returns (stream google.api.HttpBody);\n      rpc UpdateCalendar(stream google.api.HttpBody)\n        returns (stream google.api.HttpBody);\n\n    }\n\nUse of this type only changes how the request and response bodies are\nhandled, all other features will continue to work unchanged."
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        }
+      },
+      "additionalProperties": {},
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1ConstraintDuration": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "string",
+          "description": "Minimum (inclusive) allowed value."
+        },
+        "max": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maximum (inclusive) allowed value. Unset is treated as unlimited."
+        },
+        "default": {
+          "type": "string",
+          "description": "Default value. It is used as an initial value or when the value is unset by the user."
+        }
+      },
+      "description": "Message representing a constraint on a user-specified duration value."
+    },
+    "v1ConstraintNumeric": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "string",
+          "format": "int64",
+          "description": "Minimum (inclusive) allowed value."
+        },
+        "max": {
+          "type": "string",
+          "format": "int64",
+          "x-nullable": true,
+          "description": "Maximum (inclusive) allowed value. Unset is treated as unlimited."
+        },
+        "default": {
+          "type": "string",
+          "format": "int64",
+          "description": "Default value. It is used as an initial value or when the value is unset by the user."
+        }
+      },
+      "description": "Message representing a constraint on a user-specified numeric value."
+    },
+    "v1CreateDAIEngineResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine resource."
+        }
+      },
+      "description": "Response message for DAIEngineService.CreateDAIEngine."
+    },
+    "v1CreateH2OEngineResponse": {
+      "type": "object",
+      "properties": {
+        "h2oEngine": {
+          "$ref": "#/definitions/v1H2OEngine",
+          "description": "H2OEngine resource."
+        }
+      },
+      "description": "Response message for H2OEngineService.CreateH2OEngine."
+    },
+    "v1DAIEngine": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "DAIEngine resource name.",
+          "readOnly": true
+        },
+        "uid": {
+          "type": "string",
+          "description": "Globally unique identifier of the resource.",
+          "readOnly": true
+        },
+        "creator": {
+          "type": "string",
+          "description": "Name of an entity that created the DAIEngine.",
+          "readOnly": true
+        },
+        "creatorDisplayName": {
+          "type": "string",
+          "description": "Human-readable name of creator.",
+          "readOnly": true
+        },
+        "state": {
+          "$ref": "#/definitions/v1DAIEngineState",
+          "description": "The current state of the DAIEngine."
+        },
+        "reconciling": {
+          "type": "boolean",
+          "description": "Indicates whether changes to the resource are in progress.\nIf true, current state of the DAIEngine does not match the intended state.",
+          "readOnly": true
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time when the DAIEngine creation was requested.",
+          "readOnly": true
+        },
+        "deleteTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the DAIEngine was deleted.",
+          "readOnly": true
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the DAIEngine was last updated.",
+          "readOnly": true
+        },
+        "resumeTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the DAIEngine was last resumed (or started for the first time).",
+          "readOnly": true
+        },
+        "apiUrl": {
+          "type": "string",
+          "description": "The URL address to access the engine API.",
+          "readOnly": true
+        },
+        "loginUrl": {
+          "type": "string",
+          "description": "The URL address to initiate login flow.",
+          "readOnly": true
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional arbitrary metadata associated with the DAIEngine.\n\nAnnotations are key/value pairs.\nThe key must:\n- be 63 characters or less\n- begin and end with an alphanumeric character ([a-z0-9A-Z])\n- with dashes (-), underscores (_), dots (.), and alphanumerics between\n- regex used for validation is: ^[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human-readable name of the DAIEngine. Must contain at most 63 characters. Does not have to be unique."
+        },
+        "version": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Driverless AI version identifier. Version may be specified during engine creation but cannot be changed later.\nFor example: \"1.10.1\" or \"latest\"."
+        },
+        "cpu": {
+          "type": "integer",
+          "format": "int32",
+          "x-nullable": true,
+          "description": "The amount of CPU units requested by this DAIEngine."
+        },
+        "gpu": {
+          "type": "integer",
+          "format": "int32",
+          "x-nullable": true,
+          "description": "The amount of GPU units requested by this DAIEngine."
+        },
+        "memoryBytes": {
+          "type": "string",
+          "format": "int64",
+          "x-nullable": true,
+          "description": "The amount of memory in bytes requested by this DAIEngine."
+        },
+        "storageBytes": {
+          "type": "string",
+          "format": "int64",
+          "x-nullable": true,
+          "description": "The amount of storage requested by this DAIEngine."
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional Driverless AI configuration.\n\nTemporary: Some config keys are reserved and their value cannot be changed.\nAttempting to set or override a reserved key will have no effect, no error\nwill be raised.\nEntries with reserved keys will not be available in this field (they are\nhidden)."
+        },
+        "maxIdleDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "title": "Maximum time the DAIEngine can be idle. When exceeded, the DAIEngine will pause.\nThe idle time is reset when any of the following occurs:\n- incoming RPC request from client\n- user login or logout\n- system event like sync message from running or finished experiment\n- initialization of dataset upload\n- custom recipe upload"
+        },
+        "maxRunningDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maximum time the DAIEngine can be running. When exceeded, the DAIEngine will pause."
+        },
+        "upgradeAvailable": {
+          "type": "boolean",
+          "description": "Indicates, whether the used version can be upgraded to a later one.",
+          "readOnly": true
+        },
+        "currentIdleDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Current time the DAIEngine is idle.",
+          "readOnly": true
+        },
+        "currentRunningDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Current time the DAIEngine is running.",
+          "readOnly": true
+        }
+      },
+      "title": "Message representing Driverless AI Engine.\n(-- api-linter: core::0164::declarative-friendly-required=disabled\n    aip.dev/not-precedent: Not adding Undelete method because it requires\n    changes on generic Engine and H2OEngine as well. Undelete method should\n    be added later. --)"
+    },
+    "v1DAIEngineConstraintSet": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "DAIEngineConstraintSet resource name."
+        },
+        "cpu": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'cpu' field."
+        },
+        "gpu": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'gpu' field."
+        },
+        "memoryBytes": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'memory_bytes' field."
+        },
+        "storageBytes": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'storage_bytes' field."
+        },
+        "maxIdleDuration": {
+          "$ref": "#/definitions/v1ConstraintDuration",
+          "description": "Constraint for 'max_idle_duration' field."
+        },
+        "maxRunningDuration": {
+          "$ref": "#/definitions/v1ConstraintDuration",
+          "description": "Constraint for 'max_running_duration' field."
+        }
+      },
+      "description": "Message representing a set of constraints for DAIEngine."
+    },
+    "v1DAIEngineServiceDownloadLogsResponse": {
+      "type": "object",
+      "properties": {
+        "logs": {
+          "$ref": "#/definitions/apiHttpBody",
+          "description": "Represents text logs file as an arbitrary HTTP body."
+        }
+      },
+      "description": "Response message for downloaded logs."
+    },
+    "v1DAIEngineServiceMigrateCreatorResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine with migrated creator."
+        }
+      },
+      "description": "Response message for migrateCreatorRequest."
+    },
+    "v1DAIEngineServiceUpgradeVersionResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine with upgraded version."
+        }
+      },
+      "description": "Response message for UpgradeVersionRequest."
+    },
+    "v1DAIEngineState": {
+      "type": "string",
+      "enum": [
+        "STATE_UNSPECIFIED",
+        "STATE_STARTING",
+        "STATE_RUNNING",
+        "STATE_PAUSING",
+        "STATE_PAUSED",
+        "STATE_FAILED",
+        "STATE_DELETING",
+        "STATE_CONNECTING"
+      ],
+      "default": "STATE_UNSPECIFIED",
+      "description": "All possible DAIEngine states.\n\n - STATE_UNSPECIFIED: DAIEngine state is unspecified or unknown.\n - STATE_STARTING: DAIEngine is starting.\n - STATE_RUNNING: DAIEngine is running and can be used.\n - STATE_PAUSING: DAIEngine is pausing.\n - STATE_PAUSED: DAIEngine is paused and can be resumed again.\n - STATE_FAILED: DAIEngine has failed and can be resumed again.\n - STATE_DELETING: DAIEngine is being deleted.\n - STATE_CONNECTING: DAIEngine is establishing a connection with the AI Engine Manager."
+    },
+    "v1DAIVersion": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Unique identifier of Driverless AI version.\nFor example \"1.10.1.2\".",
+          "readOnly": true
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Aliases for the specified Driverless AI version.\nFor example {\"latest\", \"prerelease\"}.",
+          "readOnly": true
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional arbitrary metadata associated with the DAIVersion.\n\nAnnotations are key/value pairs.\nThe key must:\n- be 63 characters or less\n- begin and end with an alphanumeric character ([a-z0-9A-Z])\n- with dashes (-), underscores (_), dots (.), and alphanumerics between\n- regex used for validation is: ^[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$"
+        }
+      },
+      "description": "DAIVersion describes Driverless AI version."
+    },
+    "v1DeleteDAIEngineResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "x-nullable": true,
+          "description": "DAIEngine resource being deleted. May be empty in case delete was instant."
+        }
+      },
+      "description": "Response message for DAIEngineService.DeleteDAIEngine."
+    },
+    "v1DeleteH2OEngineResponse": {
+      "type": "object",
+      "properties": {
+        "h2oEngine": {
+          "$ref": "#/definitions/v1H2OEngine",
+          "x-nullable": true,
+          "description": "H2OEngine resource being deleted. May be empty in case delete was instant."
+        }
+      },
+      "description": "Response message for H2OEngineService.DeleteH2OEngine."
+    },
+    "v1Engine": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Engine resource name.",
+          "readOnly": true
+        },
+        "uid": {
+          "type": "string",
+          "description": "Globally unique identifier of the resource.",
+          "readOnly": true
+        },
+        "creator": {
+          "type": "string",
+          "description": "Name of an entity that created the Engine.",
+          "readOnly": true
+        },
+        "creatorDisplayName": {
+          "type": "string",
+          "description": "Human-readable name of creator.",
+          "readOnly": true
+        },
+        "type": {
+          "$ref": "#/definitions/v1EngineType",
+          "description": "Output only.",
+          "readOnly": true
+        },
+        "state": {
+          "$ref": "#/definitions/v1EngineState",
+          "description": "The current state of the Engine."
+        },
+        "reconciling": {
+          "type": "boolean",
+          "description": "Indicates whether changes to the resource are in progress.\nIf true, current state of the Engine does not match the intended state.",
+          "readOnly": true
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time when the Engine creation was requested.",
+          "readOnly": true
+        },
+        "deleteTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the Engine was deleted.",
+          "readOnly": true
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the Engine was last updated.",
+          "readOnly": true
+        },
+        "resumeTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the Engine was last resumed (or started for the first time).",
+          "readOnly": true
+        },
+        "loginUrl": {
+          "type": "string",
+          "description": "The URL address to initiate login flow.",
+          "readOnly": true
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional arbitrary metadata associated with the Engine. Annotations are key/value pairs.",
+          "readOnly": true
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human-readable name of the Engine. Contains at most 63 characters and is not unique.",
+          "readOnly": true
+        },
+        "version": {
+          "type": "string",
+          "description": "Engine version identifier.\nFor example: \"1.10.1\" or \"latest\".",
+          "readOnly": true
+        },
+        "cpu": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The amount of CPU units in total requested by this Engine.",
+          "readOnly": true
+        },
+        "gpu": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The amount of GPU units in total requested by this Engine.",
+          "readOnly": true
+        },
+        "memoryBytes": {
+          "type": "string",
+          "format": "int64",
+          "description": "The amount of memory in bytes requested by this Engine.",
+          "readOnly": true
+        },
+        "storageBytes": {
+          "type": "string",
+          "format": "int64",
+          "description": "The amount of storage in bytes requested by this Engine.",
+          "readOnly": true
+        },
+        "upgradeAvailable": {
+          "type": "boolean",
+          "description": "Indicates, whether the used version can be upgraded to a later one.",
+          "readOnly": true
+        },
+        "maxIdleDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maximum time the engine can be idle.",
+          "readOnly": true
+        },
+        "maxRunningDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maximum time the engine can be running.",
+          "readOnly": true
+        },
+        "currentIdleDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Current time the engine is idle.",
+          "readOnly": true
+        },
+        "currentRunningDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Current time the engine is running.",
+          "readOnly": true
+        }
+      }
+    },
+    "v1EngineState": {
+      "type": "string",
+      "enum": [
+        "STATE_UNSPECIFIED",
+        "STATE_STARTING",
+        "STATE_RUNNING",
+        "STATE_PAUSING",
+        "STATE_PAUSED",
+        "STATE_FAILED",
+        "STATE_DELETING",
+        "STATE_CONNECTING"
+      ],
+      "default": "STATE_UNSPECIFIED",
+      "description": "All possible Engine states.\n\n - STATE_UNSPECIFIED: Engine state is unspecified or unknown\n - STATE_STARTING: Engine is starting.\n - STATE_RUNNING: Engine is running and can be used.\n - STATE_PAUSING: Engine is pausing.\n - STATE_PAUSED: Engine is paused and can be resumed again.\n - STATE_FAILED: Engine has failed and can be resumed again.\n - STATE_DELETING: Engine is being deleted.\n - STATE_CONNECTING: Engine is establishing a connection with the AI Engine Manager."
+    },
+    "v1EngineType": {
+      "type": "string",
+      "enum": ["TYPE_UNSPECIFIED", "TYPE_DRIVERLESS_AI", "TYPE_H2O"],
+      "default": "TYPE_UNSPECIFIED",
+      "description": "All possible Engine types.\n\n - TYPE_UNSPECIFIED: Engine type is unspecified or unknown.\n - TYPE_DRIVERLESS_AI: Driverless AI Engine.\n - TYPE_H2O: H2O Engine."
+    },
+    "v1GetDAIEngineConstraintSetResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngineConstraintSet": {
+          "$ref": "#/definitions/v1DAIEngineConstraintSet",
+          "description": "DAIEngineConstraintSet resource."
+        }
+      },
+      "description": "Response message for getting the current DAIEngineConstraintSet."
+    },
+    "v1GetDAIEngineResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine resource."
+        }
+      },
+      "description": "Response message for DAIEngineService.GetDAIEngine."
+    },
+    "v1GetH2OEngineConstraintSetResponse": {
+      "type": "object",
+      "properties": {
+        "h2oEngineConstraintSet": {
+          "$ref": "#/definitions/v1H2OEngineConstraintSet",
+          "description": "H2OEngineConstraintSet resource."
+        }
+      },
+      "description": "Response message for getting the current H2OEngineConstraintSet."
+    },
+    "v1GetH2OEngineResponse": {
+      "type": "object",
+      "properties": {
+        "h2oEngine": {
+          "$ref": "#/definitions/v1H2OEngine",
+          "description": "H2OEngine resource."
+        }
+      },
+      "description": "Response message for H2OEngineService.GetH2OEngine."
+    },
+    "v1H2OEngine": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "H2OEngine resource name.",
+          "readOnly": true
+        },
+        "uid": {
+          "type": "string",
+          "description": "Globally unique identifier of the resource.",
+          "readOnly": true
+        },
+        "creator": {
+          "type": "string",
+          "description": "Name of na entity that created the H2OEngine.",
+          "readOnly": true
+        },
+        "creatorDisplayName": {
+          "type": "string",
+          "description": "Human-readable name of creator.",
+          "readOnly": true
+        },
+        "state": {
+          "$ref": "#/definitions/v1H2OEngineState",
+          "description": "The current state of the H2OEngine."
+        },
+        "reconciling": {
+          "type": "boolean",
+          "description": "Indicates whether changes to the resource are in progress.\nIf true, current state of the H2OEngine does not match the intended state.",
+          "readOnly": true
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time when the H2OEngine creation was requested.",
+          "readOnly": true
+        },
+        "deleteTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the H2OEngine was deleted.",
+          "readOnly": true
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "description": "Time when the H2OEngine was last updated.",
+          "readOnly": true
+        },
+        "apiUrl": {
+          "type": "string",
+          "description": "The URL address to access the engine API.",
+          "readOnly": true
+        },
+        "loginUrl": {
+          "type": "string",
+          "description": "The URL address to initiate login flow.",
+          "readOnly": true
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional arbitrary metadata associated with the H2OEngine.\n\nAnnotations are key/value pairs.\nThe key must:\n- be 63 characters or less\n- begin and end with an alphanumeric character ([a-z0-9A-Z])\n- with dashes (-), underscores (_), dots (.), and alphanumerics between\n- regex used for validation is: ^[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human-readable name of the H2OEngine. Must contain at most 63 characters. Does not have to be unique."
+        },
+        "version": {
+          "type": "string",
+          "description": "H2OEngine version identifier. Version must be specified during engine creation but cannot be changed later.\nFor example: \"3.38.0.1\" or \"latest\".",
+          "required": ["version"]
+        },
+        "cpu": {
+          "type": "integer",
+          "format": "int32",
+          "x-nullable": true,
+          "description": "The amount of CPU units per node requested by this H2OEngine."
+        },
+        "gpu": {
+          "type": "integer",
+          "format": "int32",
+          "x-nullable": true,
+          "description": "The amount of GPU units per node requested by this H2OEngine."
+        },
+        "memoryBytes": {
+          "type": "string",
+          "format": "int64",
+          "x-nullable": true,
+          "description": "The amount of memory in bytes per node requested by this H2OEngine."
+        },
+        "maxIdleDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maximum time an H2OEngine can be idle. When exceeded, the H2OEngine will pause."
+        },
+        "maxRunningDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maximum time an H2OEngine can be running. When exceeded, the H2OEngine will pause."
+        },
+        "currentIdleDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Current time the H2OEngine is idle.",
+          "readOnly": true
+        },
+        "currentRunningDuration": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Current time the H2OEngine is running.",
+          "readOnly": true
+        },
+        "nodeCount": {
+          "type": "integer",
+          "format": "int32",
+          "x-nullable": true,
+          "description": "The number of nodes requested by this H2OEngine."
+        }
+      },
+      "title": "Message representing H2O AI engine.\n(-- api-linter: core::0164::declarative-friendly-required=disabled\n    aip.dev/not-precedent: Not adding Undelete method because it requires\n    changes on generic Engine and H2OEngine as well. Undelete method should\n    be added later. --)",
+      "required": ["version"]
+    },
+    "v1H2OEngineConstraintSet": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "H2OEngineConstraintSet resource name."
+        },
+        "cpu": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'cpu' field."
+        },
+        "gpu": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'gpu' field."
+        },
+        "memoryBytes": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'memory_bytes' field."
+        },
+        "maxIdleDuration": {
+          "$ref": "#/definitions/v1ConstraintDuration",
+          "description": "Constraint for 'max_idle_duration' field."
+        },
+        "maxRunningDuration": {
+          "$ref": "#/definitions/v1ConstraintDuration",
+          "description": "Constraint for 'max_running_duration' field."
+        },
+        "nodeCount": {
+          "$ref": "#/definitions/v1ConstraintNumeric",
+          "description": "Constraint for 'node_count' field."
+        }
+      },
+      "description": "Message representing a set of constraints for H2OEngine."
+    },
+    "v1H2OEngineServiceDownloadLogsResponse": {
+      "type": "object",
+      "properties": {
+        "logs": {
+          "$ref": "#/definitions/apiHttpBody",
+          "description": "Represents text logs file as an arbitrary HTTP body."
+        }
+      },
+      "description": "Response message for downloaded logs."
+    },
+    "v1H2OEngineState": {
+      "type": "string",
+      "enum": [
+        "STATE_UNSPECIFIED",
+        "STATE_STARTING",
+        "STATE_RUNNING",
+        "STATE_PAUSING",
+        "STATE_PAUSED",
+        "STATE_FAILED",
+        "STATE_DELETING",
+        "STATE_CONNECTING"
+      ],
+      "default": "STATE_UNSPECIFIED",
+      "description": "All possible H2OEngine states.\n\n - STATE_UNSPECIFIED: H2OEngine state is unspecified or unknown.\n - STATE_STARTING: H2OEngine is starting.\n - STATE_RUNNING: H2OEngine is running and can be used.\n - STATE_PAUSING: H2OEngine is pausing.\n - STATE_PAUSED: H2OEngine is paused and CANNOT be resumed again.\n - STATE_FAILED: H2OEngine has failed.\n - STATE_DELETING: H2OEngine is being deleted.\n - STATE_CONNECTING: H2OEngine is establishing a connection with the AI Engine Manager."
+    },
+    "v1H2OVersion": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Unique identifier of H2O version.\nFor example \"3.38.0.1\".",
+          "readOnly": true
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Aliases for the specified H2O version.\nFor example {\"latest\", \"prerelease\"}.",
+          "readOnly": true
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional arbitrary metadata associated with the H2OVersion.\n\nAnnotations are key/value pairs.\nThe key must:\n- be 63 characters or less\n- begin and end with an alphanumeric character ([a-z0-9A-Z])\n- with dashes (-), underscores (_), dots (.), and alphanumerics between\n- regex used for validation is: ^[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$"
+        }
+      },
+      "description": "H2OVersion describes H2O version."
+    },
+    "v1ListDAIEnginesResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1DAIEngine"
+          },
+          "description": "Collection of DAIEngines."
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "Used to retrieve the next page of results.\nWhen unset, no further items are available (this response was the last page)."
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of DAIEngines matched by the List request."
+        }
+      },
+      "description": "Response message for DAIEngineService.ListDAIEngines."
+    },
+    "v1ListDAIVersionsResponse": {
+      "type": "object",
+      "properties": {
+        "daiVersions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1DAIVersion"
+          },
+          "description": "Collection of DAIVersions."
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "Used to retrieve the next page of results.\nWhen unset, no further items are available (this response was the last page)."
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of DAIVersions matched by the List request."
+        }
+      },
+      "description": "Response message for DAIVersionService.ListDAIVersions."
+    },
+    "v1ListEnginesResponse": {
+      "type": "object",
+      "properties": {
+        "engines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Engine"
+          },
+          "description": "Collection of Engines."
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "Used to retrieve the next page of results.\nWhen unset, no further items are available (this response was the last page)."
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of Engines matched by the List request."
+        }
+      },
+      "description": "Response message for EngineService.ListEngines."
+    },
+    "v1ListH2OEnginesResponse": {
+      "type": "object",
+      "properties": {
+        "h2oEngines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1H2OEngine"
+          },
+          "description": "Collection of H2OEngines."
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "Used to retrieve the next page of results.\nWhen unset, no further items are available (this response was the last page)."
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of H2OEngines matched by the List request."
+        }
+      },
+      "description": "Response message for H2OEngineService.ListH2OEngines."
+    },
+    "v1ListH2OVersionsResponse": {
+      "type": "object",
+      "properties": {
+        "h2oVersions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1H2OVersion"
+          },
+          "description": "Collection of H2OVersions."
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "Used to retrieve the next page of results.\nWhen unset, no further items are available (this response was the last page)."
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of H2OVersions matched by the List request."
+        }
+      },
+      "description": "Response message for H2OVersionService.ListH2OVersions."
+    },
+    "v1PauseDAIEngineResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine resource."
+        }
+      },
+      "description": "Response for DAIEngineService.PauseDAIEngine."
+    },
+    "v1ResumeDAIEngineResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine resource."
+        }
+      },
+      "description": "Response for DAIEngineService.ResumeDAIEngine."
+    },
+    "v1UpdateDAIEngineResponse": {
+      "type": "object",
+      "properties": {
+        "daiEngine": {
+          "$ref": "#/definitions/v1DAIEngine",
+          "description": "DAIEngine resource."
+        }
+      },
+      "description": "Response for DAIEngineService.UpdateDAIEngine."
+    }
+  }
+}
