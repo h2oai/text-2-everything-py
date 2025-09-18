@@ -90,9 +90,9 @@ Text2Everything API (via SDK)
        ↓
 Snowflake Connector (for execution)
        ↓
-CustomGPT (for AI assistance)
-       ↓
-Agent Environment (for production)
+Agent Environment (to enable agent <> API orchestration)
+    ↓
+CustomGPT (for putting all settings together)
 ```
 
 ## 🛠️ Prerequisites
