@@ -6,3 +6,6 @@ managers/
 jsons_generados_20250828/
 site/
 
+# Documentation build artifacts
+documentation/tmp/
+
