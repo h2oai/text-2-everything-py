@@ -32,6 +32,11 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Quickstart: quickstart.md
+  - Quick Start Guides:
+      - Overview: quick-start/README.md
+      - Developer Guide: quick-start/developer-starter-guide.md
+      - Quick Reference: quick-start/quick-reference.md
+      - Integration Summary: quick-start/integration-summary.md
   - Installation: installation.md
   - Configuration: configuration.md
   - Guides:

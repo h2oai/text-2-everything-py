@@ -5,7 +5,5 @@ __pycache__
 managers/
 jsons_generados_20250828/
 site/
-
-# Documentation build artifacts
+JSON - tests/
 documentation/tmp/
-

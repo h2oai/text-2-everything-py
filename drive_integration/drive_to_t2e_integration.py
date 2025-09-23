@@ -66,6 +66,24 @@ class DriveManager:
             print(f"❌ Error listing projects in Drive: {e}")
             return []
     
+    async def list_subdirectories(self, parent_path: str) -> List[str]:
+        """List subdirectories within a given path"""
+        try:
+            all_objects = await self.bucket.list_objects(f"{parent_path}/")
+            subdirs = set()
+            
+            for obj in all_objects:
+                # Remove the parent path prefix and get the next level
+                relative_path = obj.key[len(parent_path)+1:]  # +1 for the trailing slash
+                parts = relative_path.split('/')
+                if len(parts) > 1:  # Has subdirectories
+                    subdirs.add(parts[0])
+            
+            return sorted(list(subdirs))
+        except Exception as e:
+            print(f"❌ Error listing subdirectories in {parent_path}: {e}")
+            return []
+    
     async def load_file_from_drive(self, file_key: str) -> Any:
         """Download and load a file from H2O Drive"""
         with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.tmp') as tmp_file:
@@ -515,26 +533,67 @@ async def main():
             sdk_client.close()
             sys.exit(1)
         
+        # Check if the only available project is "home" and look deeper
+        if len(drive_projects) == 1 and drive_projects[0] == "home":
+            print("🔍 Found 'home' as the only project. Looking for subdirectories within home/...")
+            home_subdirs = await drive_manager.list_subdirectories("home")
+            
+            if home_subdirs:
+                print(f"📁 Found {len(home_subdirs)} subdirectories in home/")
+                # Use subdirectories as the project options
+                actual_projects = home_subdirs
+                project_prefix = "home/"
+                project_display_type = "H2O Drive (within home/)"
+            else:
+                print("⚠️  No subdirectories found in home/. Using 'home' as the project.")
+                actual_projects = drive_projects
+                project_prefix = ""
+                project_display_type = "H2O Drive"
+        else:
+            # Normal case - use top-level projects
+            actual_projects = drive_projects
+            project_prefix = ""
+            project_display_type = "H2O Drive"
+        
         if args.drive_project_name:
             # Use specified project name
-            if args.drive_project_name not in drive_projects:
+            # Handle both cases: direct project name or home/project_name format
+            if project_prefix and args.drive_project_name.startswith("home/"):
+                # Remove home/ prefix for comparison with actual_projects
+                project_name_without_prefix = args.drive_project_name[5:]  # Remove "home/"
+                if project_name_without_prefix not in actual_projects:
+                    print(f"❌ H2O Drive project '{args.drive_project_name}' not found")
+                    print(f"Available projects: {', '.join([project_prefix + p for p in actual_projects])}")
+                    sdk_client.close()
+                    sys.exit(1)
+                selected_drive_project = args.drive_project_name
+            elif not project_prefix and args.drive_project_name in actual_projects:
+                # Normal case - direct project name
+                selected_drive_project = args.drive_project_name
+            else:
                 print(f"❌ H2O Drive project '{args.drive_project_name}' not found")
-                print(f"Available projects: {', '.join(drive_projects)}")
+                if project_prefix:
+                    print(f"Available projects: {', '.join([project_prefix + p for p in actual_projects])}")
+                else:
+                    print(f"Available projects: {', '.join(actual_projects)}")
                 sdk_client.close()
                 sys.exit(1)
-            selected_drive_project = args.drive_project_name
         else:
             # Interactive selection
             if args.non_interactive:
                 print("❌ Non-interactive mode requires --drive-project-name")
                 sdk_client.close()
                 sys.exit(1)
-            selected_drive_project = select_project_interactive(drive_projects, "H2O Drive")
             
-            if not selected_drive_project:
+            selected_project_name = select_project_interactive(actual_projects, project_display_type)
+            
+            if not selected_project_name:
                 print("❌ No H2O Drive project selected")
                 sdk_client.close()
                 sys.exit(1)
+            
+            # Construct the full project path
+            selected_drive_project = project_prefix + selected_project_name
         
         print(f"✅ Selected Drive project: {selected_drive_project}")
         
