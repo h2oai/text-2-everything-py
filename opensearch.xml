@@ -4,8 +4,8 @@
   <ShortName>Text 2 Everything Python Documentation</ShortName>
   <Description>Search Text 2 Everything Python Documentation</Description>
   <InputEncoding>UTF-8</InputEncoding>
-  <Image width="16" height="16" type="image/x-icon">https://docs.h2o.ai/text2everything/img/favicon.ico</Image>
-  <Url type="text/html" method="get" template="https://docs.h2o.ai/text2everything/search?q={searchTerms}"/>
-  <Url type="application/opensearchdescription+xml" rel="self" template="https://docs.h2o.ai/text2everything/opensearch.xml" />
-  <moz:SearchForm>https://docs.h2o.ai/text2everything/</moz:SearchForm>
+  <Image width="16" height="16" type="image/x-icon">https://docs.h2o.ai/text-2-everything-py/img/favicon.ico</Image>
+  <Url type="text/html" method="get" template="https://docs.h2o.ai/text-2-everything-py/search?q={searchTerms}"/>
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://docs.h2o.ai/text-2-everything-py/opensearch.xml" />
+  <moz:SearchForm>https://docs.h2o.ai/text-2-everything-py/</moz:SearchForm>
 </OpenSearchDescription>
