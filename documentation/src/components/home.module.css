@@ -1,0 +1,120 @@
+/* stylelint-disable docusaurus/copyright-header */
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+:root {
+  --ifm-spacing-horizontal: 1rem;
+}
+
+.header {
+  display: flex;
+  margin: 50px 0 80px 0;
+}
+
+.headerImage {
+  max-width: 420px;
+  width: 100%;
+  height: 100%;
+  margin-right: 40px;
+}
+
+.headerWords {
+  width: 100%;
+}
+
+.docsLabel {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.headerTitle {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.headerDescription {
+  font-size: 1.25rem;
+  margin-top: 12px;
+    letter-spacing: -0.48px;
+}
+@media screen and (max-width: 880px) {
+  .header {
+    flex-wrap: wrap-reverse;
+  }
+  
+  .docsLabel {
+    font-size: 1.25rem;
+  }
+
+  .headerTitle {
+    font-size: 2rem;
+  }
+
+  .headerDescription {
+    font-size: 1rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sections {
+  display: flex;
+  align-items: center;
+  padding-bottom: 1rem;
+  width: 100%;
+}
+
+.sectionTitle {
+  padding-left: var(--ifm-spacing-horizontal);
+}
+
+.group {
+  padding-bottom: 2rem;
+  width: 288px;
+    max-width: 100%;
+  margin-right: 20px;
+}
+
+.groupContent {
+  background-color: rgba(232, 231, 230, 0.47);
+  padding: 20px;
+  height: 100%;
+}
+
+.groupTitle {
+  display: flex;
+  align-items: center;
+}
+
+.groupTitleIcon {
+  margin-right: 6px;
+}
+html[data-theme="dark"] .groupContent {
+  background-color: #262626;
+}
+
+.groupContent p {
+  color: #414248;
+}
+
+html[data-theme="dark"] .groupContent p {
+  color: #D1D5DB;
+}
+
+.sections ul {
+  list-style-type: none;
+  padding-left: 0px;
+}
+
+.sections li {
+  padding-top: 5px;
+}
+
+.sections li a {
+  color: var(--h2o-link-color);
+}
