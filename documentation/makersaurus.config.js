@@ -2,7 +2,7 @@ module.exports = {
   title: "Text 2 Everything Python Documentation",
   tagline: "Text 2 Everything Python Documentation",
   url: "https://docs.h2o.ai",
-  baseUrl: "/text2everything/",
+  baseUrl: "/text-2-everything-py/",
   projectName: "text-2-everything-py", // Usually your repo name
   feedbackAssignee: "oshi98", // Should be a github username
   includeCurrentVersion: true,
