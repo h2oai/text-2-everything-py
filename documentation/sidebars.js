@@ -2,10 +2,13 @@ module.exports = {
   defaultSidebar: [
     "index",
     {
-      "Get Started": [
-        "quickstart",
-        "installation",
-        "configuration",
+      type: 'category',
+      label: 'Get Started',
+      link: { type: 'doc', id: 'get-started' },
+      items: [
+        'quickstart',
+        'installation',
+        'configuration',
       ],
     },
     {
