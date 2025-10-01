@@ -267,12 +267,21 @@ class ConnectorsResource(BaseResource):
             ```
         """
         try:
-            # This would typically be a separate endpoint, but for now we'll use get
-            # In a real implementation, there might be a POST /connectors/{id}/test endpoint
-            connector = self.get(connector_id)
-            return True
+            resp = self._client.post(f"/connectors/{connector_id}/test")
+            return bool(resp.get("ok", False))
         except Exception as e:
             raise ValidationError(f"Connection test failed: {str(e)}")
+
+    def test_connection_detailed(self, connector_id: str) -> dict:
+        """Test a connector and return detailed response (e.g., elapsed_ms).
+        
+        Args:
+            connector_id: The connector ID to test
+            
+        Returns:
+            Dict with fields like { ok: bool, elapsed_ms: int }
+        """
+        return self._client.post(f"/connectors/{connector_id}/test")
     
     def list_by_type(self, db_type: str) -> List[Connector]:
         """List connectors by database type.
