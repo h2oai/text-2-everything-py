@@ -43,3 +43,13 @@ class ExecutionBase(BaseModel):
 class Execution(ExecutionBase, BaseResponse):
     """Complete execution model with all fields."""
     pass
+
+
+class ExecutionListItem(BaseResponse):
+    """Execution summary item for list endpoints (no result payload)."""
+
+    execution_time_ms: int
+    is_successful: bool
+    chat_message_id: Optional[str] = None
+    sql_query: Optional[str] = None
+    connector_id: str

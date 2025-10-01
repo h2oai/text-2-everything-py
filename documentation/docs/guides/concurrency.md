@@ -9,7 +9,8 @@ Optimize `Text2EverythingClient` for high-throughput and long-running requests.
 ```python
 client = Text2EverythingClient(
     base_url="https://...",
-    api_key="...",
+    access_token="...",
+    workspace_name="workspaces/dev",
     read_timeout=300,
     max_connections=100,
     max_keepalive_connections=20,

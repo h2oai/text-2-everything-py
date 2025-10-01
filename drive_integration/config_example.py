@@ -7,7 +7,8 @@ Copy this file to config.py and update the values for your environment.
 # Text2Everything API Configuration
 T2E_CONFIG = {
     "base_url": "http://text2everything.text2everything.svc.cluster.local:8000",
-    "api_key": "",  # Set this or use T2E_API_KEY environment variable
+    "access_token": "",  # Set this or use T2E_ACCESS_TOKEN environment variable
+    "workspace_name": "",  # Optional, or use T2E_WORKSPACE_NAME
     "timeout": 60,
     "max_retries": 3
 }

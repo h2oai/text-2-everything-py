@@ -40,7 +40,8 @@ class Text2EverythingClient:
     
     Args:
         base_url: The base URL of the Text2Everything API
-        api_key: Your API key for authentication
+        access_token: OIDC access token to send as Authorization Bearer
+        workspace_name: Optional workspace scope to include via X-Workspace-Name
         timeout: Connection timeout in seconds (default: 30)
         max_retries: Maximum number of retries for failed requests (default: 3)
         retry_delay: Initial delay between retries in seconds (default: 1)
@@ -52,16 +53,17 @@ class Text2EverythingClient:
         http2: Enable HTTP/2 support (default: False)
         
     Example:
-        >>> # Standard usage
+        >>> # Standard usage (Bearer + optional workspace)
         >>> client = Text2EverythingClient(
         ...     base_url="https://api.text2everything.com",
-        ...     api_key="your-api-key"
+        ...     access_token="your-oidc-access-token",
+        ...     workspace_name="workspaces/my-workspace"
         ... )
         >>> 
         >>> # High-concurrency configuration
         >>> client = Text2EverythingClient(
         ...     base_url="https://api.text2everything.com",
-        ...     api_key="your-api-key",
+        ...     access_token="your-oidc-access-token",
         ...     read_timeout=300,  # 5 minutes for long requests
         ...     max_connections=100,
         ...     max_keepalive_connections=20
@@ -72,7 +74,8 @@ class Text2EverythingClient:
     
     def __init__(
         self,
-        api_key: str,
+        access_token: str,
+        workspace_name: Optional[str] = None,
         base_url: str = "http://text2everything.text2everything.svc.cluster.local:8000",
         timeout: int = 30,
         max_retries: int = 3,
@@ -87,11 +90,12 @@ class Text2EverythingClient:
     ):
         if not base_url:
             raise InvalidConfigurationError("base_url is required")
-        if not api_key:
-            raise InvalidConfigurationError("api_key is required")
+        if not access_token:
+            raise InvalidConfigurationError("access_token is required")
             
         self.base_url = base_url.rstrip('/')
-        self.api_key = api_key
+        self.access_token = access_token
+        self.workspace_name = workspace_name
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_delay = retry_delay
@@ -133,11 +137,14 @@ class Text2EverythingClient:
     
     def _get_default_headers(self) -> Dict[str, str]:
         """Get default headers for API requests."""
-        return {
-            "X-API-Key": self.api_key,
+        headers: Dict[str, str] = {
             "Content-Type": "application/json",
-            "User-Agent": "text2everything-sdk/1.0.0"
+            "User-Agent": "text2everything-sdk/1.0.0",
+            "Authorization": f"Bearer {self.access_token}",
         }
+        if self.workspace_name:
+            headers["X-Workspace-Name"] = self.workspace_name
+        return headers
     
     def _build_url(self, endpoint: str) -> str:
         """Build full URL from endpoint."""
@@ -319,11 +326,10 @@ class Text2EverythingClient:
         """
         url = self._build_url(endpoint)
         # Start with default headers but remove Content-Type for multipart
-        request_headers = {
-            "X-API-Key": self.api_key,
-            "User-Agent": "text2everything-sdk/1.0.0"
-            # Don't set Content-Type for multipart, let httpx handle it
-        }
+        request_headers = self._get_default_headers().copy()
+        # Don't set Content-Type for multipart, let httpx set boundary
+        if "Content-Type" in request_headers:
+            request_headers.pop("Content-Type", None)
         
         # Use list of tuples format which works with FastAPI
         for attempt in range(self.max_retries + 1):

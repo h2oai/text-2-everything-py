@@ -8,7 +8,7 @@ Create/list/get/update/delete:
 ```python
 from text2everything_sdk import Text2EverythingClient
 
-client = Text2EverythingClient(base_url="https://...", api_key="...")
+client = Text2EverythingClient(base_url="https://...", access_token="...", workspace_name="workspaces/dev")
 
 # Create
 conn = client.connectors.create(
@@ -46,7 +46,7 @@ Snowflake connector example:
 ```python
 from text2everything_sdk import Text2EverythingClient
 
-client = Text2EverythingClient(base_url="https://...", api_key="...")
+client = Text2EverythingClient(base_url="https://...", access_token="...", workspace_name="workspaces/dev")
 
 snowflake_conn = client.connectors.create(
     name="Snowflake - Analytics",

@@ -257,7 +257,8 @@ print("🔌 Initializing Text2Everything SDK...")
 try:
     sdk_client = Text2EverythingClient(
         base_url=os.getenv("TEXT2EVERYTHING_URL"),
-        api_key=os.getenv("H2OGPTE_API_KEY"),
+        access_token=os.getenv("T2E_ACCESS_TOKEN"),
+        workspace_name=os.getenv("T2E_WORKSPACE_NAME"),
         timeout=200,
         max_retries=1
     )
@@ -469,7 +470,7 @@ if snowflake_connector:
     base_url = os.getenv("TEXT2EVERYTHING_URL") 
     project_id = os.getenv("TEXT2EVERYTHING_PROJECT_ID")  
     connector_id = os.getenv("TEXT2EVERYTHING_CONNECTOR_ID")  
-    api_key = os.getenv("H2OGPTE_API_KEY")  
+    access_token = os.getenv("T2E_ACCESS_TOKEN")  
 
    Prompt Name: H2O Drive SQL Assistant
    
@@ -495,7 +496,7 @@ if snowflake_connector:
     base_url = os.getenv("TEXT2EVERYTHING_URL") # Already set up
     project_id = os.getenv("TEXT2EVERYTHING_PROJECT_ID")  # Already set up
     connector_id = os.getenv("TEXT2EVERYTHING_CONNECTOR_ID")  # Already set up
-    api_key = os.getenv("H2OGPTE_API_KEY")  # Already set up
+    access_token = os.getenv("T2E_ACCESS_TOKEN")  # Already set up
     ```
 
     ### Headers
@@ -503,7 +504,8 @@ if snowflake_connector:
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
-        "X-API-Key": api_key  # Changed from Authorization Bearer
+        "Authorization": f"Bearer {access_token}",
+        "X-Workspace-Name": os.getenv("T2E_WORKSPACE_NAME", "")
     }
     ```
 
@@ -563,7 +565,7 @@ if snowflake_connector:
    TEXT2EVERYTHING_CONNECTOR_ID = "<your_connector_id>"
    
    # H2OGPTE API Configuration
-   H2OGPTE_API_KEY = "<your_api_key>"
+   T2E_ACCESS_TOKEN = "<your_access_token>"
    ```
 
 3. **Replace Placeholder Values**:
@@ -740,7 +742,8 @@ print("API Key:", os.getenv('H2OGPTE_API_KEY')[:10] + "..." if os.getenv('H2OGPT
 try:
     test_client = Text2EverythingClient(
         base_url=os.getenv('TEXT2EVERYTHING_URL'),
-        api_key=os.getenv('H2OGPTE_API_KEY')
+        access_token=os.getenv('T2E_ACCESS_TOKEN'),
+        workspace_name=os.getenv('T2E_WORKSPACE_NAME')
     )
     projects = test_client.projects.list()
     print(f"✅ API connection successful, {len(projects)} projects found")

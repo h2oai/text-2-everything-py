@@ -37,13 +37,14 @@ class ProjectsResource(BaseResource):
             >>> for project in projects:
             ...     print(f"{project.name}: {project.description}")
         """
+        # Backend expects skip/limit. Convert page/per_page to skip/limit.
         params = {
-            'page': page,
-            'per_page': per_page
+            'skip': (page - 1) * per_page,
+            'limit': per_page,
         }
         if search:
-            params['search'] = search
-            
+            # Backend uses 'q' as free-text filter
+            params['q'] = search
         return self._paginate("projects", params=params, model_class=Project)
     
     def get(self, project_id: str) -> Project:

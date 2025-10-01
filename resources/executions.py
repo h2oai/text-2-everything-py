@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING
 from ..models.executions import (
     SQLExecuteRequest,
     SQLExecuteResponse,
-    Execution
+    Execution,
+    ExecutionListItem
 )
 from ..exceptions import ValidationError
 from .base import BaseResource
@@ -153,7 +154,37 @@ class ExecutionsResource(BaseResource):
             print(f"Time: {execution.execution_time_ms}ms")
             ```
         """
-        # Note: This endpoint might not exist in the current API
-        # This is a placeholder for future implementation
-        response = self._client.get(f"/executions/{execution_id}")
+        response = self._client.get(f"/sql/executions/{execution_id}")
         return Execution(**response)
+
+    def list_executions(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        q: str | None = None,
+        connector_id: str | None = None,
+        chat_message_id: str | None = None,
+    ) -> list[ExecutionListItem]:
+        """List SQL executions with optional filters.
+
+        Args:
+            skip: Number of items to skip
+            limit: Max items to return
+            q: Search term
+            connector_id: Filter by connector
+            chat_message_id: Filter by source chat message
+
+        Returns:
+            List of execution summary items
+        """
+        params = {"skip": skip, "limit": limit}
+        if q is not None:
+            params["q"] = q
+        if connector_id is not None:
+            params["connector_id"] = connector_id
+        if chat_message_id is not None:
+            params["chat_message_id"] = chat_message_id
+
+        endpoint = "/sql/executions"
+        # Use pagination helper to unify response handling
+        return self._paginate(endpoint, params=params, model_class=ExecutionListItem)

@@ -28,7 +28,8 @@ class ContextsResource(BaseResource):
         project_id: str,
         page: int = 1,
         per_page: int = 50,
-        search: Optional[str] = None
+        search: Optional[str] = None,
+        is_always_displayed: Optional[bool] = None,
     ) -> List[Context]:
         """
         List contexts for a specific project.
@@ -47,13 +48,16 @@ class ContextsResource(BaseResource):
             >>> for context in contexts:
             ...     print(f"{context.name}: {context.is_always_displayed}")
         """
+        # Convert to backend params
         params = {
-            'page': page,
-            'per_page': per_page
+            'skip': (page - 1) * per_page,
+            'limit': per_page,
         }
         if search:
-            params['search'] = search
-            
+            params['q'] = search
+        if is_always_displayed is not None:
+            params['is_always_displayed'] = is_always_displayed
+
         endpoint = self._build_endpoint("projects", project_id, "contexts")
         return self._paginate(endpoint, params=params, model_class=Context)
     

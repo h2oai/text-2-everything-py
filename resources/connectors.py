@@ -136,7 +136,7 @@ class ConnectorsResource(BaseResource):
         response = self._client.get(f"/connectors/{connector_id}")
         return Connector(**response)
     
-    def list(self, limit: int = 100, offset: int = 0) -> List[Connector]:
+    def list(self, limit: int = 100, offset: int = 0, search: Optional[str] = None) -> List[Connector]:
         """List all connectors.
         
         Args:
@@ -155,6 +155,8 @@ class ConnectorsResource(BaseResource):
         """
         endpoint = "/connectors"
         params = {"limit": limit, "skip": offset}
+        if search:
+            params["q"] = search
         return self._paginate(endpoint, params=params, model_class=Connector)
     
     def update(

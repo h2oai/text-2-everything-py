@@ -150,7 +150,7 @@ SNOWFLAKE_WAREHOUSE=COMPUTE_WH
 TEXT2EVERYTHING_URL = "http://text2everything.text2everything.svc.cluster.local:8000"
 TEXT2EVERYTHING_PROJECT_ID = "<project_id_from_step_2>"
 TEXT2EVERYTHING_CONNECTOR_ID = "<connector_id_from_step_3>"
-H2OGPTE_API_KEY = "<your_api_key>"
+T2E_ACCESS_TOKEN = "<your_access_token>"
 ```
 
 ### CustomGPT Settings

@@ -54,7 +54,8 @@ from text2everything_sdk import Text2EverythingClient
 # Initialize the client
 client = Text2EverythingClient(
     base_url="https://your-api-endpoint.com",
-    api_key="your-api-key"
+    access_token="your-access-token",
+    workspace_name="workspaces/my-workspace"
 )
 
 # Create a project
@@ -283,7 +284,8 @@ You can configure the SDK using environment variables:
 
 ```bash
 export TEXT2EVERYTHING_BASE_URL="https://your-api-endpoint.com"
-export H2OGPTE_API_KEY="your-h2ogpte-api-key"
+export T2E_ACCESS_TOKEN="your-oidc-access-token"
+export T2E_WORKSPACE_NAME="workspaces/my-workspace"
 ```
 
 ```python
@@ -292,7 +294,8 @@ from text2everything_sdk import Text2EverythingClient
 
 client = Text2EverythingClient(
     base_url=os.getenv("TEXT2EVERYTHING_BASE_URL"),
-    api_key=os.getenv("H2OGPTE_API_KEY")
+    access_token=os.getenv("T2E_ACCESS_TOKEN"),
+    workspace_name=os.getenv("T2E_WORKSPACE_NAME")
 )
 ```
 
@@ -303,7 +306,8 @@ For local development, create a `.env` file in your project root:
 ```bash
 # .env file
 T2E_BASE_URL=https://your-api-endpoint.com
-T2E_API_KEY=your-h2ogpte-api-key
+T2E_ACCESS_TOKEN=your-oidc-access-token
+T2E_WORKSPACE_NAME=workspaces/my-workspace
 ```
 
 The SDK will automatically load these variables when running tests:
@@ -321,7 +325,8 @@ client = Text2EverythingClient()
 ```python
 client = Text2EverythingClient(
     base_url="https://your-api-endpoint.com",
-    api_key="your-h2ogpte-api-key",
+    access_token="your-oidc-access-token",
+    workspace_name="workspaces/my-workspace",
     timeout=60,  # Request timeout in seconds
     max_retries=5,  # Maximum retry attempts
     retry_delay=2.0  # Initial retry delay in seconds
@@ -333,7 +338,7 @@ client = Text2EverythingClient(
 Use the client as a context manager for proper resource cleanup:
 
 ```python
-with Text2EverythingClient(base_url="...", api_key="...") as client:
+with Text2EverythingClient(base_url="...", access_token="...", workspace_name="workspaces/dev") as client:
     projects = client.projects.list()
     # Client will be automatically closed when exiting the context
 ```

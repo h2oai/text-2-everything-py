@@ -58,7 +58,8 @@ import os
 
 sdk_client = Text2EverythingClient(
     base_url=os.getenv("TEXT2EVERYTHING_URL"),
-    api_key=os.getenv("H2OGPTE_API_KEY"),
+    access_token=os.getenv("T2E_ACCESS_TOKEN"),
+    workspace_name=os.getenv("T2E_WORKSPACE_NAME"),
     timeout=200,
     max_retries=1
 )
@@ -228,7 +229,7 @@ else:
 TEXT2EVERYTHING_URL = "http://text2everything.text2everything.svc.cluster.local:8000"
 TEXT2EVERYTHING_PROJECT_ID = "<your_project_id>"
 TEXT2EVERYTHING_CONNECTOR_ID = "<your_connector_id>"
-H2OGPTE_API_KEY = "<your_api_key>"
+T2E_ACCESS_TOKEN = "<your_access_token>"
 ```
 
 ## 🚨 Common Error Solutions
@@ -257,7 +258,8 @@ print("API Key set:", bool(os.getenv('H2OGPTE_API_KEY')))
 try:
     test_client = Text2EverythingClient(
         base_url=os.getenv('TEXT2EVERYTHING_URL'),
-        api_key=os.getenv('H2OGPTE_API_KEY')
+        access_token=os.getenv('T2E_ACCESS_TOKEN'),
+        workspace_name=os.getenv('T2E_WORKSPACE_NAME')
     )
     projects = test_client.projects.list()
     print(f"✅ Connected, {len(projects)} projects")

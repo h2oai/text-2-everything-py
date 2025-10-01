@@ -21,7 +21,8 @@ from text2everything_sdk import Text2EverythingClient
 
 # Simple initialization
 client = Text2EverythingClient(
-    api_key="your-api-key",
+    access_token="your-access-token",
+    workspace_name="workspaces/my-workspace",
 )
 
 # 1) Create a project

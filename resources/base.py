@@ -51,17 +51,23 @@ class BaseResource:
             page_params.update({'page': page, 'per_page': per_page})
             
             response = self._client.get(endpoint, params=page_params)
-            
+
             # Handle both paginated and non-paginated responses
             if isinstance(response, list):
                 # Direct list response
                 items = response
                 has_more = len(items) == per_page
             elif isinstance(response, dict) and 'items' in response:
-                # Paginated response
-                pagination = PaginatedResponse(**response)
-                items = pagination.items
-                has_more = pagination.has_next
+                # Backend returns { items, total, page, page_size, has_next }
+                items = response.get('items', [])
+                # Derive has_more from explicit has_next if present; otherwise compute
+                if 'has_next' in response:
+                    has_more = bool(response.get('has_next'))
+                else:
+                    total = response.get('total')
+                    page_value = response.get('page') or page
+                    page_size_value = response.get('page_size') or per_page
+                    has_more = (page_value * page_size_value) < (total or 0)
             else:
                 # Single item response
                 items = [response] if response else []

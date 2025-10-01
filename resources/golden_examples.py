@@ -119,7 +119,7 @@ class GoldenExamplesResource(BaseResource):
         
         return GoldenExampleResponse(**response_data)
     
-    def list(self, project_id: str, limit: int = 100, offset: int = 0) -> List[GoldenExampleResponse]:
+    def list(self, project_id: str, limit: int = 100, offset: int = 0, search: Optional[str] = None, is_always_displayed: Optional[bool] = None) -> List[GoldenExampleResponse]:
         """List golden examples for a project.
         
         Args:
@@ -138,7 +138,12 @@ class GoldenExamplesResource(BaseResource):
             ```
         """
         endpoint = f"/projects/{project_id}/golden-examples"
-        params = {"limit": limit, "offset": offset}
+        # Backend expects skip/limit and supports q, is_always_displayed
+        params = {"limit": limit, "skip": offset}
+        if search:
+            params["q"] = search
+        if is_always_displayed is not None:
+            params["is_always_displayed"] = is_always_displayed
         return self._paginate(endpoint, params=params, model_class=GoldenExampleResponse)
     
     def update(

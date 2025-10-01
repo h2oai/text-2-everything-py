@@ -262,7 +262,8 @@ Examples:
   python drive_to_t2e_integration.py --t2e-base-url "https://custom.api.com" --timeout 120
 
 Environment Variables:
-  H2OGPTE_API_KEY              Text2Everything API key (required)
+  T2E_ACCESS_TOKEN             OIDC access token for Text2Everything (required)
+  T2E_WORKSPACE_NAME           Optional workspace scope, e.g., workspaces/dev
   T2E_BASE_URL                 Text2Everything base URL (optional)
   H2O_CLOUD_ENVIRONMENT       H2O Cloud environment URL (required for H2O Drive)
   H2O_CLOUD_CLIENT_PLATFORM_TOKEN  H2O Cloud platform token (required for H2O Drive)
@@ -296,8 +297,12 @@ Environment Variables:
     )
     
     parser.add_argument(
-        "--api-key",
-        help="H2OGPTE API key (default: from H2OGPTE_API_KEY env var)"
+        "--access-token",
+        help="OIDC access token (default: from T2E_ACCESS_TOKEN env var)"
+    )
+    parser.add_argument(
+        "--workspace-name",
+        help="Optional workspace name (default: from T2E_WORKSPACE_NAME env var)"
     )
     
     parser.add_argument(
@@ -383,10 +388,11 @@ async def main():
     
     # Configuration
     BASE_URL = args.t2e_base_url or os.getenv("T2E_BASE_URL", "http://text2everything.text2everything.svc.cluster.local:8000")
-    API_KEY = args.api_key or os.getenv("H2OGPTE_API_KEY")
+    ACCESS_TOKEN = args.access_token or os.getenv("T2E_ACCESS_TOKEN")
+    WORKSPACE_NAME = args.workspace_name or os.getenv("T2E_WORKSPACE_NAME")
     
-    if not API_KEY:
-        print("❌ API key not found. Provide via --api-key or set H2OGPTE_API_KEY environment variable")
+    if not ACCESS_TOKEN:
+        print("❌ Access token not found. Provide via --access-token or set T2E_ACCESS_TOKEN environment variable")
         sys.exit(1)
     
     # Validate project creation requirements
@@ -427,7 +433,8 @@ async def main():
     try:
         sdk_client = Text2EverythingClient(
             base_url=BASE_URL,
-            api_key=API_KEY,
+            access_token=ACCESS_TOKEN,
+            workspace_name=WORKSPACE_NAME,
             timeout=args.timeout,
             max_retries=args.max_retries
         )
@@ -681,7 +688,7 @@ async def main():
                 upload_results['golden_examples'] = {'success': 0, 'total': len(sdk_ready_data['golden_examples'])}
         
     except AuthenticationError:
-        print("❌ Authentication failed. Check your API key.")
+        print("❌ Authentication failed. Check your access token and workspace configuration.")
         return
     except RateLimitError as e:
         print(f"❌ Rate limit exceeded. Retry after: {e.retry_after} seconds")

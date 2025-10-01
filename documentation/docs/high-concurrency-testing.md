@@ -22,13 +22,15 @@ from text2everything_sdk import Text2EverythingClient
 # Standard configuration
 client = Text2EverythingClient(
     base_url="https://api.text2everything.com",
-    api_key="your-api-key"
+    access_token="your-access-token",
+    workspace_name="workspaces/dev"
 )
 
 # High-concurrency optimized configuration
 client = Text2EverythingClient(
     base_url="https://api.text2everything.com",
-    api_key="your-api-key",
+    access_token="your-access-token",
+    workspace_name="workspaces/dev",
     read_timeout=300,              # 5 minutes for long requests
     pool_timeout=600,              # 10 minutes pool timeout
     max_connections=100,           # Higher connection pool
@@ -209,7 +211,8 @@ python run_tests.py --list-tests
 ```python
 client = Text2EverythingClient(
     base_url="https://api.text2everything.com",
-    api_key="your-api-key",
+    access_token="your-access-token",
+    workspace_name="workspaces/dev",
     max_connections=200,
     max_keepalive_connections=50,
     max_concurrent=16,  # Higher concurrency
@@ -232,7 +235,8 @@ client = Text2EverythingClient(
 ```python
 client = Text2EverythingClient(
     base_url="https://api.text2everything.com",
-    api_key="your-api-key", 
+    access_token="your-access-token", 
+    workspace_name="workspaces/dev", 
     max_connections=25,
     max_keepalive_connections=5,
     max_concurrent=4,    # Lower concurrency
