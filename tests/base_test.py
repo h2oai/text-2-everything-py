@@ -30,7 +30,7 @@ class BaseTestRunner:
         self.base_url = base_url
         self.access_token = access_token
         self.workspace_name = workspace_name
-        self.client = None
+        self.client: Optional[Text2EverythingClient] = None
         self.test_project_id = None
         self.created_resources = {
             'projects': [],
