@@ -221,6 +221,15 @@ class ConnectorsResource(BaseResource):
         # Get current connector first since API expects complete data
         current_connector = self.get(connector_id)
         
+        # Resolve password_secret_id for non-Snowflake to satisfy API validation without rotating secrets
+        effective_db_type = (db_type or current_connector.db_type or "").lower()
+        resolved_password_secret_id = password_secret_id
+        if not resolved_password_secret_id and not password and effective_db_type != "snowflake":
+            # Try to preserve existing secret by converting name to id (suffix after '/secrets/')
+            existing_secret_name = getattr(current_connector, "password_secret_name", None)
+            if isinstance(existing_secret_name, str) and "/secrets/" in existing_secret_name:
+                resolved_password_secret_id = existing_secret_name.split("/secrets/")[-1] or None
+
         # Use current values as defaults, override with provided values
         update_data = ConnectorCreate(
             name=name if name is not None else current_connector.name,
@@ -230,7 +239,7 @@ class ConnectorsResource(BaseResource):
             port=port if port is not None else current_connector.port,
             username=username if username is not None else current_connector.username,
             password=password if password is not None else current_connector.password,
-            password_secret_id=password_secret_id if password_secret_id is not None else None,
+            password_secret_id=resolved_password_secret_id,
             database=database if database is not None else current_connector.database,
             config=config if config is not None else current_connector.config,
             **kwargs
