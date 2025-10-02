@@ -2,13 +2,17 @@
 title: Configuration
 ---
 
-Env vars:
+This guide helps you configure the Text2Everything SDK using environment variables or direct parameters.
+
+## Environment variables
+Define your API endpoint and credentials as environment variables so they can be reused safely across shells and scripts.
 ```bash
 export TEXT2EVERYTHING_BASE_URL="https://your-api-endpoint.com"
 export TEXT2EVERYTHING_API_KEY="your-api-key"
 ```
 
-Using env vars:
+## Basic client initialization (env vars)
+Create a client by reading values from the environment variables defined above.
 ```python
 import os
 from text2everything_sdk import Text2EverythingClient
@@ -19,7 +23,8 @@ client = Text2EverythingClient(
 )
 ```
 
-Advanced:
+## Advanced options
+Tune timeouts and retries to match your network conditions and request profiles.
 ```python
 client = Text2EverythingClient(
     base_url="https://...",
@@ -30,12 +35,11 @@ client = Text2EverythingClient(
 )
 ```
 
-Context manager:
+## Context manager usage
+Use the client as a context manager to ensure connections are closed and resources cleaned up automatically.
 ```python
 from text2everything_sdk import Text2EverythingClient
 
 with Text2EverythingClient(base_url="...", api_key="...") as client:
     projects = client.projects.list()
 ```
-
-
