@@ -29,21 +29,31 @@ class ConnectorsTestRunner(BaseTestRunner):
             print(f"✅ Created PostgreSQL connector: {connector_result.id}")
             
             # Test create Snowflake connector with credentials from environment variables
-            snowflake_result = self.client.connectors.create(
-                name="h2o-snowflake-connector",
-                description="H2O AI Snowflake connector for Text2Everything demo data",
-                db_type="snowflake",
-                host=os.getenv("SNOWFLAKE_HOST"),
-                username=os.getenv("SNOWFLAKE_USERNAME"),
-                password=os.getenv("SNOWFLAKE_PASSWORD"),
-                database=os.getenv("SNOWFLAKE_DATABASE"),
-                config={
-                    "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
-                    "role": os.getenv("SNOWFLAKE_ROLE")
-                }
-            )
-            self.created_resources['connectors'].append(snowflake_result.id)
-            print(f"✅ Created Snowflake connector: {snowflake_result.id}")
+            # Only attempt Snowflake creation if minimal env vars present
+            if all([
+                os.getenv("SNOWFLAKE_HOST"),
+                os.getenv("SNOWFLAKE_USERNAME"),
+                os.getenv("SNOWFLAKE_PASSWORD") or os.getenv("SNOWFLAKE_PASSWORD_SECRET_NAME"),
+                os.getenv("SNOWFLAKE_DATABASE")
+            ]):
+                snowflake_result = self.client.connectors.create(
+                    name="h2o-snowflake-connector",
+                    description="H2O AI Snowflake connector for Text2Everything demo data",
+                    db_type="snowflake",
+                    host=os.getenv("SNOWFLAKE_HOST"),
+                    username=os.getenv("SNOWFLAKE_USERNAME"),
+                    password=os.getenv("SNOWFLAKE_PASSWORD"),
+                    password_secret_id=os.getenv("SNOWFLAKE_PASSWORD_SECRET_ID"),
+                    database=os.getenv("SNOWFLAKE_DATABASE"),
+                    config={
+                        "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
+                        "role": os.getenv("SNOWFLAKE_ROLE")
+                    }
+                )
+                self.created_resources['connectors'].append(snowflake_result.id)
+                print(f"✅ Created Snowflake connector: {snowflake_result.id}")
+            else:
+                print("⚠️  Skipping Snowflake connector creation (missing env vars)")
             
             # Test list connectors
             connectors = self.client.connectors.list()

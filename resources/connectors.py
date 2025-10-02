@@ -29,8 +29,9 @@ class ConnectorsResource(BaseResource):
         db_type: str,
         host: str,
         username: str,
-        password: str,
         database: str,
+        password: str | None = None,
+        password_secret_id: str | None = None,
         port: Optional[int] = None,
         description: Optional[str] = None,
         config: Optional[dict] = None,
@@ -82,8 +83,18 @@ class ConnectorsResource(BaseResource):
         if not username or not username.strip():
             raise ValidationError("Username cannot be empty")
         
-        if not password or not password.strip():
-            raise ValidationError("Password cannot be empty")
+        # Snowflake supports key-pair auth via config.private_key/secret; otherwise need password or secret id
+        if db_type.lower() == "snowflake":
+            cfg = config or {}
+            has_private_key = bool(cfg.get("private_key") or cfg.get("private_key_secret_id") or cfg.get("private_key_secret_name"))
+            has_password = bool((password and password.strip()) or (password_secret_id and password_secret_id.strip()))
+            if not has_private_key and not has_password:
+                raise ValidationError("Snowflake requires password or private_key (or secret reference)")
+            if has_private_key and has_password:
+                raise ValidationError("Provide either password or private_key, not both, for Snowflake")
+        else:
+            if not (password and password.strip()) and not (password_secret_id and password_secret_id.strip()):
+                raise ValidationError("Either password or password_secret_id must be provided")
         
         if not database or not database.strip():
             raise ValidationError("Database name cannot be empty")
@@ -106,6 +117,7 @@ class ConnectorsResource(BaseResource):
             port=port,
             username=username,
             password=password,
+            password_secret_id=password_secret_id,
             database=database,
             description=description,
             config=config,
@@ -168,6 +180,7 @@ class ConnectorsResource(BaseResource):
         port: Optional[int] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
+        password_secret_id: Optional[str] = None,
         database: Optional[str] = None,
         description: Optional[str] = None,
         config: Optional[dict] = None,
@@ -217,6 +230,7 @@ class ConnectorsResource(BaseResource):
             port=port if port is not None else current_connector.port,
             username=username if username is not None else current_connector.username,
             password=password if password is not None else current_connector.password,
+            password_secret_id=password_secret_id if password_secret_id is not None else None,
             database=database if database is not None else current_connector.database,
             config=config if config is not None else current_connector.config,
             **kwargs
