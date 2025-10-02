@@ -17,5 +17,5 @@ The SDK optimizes the project setup, schema management, and query execution, mak
 - **Quickstart**: For a hands-on start, go to [Quickstart](./quickstart.md)
 - **Guides**: TO explore resource-specific tasks, go to **Guides** (Projects, Contexts, Schema metadata, Golden examples, Connectors, Chat, Executions, Feedback, Custom tools, Concurrency)
 - **How To**: See step-by-step tasks in **How-To** (Bulk operations, Jupyter usage, Validation)
-- **APIs**: For API details, go to **Reference** (Client, Resources, Models)
+- **APIs**: For API details, go to [Reference](./reference/client.md) (Client, Resources, Models)
 
