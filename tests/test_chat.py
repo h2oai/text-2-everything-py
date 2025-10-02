@@ -15,51 +15,14 @@ class ChatTestRunner(BaseTestRunner):
         print("\n7. Testing Chat Resource...")
         
         try:
-            # First, try to get a connector for chat operations that might need one
+            # Prefer explicit env-provided connector id for chat operations
             connector_id = None
-            
-            # Try to find existing connectors first
-            try:
-                connectors = self.client.connectors.list()
-                for connector in connectors:
-                    if connector.name == "h2o-snowflake-connector":
-                        connector_id = connector.id
-                        print("✅ Found existing Snowflake connector for chat tests")
-                        break
-                
-                # If no Snowflake connector found, use any available connector
-                if not connector_id and connectors:
-                    connector_id = connectors[0].id
-                    print(f"✅ Using existing connector for chat tests: {connectors[0].name}")
-                    
-            except Exception as e:
-                print(f"⚠️  Could not list existing connectors: {e}")
-            
-            # If no existing connectors, create a test connector for chat operations
-            if not connector_id:
-                print("🔧 Creating test connector for chat operations...")
-                try:
-                    # Create Snowflake connector with credentials from environment variables
-                    connector_result = self.client.connectors.create(
-                        name="h2o-snowflake-connector",
-                        description="H2O AI Snowflake connector for chat testing",
-                        db_type="snowflake",
-                        host=os.getenv("SNOWFLAKE_HOST"),
-                        username=os.getenv("SNOWFLAKE_USERNAME"),
-                        password=os.getenv("SNOWFLAKE_PASSWORD"),
-                        database=os.getenv("SNOWFLAKE_DATABASE"),
-                        config={
-                            "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
-                            "role": os.getenv("SNOWFLAKE_ROLE")
-                        }
-                    )
-                    connector_id = connector_result.id
-                    self.created_resources['connectors'].append(connector_id)
-                    print(f"✅ Created Snowflake connector for chat: {connector_id}")
-                    
-                except Exception as e:
-                    print(f"⚠️  Failed to create connector for chat: {e}")
-                    # Chat tests can still run without connectors for basic functionality
+            env_connector_id = os.getenv("EXECUTIONS_CONNECTOR_ID")
+            if env_connector_id:
+                connector_id = env_connector_id
+                print(f"✅ Using connector from EXECUTIONS_CONNECTOR_ID: {connector_id}")
+            else:
+                print("⚠️  No EXECUTIONS_CONNECTOR_ID provided; proceeding without connector where possible")
             
             # Create a real chat session for proper testing
             try:
