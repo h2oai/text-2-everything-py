@@ -28,32 +28,77 @@ class ConnectorsTestRunner(BaseTestRunner):
             self.created_resources['connectors'].append(connector_result.id)
             print(f"✅ Created PostgreSQL connector: {connector_result.id}")
             
-            # Test create Snowflake connector with credentials from environment variables
-            # Only attempt Snowflake creation if minimal env vars present
-            if all([
-                os.getenv("SNOWFLAKE_HOST"),
-                os.getenv("SNOWFLAKE_USERNAME"),
-                os.getenv("SNOWFLAKE_PASSWORD") or os.getenv("SNOWFLAKE_PASSWORD_SECRET_NAME"),
-                os.getenv("SNOWFLAKE_DATABASE")
-            ]):
-                snowflake_result = self.client.connectors.create(
-                    name="h2o-snowflake-connector",
-                    description="H2O AI Snowflake connector for Text2Everything demo data",
+            # Test create Snowflake connector (prefer key-pair if present, otherwise password/secret-id)
+            sf_host = os.getenv("SNOWFLAKE_HOST")
+            sf_user = os.getenv("SNOWFLAKE_USERNAME")
+            sf_db = os.getenv("SNOWFLAKE_DATABASE")
+            sf_wh = os.getenv("SNOWFLAKE_WAREHOUSE")
+            sf_role = os.getenv("SNOWFLAKE_ROLE")
+
+            # Key-pair envs
+            sf_pk = os.getenv("SNOWFLAKE_PRIVATE_KEY")
+            sf_pk_secret_id = os.getenv("SNOWFLAKE_PRIVATE_KEY_SECRET_ID")
+            sf_pk_secret_name = os.getenv("SNOWFLAKE_PRIVATE_KEY_SECRET_NAME")
+            # Optional passphrase for encrypted private keys
+            sf_pk_pass = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
+            sf_pk_pass_secret_id = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE_SECRET_ID")
+            sf_pk_pass_secret_name = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE_SECRET_NAME")
+
+            # Password envs
+            sf_pwd = os.getenv("SNOWFLAKE_PASSWORD")
+            sf_pwd_secret_id = os.getenv("SNOWFLAKE_PASSWORD_SECRET_ID")
+
+            any_created = False
+            if all([sf_host, sf_user, sf_db]) and any([sf_pk, sf_pk_secret_id, sf_pk_secret_name]):
+                cfg = {"warehouse": sf_wh, "role": sf_role}
+                if sf_pk:
+                    cfg["private_key"] = sf_pk
+                elif sf_pk_secret_id:
+                    cfg["private_key_secret_id"] = sf_pk_secret_id
+                else:
+                    cfg["private_key_secret_name"] = sf_pk_secret_name
+                # Add passphrase if provided (value or secret reference)
+                if sf_pk_pass:
+                    cfg["private_key_passphrase"] = sf_pk_pass
+                elif sf_pk_pass_secret_id:
+                    cfg["private_key_passphrase_secret_id"] = sf_pk_pass_secret_id
+                elif sf_pk_pass_secret_name:
+                    cfg["private_key_passphrase_secret_name"] = sf_pk_pass_secret_name
+
+                snowflake_keypair = self.client.connectors.create(
+                    name="h2o-snowflake-connector-keypair",
+                    description="H2O AI Snowflake connector (key-pair)",
                     db_type="snowflake",
-                    host=os.getenv("SNOWFLAKE_HOST"),
-                    username=os.getenv("SNOWFLAKE_USERNAME"),
-                    password=os.getenv("SNOWFLAKE_PASSWORD"),
-                    password_secret_id=os.getenv("SNOWFLAKE_PASSWORD_SECRET_ID"),
-                    database=os.getenv("SNOWFLAKE_DATABASE"),
-                    config={
-                        "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
-                        "role": os.getenv("SNOWFLAKE_ROLE")
-                    }
+                    host=sf_host,
+                    username=sf_user,
+                    database=sf_db,
+                    config=cfg,
                 )
-                self.created_resources['connectors'].append(snowflake_result.id)
-                print(f"✅ Created Snowflake connector: {snowflake_result.id}")
-            else:
-                print("⚠️  Skipping Snowflake connector creation (missing env vars)")
+                self.created_resources['connectors'].append(snowflake_keypair.id)
+                print(f"✅ Created Snowflake connector (key-pair): {snowflake_keypair.id}")
+                any_created = True
+
+            if all([sf_host, sf_user, sf_db]) and (sf_pwd or sf_pwd_secret_id):
+                snowflake_password = self.client.connectors.create(
+                    name="h2o-snowflake-connector-password",
+                    description="H2O AI Snowflake connector (password)",
+                    db_type="snowflake",
+                    host=sf_host,
+                    username=sf_user,
+                    database=sf_db,
+                    password=sf_pwd,
+                    password_secret_id=sf_pwd_secret_id,
+                    config={
+                        "warehouse": sf_wh,
+                        "role": sf_role,
+                    },
+                )
+                self.created_resources['connectors'].append(snowflake_password.id)
+                print(f"✅ Created Snowflake connector (password): {snowflake_password.id}")
+                any_created = True
+
+            if not any_created:
+                print("⚠️  Skipping Snowflake connector creation (missing env vars for both methods)")
             
             # Test list connectors
             connectors = self.client.connectors.list()
