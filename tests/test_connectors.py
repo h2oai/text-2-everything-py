@@ -126,15 +126,33 @@ class ConnectorsTestRunner(BaseTestRunner):
             except Exception as e:
                 print(f"⚠️  List by type skipped due to error: {e}")
             
-            # Test connection (this might fail with test credentials, but should not raise unexpected errors)
+            # Test connection endpoints for all created connectors (non-blocking)
+            created_connectors = [connector_result]
             try:
-                test_result = self.client.connectors.test_connection(connector_result.id)
-                if isinstance(test_result, dict):
-                    print(f"✅ Connection test completed (success: {test_result.get('success', False)})")
-                else:
-                    print(f"✅ Connection test completed (result: {test_result})")
-            except Exception as e:
-                print(f"⚠️  Connection test failed as expected with test credentials: {e}")
+                if 'snowflake_keypair' in locals() and snowflake_keypair:
+                    created_connectors.append(snowflake_keypair)
+            except Exception:
+                pass
+            try:
+                if 'snowflake_password' in locals() and snowflake_password:
+                    created_connectors.append(snowflake_password)
+            except Exception:
+                pass
+
+            for c in created_connectors:
+                # Boolean/ok-style test
+                try:
+                    ok = self.client.connectors.test_connection(c.id)
+                    print(f"✅ test_connection ok={ok} for {c.name} ({c.id})")
+                except Exception as e:
+                    print(f"⚠️  test_connection failed for {c.name} ({c.id}): {e}")
+                # Detailed test
+                try:
+                    detail = self.client.connectors.test_connection_detailed(c.id)
+                    elapsed = detail.get('elapsed_ms') if isinstance(detail, dict) else None
+                    print(f"✅ test_connection_detailed ok={detail.get('ok', False) if isinstance(detail, dict) else detail} elapsed_ms={elapsed} for {c.name} ({c.id})")
+                except Exception as e:
+                    print(f"⚠️  test_connection_detailed failed for {c.name} ({c.id}): {e}")
             
             return True
             
