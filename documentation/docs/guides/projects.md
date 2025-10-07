@@ -10,7 +10,7 @@ List/get/create/update/delete:
 ```python
 from text2everything_sdk import Text2EverythingClient
 
-client = Text2EverythingClient(base_url="https://...", api_key="...")
+client = Text2EverythingClient(base_url="https://...", access_token="...", workspace_name="workspaces/dev")
 
 # List
 projects = client.projects.list()

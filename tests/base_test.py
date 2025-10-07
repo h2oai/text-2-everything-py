@@ -26,10 +26,11 @@ from text2everything_sdk.exceptions import (
 class BaseTestRunner:
     """Base class for functional test runners."""
     
-    def __init__(self, base_url: str, api_key: str):
+    def __init__(self, base_url: str, access_token: str, workspace_name: Optional[str] = None):
         self.base_url = base_url
-        self.api_key = api_key
-        self.client = None
+        self.access_token = access_token
+        self.workspace_name = workspace_name
+        self.client: Optional[Text2EverythingClient] = None
         self.test_project_id = None
         self.created_resources = {
             'projects': [],
@@ -49,7 +50,8 @@ class BaseTestRunner:
         try:
             self.client = Text2EverythingClient(
                 base_url=self.base_url,
-                api_key=self.api_key
+                access_token=self.access_token,
+                workspace_name=self.workspace_name,
             )
             print(f"✅ Client initialized for {self.base_url}")
             

@@ -18,65 +18,11 @@ class ExecutionsTestRunner(BaseTestRunner):
             # Check if we have any connectors, if not create one
             connector_id = None
             
-            # Try to find existing connectors first
-            try:
-                connectors = self.client.connectors.list()
-                for connector in connectors:
-                    if connector.name == "h2o-snowflake-connector":
-                        connector_id = connector.id
-                        print("✅ Found existing Snowflake connector for execution tests")
-                        break
-                
-                # If no Snowflake connector found, use any available connector
-                if not connector_id and connectors:
-                    connector_id = connectors[0].id
-                    print(f"✅ Using existing connector: {connectors[0].name}")
-                    
-            except Exception as e:
-                print(f"⚠️  Could not list existing connectors: {e}")
-            
-            # If no existing connectors, create a test connector
-            if not connector_id:
-                print("🔧 Creating test connector for executions...")
-                try:
-                    # Create Snowflake connector with credentials from environment variables
-                    connector_result = self.client.connectors.create(
-                        name="executions-test-snowflake-connector",
-                        description="H2O AI Snowflake connector for executions testing",
-                        db_type="snowflake",
-                        host=os.getenv("SNOWFLAKE_HOST"),
-                        username=os.getenv("SNOWFLAKE_USERNAME"),
-                        password=os.getenv("SNOWFLAKE_PASSWORD"),
-                        database=os.getenv("SNOWFLAKE_DATABASE"),
-                        config={
-                            "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
-                            "role": os.getenv("SNOWFLAKE_ROLE")
-                        }
-                    )
-                    connector_id = connector_result.id
-                    self.created_resources['connectors'].append(connector_id)
-                    print(f"✅ Created Snowflake connector for executions: {connector_id}")
-                    
-                except Exception as e:
-                    print(f"⚠️  Failed to create Snowflake connector, creating PostgreSQL fallback: {e}")
-                    # Fallback to PostgreSQL connector
-                    try:
-                        connector_result = self.client.connectors.create(
-                            name="executions-test-postgres-connector",
-                            description="PostgreSQL connector for executions testing",
-                            db_type="postgres",
-                            host="localhost",
-                            port=5432,
-                            database="test_db",
-                            username="test_user",
-                            password="test_password"
-                        )
-                        connector_id = connector_result.id
-                        self.created_resources['connectors'].append(connector_id)
-                        print(f"✅ Created PostgreSQL connector for executions: {connector_id}")
-                    except Exception as e2:
-                        print(f"❌ Failed to create any connector for executions: {e2}")
-                        return False
+            # Prefer explicit env-provided connector id
+            env_connector_id = os.getenv("EXECUTIONS_CONNECTOR_ID")
+            if env_connector_id:
+                connector_id = env_connector_id
+                print(f"✅ Using connector from EXECUTIONS_CONNECTOR_ID: {connector_id}")
             
             if not connector_id:
                 print("❌ No connector available for executions test")

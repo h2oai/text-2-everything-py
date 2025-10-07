@@ -8,7 +8,7 @@ Create/list/get/update/delete:
 ```python
 from text2everything_sdk import Text2EverythingClient
 
-client = Text2EverythingClient(base_url="https://...", api_key="...")
+client = Text2EverythingClient(base_url="https://...", access_token="...", workspace_name="workspaces/dev")
 
 # Create
 conn = client.connectors.create(
@@ -37,6 +37,12 @@ Test connection (basic):
 ok = client.connectors.test_connection(conn.id)
 ```
 
+Test connection (detailed):
+```python
+details = client.connectors.test_connection_detailed(conn.id)
+# {'ok': True, 'elapsed_ms': 123}
+```
+
 Filter by type:
 ```python
 pg = client.connectors.list_by_type("postgres")
@@ -46,7 +52,7 @@ Snowflake connector example:
 ```python
 from text2everything_sdk import Text2EverythingClient
 
-client = Text2EverythingClient(base_url="https://...", api_key="...")
+client = Text2EverythingClient(base_url="https://...", access_token="...", workspace_name="workspaces/dev")
 
 snowflake_conn = client.connectors.create(
     name="Snowflake - Analytics",
@@ -64,6 +70,7 @@ snowflake_conn = client.connectors.create(
 
 # Optional: test the connection
 ok = client.connectors.test_connection(snowflake_conn.id)
+details = client.connectors.test_connection_detailed(snowflake_conn.id)
 ```
 
 

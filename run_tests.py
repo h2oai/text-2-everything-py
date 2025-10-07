@@ -6,9 +6,9 @@ This script orchestrates the execution of all modularized test suites.
 It provides options to run all tests or specific test suites.
 
 Usage:
-    python run_tests.py --base-url http://localhost:8000 --api-key your-api-key
-    python run_tests.py --base-url http://localhost:8000 --api-key your-api-key --tests projects,contexts
-    python run_tests.py --base-url http://localhost:8000 --api-key your-api-key --exclude chat,executions
+    python run_tests.py --base-url http://localhost:8000 --access-token your-access-token --workspace-name workspaces/dev
+    python run_tests.py --base-url http://localhost:8000 --access-token your-access-token --tests projects,contexts
+    python run_tests.py --base-url http://localhost:8000 --access-token your-access-token --exclude chat,executions
 """
 
 import os
@@ -53,9 +53,10 @@ from text2everything_sdk.tests import (
 class TestSuiteRunner:
     """Main test suite runner that orchestrates all individual test runners."""
     
-    def __init__(self, base_url: str, api_key: str):
+    def __init__(self, base_url: str, access_token: str, workspace_name: str | None = None):
         self.base_url = base_url
-        self.api_key = api_key
+        self.access_token = access_token
+        self.workspace_name = workspace_name
         
         # Define all available test runners with proper ordering
         # Tests that create resources should run before tests that depend on them
@@ -143,7 +144,7 @@ class TestSuiteRunner:
             try:
                 # Create and run the test runner
                 runner_class = self.test_runners[test_name]
-                runner = runner_class(self.base_url, self.api_key)
+                runner = runner_class(self.base_url, self.access_token, self.workspace_name)
                 
                 # Setup the runner
                 if not runner.setup():
@@ -207,13 +208,13 @@ def main():
         epilog="""
 Examples:
   # Run all tests
-  python run_tests.py --base-url http://localhost:8000 --api-key your-key
+  python run_tests.py --base-url http://localhost:8000 --access-token your-token
   
   # Run specific tests
-  python run_tests.py --base-url http://localhost:8000 --api-key your-key --tests projects,contexts
+  python run_tests.py --base-url http://localhost:8000 --access-token your-token --tests projects,contexts
   
   # Run all tests except specific ones
-  python run_tests.py --base-url http://localhost:8000 --api-key your-key --exclude chat,executions
+  python run_tests.py --base-url http://localhost:8000 --access-token your-token --exclude chat,executions
         """
     )
     
@@ -223,9 +224,14 @@ Examples:
         help="Base URL of the Text2Everything API"
     )
     parser.add_argument(
-        "--api-key",
-        default=os.getenv("T2E_API_KEY"),
-        help="API key for authentication"
+        "--access-token",
+        default=os.getenv("T2E_ACCESS_TOKEN"),
+        help="OIDC access token for authentication"
+    )
+    parser.add_argument(
+        "--workspace-name",
+        default=os.getenv("T2E_WORKSPACE_NAME"),
+        help="Optional workspace name, e.g., workspaces/dev"
     )
     parser.add_argument(
         "--tests",
@@ -252,8 +258,8 @@ Examples:
             print(f"  • {test_name}")
         sys.exit(0)
     
-    if not args.api_key:
-        print("❌ API key is required. Provide it via --api-key or T2E_API_KEY environment variable.")
+    if not args.access_token:
+        print("❌ Access token is required. Provide it via --access-token or T2E_ACCESS_TOKEN environment variable.")
         sys.exit(1)
     
     # Parse test filters
@@ -268,10 +274,12 @@ Examples:
     print("Text2Everything SDK Modular Functional Test Suite")
     print("This script runs individual test suites against a live API endpoint.")
     print(f"API Endpoint: {args.base_url}")
+    if args.workspace_name:
+        print(f"Workspace: {args.workspace_name}")
     print()
     
     # Create and run the test suite
-    suite_runner = TestSuiteRunner(args.base_url, args.api_key)
+    suite_runner = TestSuiteRunner(args.base_url, args.access_token, args.workspace_name)
     success = suite_runner.run_tests(include_tests, exclude_tests)
     
     sys.exit(0 if success else 1)

@@ -32,22 +32,45 @@ class FeedbackTestRunner(BaseTestRunner):
             if not connector_id:
                 print("🔧 Creating h2o-snowflake-connector for feedback operations...")
                 try:
-                    connector_result = self.client.connectors.create(
-                        name="h2o-snowflake-connector",
-                        description="H2O AI Snowflake connector for feedback testing",
-                        db_type="snowflake",
-                        host=os.getenv("SNOWFLAKE_HOST"),
-                        username=os.getenv("SNOWFLAKE_USERNAME"),
-                        password=os.getenv("SNOWFLAKE_PASSWORD"),
-                        database=os.getenv("SNOWFLAKE_DATABASE"),
-                        config={
-                            "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
-                            "role": os.getenv("SNOWFLAKE_ROLE")
-                        }
-                    )
-                    connector_id = connector_result.id
-                    self.created_resources['connectors'].append(connector_id)
-                    print(f"✅ Created h2o-snowflake-connector: {connector_id}")
+                    # Only attempt Snowflake if env present
+                    if all([
+                        os.getenv("SNOWFLAKE_HOST"),
+                        os.getenv("SNOWFLAKE_USERNAME"),
+                        os.getenv("SNOWFLAKE_PASSWORD") or os.getenv("SNOWFLAKE_PASSWORD_SECRET_ID"),
+                        os.getenv("SNOWFLAKE_DATABASE")
+                    ]):
+                        connector_result = self.client.connectors.create(
+                            name="h2o-snowflake-connector",
+                            description="H2O AI Snowflake connector for feedback testing",
+                            db_type="snowflake",
+                            host=os.getenv("SNOWFLAKE_HOST"),
+                            username=os.getenv("SNOWFLAKE_USERNAME"),
+                            password=os.getenv("SNOWFLAKE_PASSWORD"),
+                            password_secret_id=os.getenv("SNOWFLAKE_PASSWORD_SECRET_ID"),
+                            database=os.getenv("SNOWFLAKE_DATABASE"),
+                            config={
+                                "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
+                                "role": os.getenv("SNOWFLAKE_ROLE")
+                            }
+                        )
+                        connector_id = connector_result.id
+                        self.created_resources['connectors'].append(connector_id)
+                        print(f"✅ Created h2o-snowflake-connector: {connector_id}")
+                    else:
+                        # Fallback postgres connector for local testing
+                        connector_result = self.client.connectors.create(
+                            name="feedback-test-postgres-connector",
+                            description="PostgreSQL connector for feedback testing",
+                            db_type="postgres",
+                            host="localhost",
+                            port=5432,
+                            database="test_db",
+                            username="test_user",
+                            password="test_password"
+                        )
+                        connector_id = connector_result.id
+                        self.created_resources['connectors'].append(connector_id)
+                        print(f"✅ Created fallback PostgreSQL connector: {connector_id}")
                     
                 except Exception as e:
                     print(f"⚠️  Failed to create connector for feedback: {e}")

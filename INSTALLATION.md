@@ -36,7 +36,8 @@ from text2everything_sdk import Text2EverythingClient
 # Initialize client
 client = Text2EverythingClient(
     base_url="https://your-api-endpoint.com",
-    api_key="your-api-key"
+    access_token="your-access-token",
+    workspace_name="workspaces/my-workspace"
 )
 
 # Create a project
@@ -122,7 +123,8 @@ Create a `.env` file in your project root:
 ```bash
 # .env file
 T2E_BASE_URL=https://your-api-endpoint.com
-T2E_API_KEY=your-api-key
+T2E_ACCESS_TOKEN=your-access-token
+T2E_WORKSPACE_NAME=workspaces/my-workspace
 ```
 
 The SDK will automatically load these variables when running tests.
@@ -133,7 +135,8 @@ Alternatively, set environment variables:
 
 ```bash
 export T2E_BASE_URL="https://your-api-endpoint.com"
-export T2E_API_KEY="your-api-key"
+export T2E_ACCESS_TOKEN="your-access-token"
+export T2E_WORKSPACE_NAME="workspaces/my-workspace"
 ```
 
 ## Development Setup

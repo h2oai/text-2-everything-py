@@ -29,8 +29,9 @@ class ConnectorsResource(BaseResource):
         db_type: str,
         host: str,
         username: str,
-        password: str,
         database: str,
+        password: str | None = None,
+        password_secret_id: str | None = None,
         port: Optional[int] = None,
         description: Optional[str] = None,
         config: Optional[dict] = None,
@@ -82,8 +83,18 @@ class ConnectorsResource(BaseResource):
         if not username or not username.strip():
             raise ValidationError("Username cannot be empty")
         
-        if not password or not password.strip():
-            raise ValidationError("Password cannot be empty")
+        # Snowflake supports key-pair auth via config.private_key/secret; otherwise need password or secret id
+        if db_type.lower() == "snowflake":
+            cfg = config or {}
+            has_private_key = bool(cfg.get("private_key") or cfg.get("private_key_secret_id") or cfg.get("private_key_secret_name"))
+            has_password = bool((password and password.strip()) or (password_secret_id and password_secret_id.strip()))
+            if not has_private_key and not has_password:
+                raise ValidationError("Snowflake requires password or private_key (or secret reference)")
+            if has_private_key and has_password:
+                raise ValidationError("Provide either password or private_key, not both, for Snowflake")
+        else:
+            if not (password and password.strip()) and not (password_secret_id and password_secret_id.strip()):
+                raise ValidationError("Either password or password_secret_id must be provided")
         
         if not database or not database.strip():
             raise ValidationError("Database name cannot be empty")
@@ -106,6 +117,7 @@ class ConnectorsResource(BaseResource):
             port=port,
             username=username,
             password=password,
+            password_secret_id=password_secret_id,
             database=database,
             description=description,
             config=config,
@@ -136,7 +148,7 @@ class ConnectorsResource(BaseResource):
         response = self._client.get(f"/connectors/{connector_id}")
         return Connector(**response)
     
-    def list(self, limit: int = 100, offset: int = 0) -> List[Connector]:
+    def list(self, limit: int = 100, offset: int = 0, search: Optional[str] = None) -> List[Connector]:
         """List all connectors.
         
         Args:
@@ -155,6 +167,8 @@ class ConnectorsResource(BaseResource):
         """
         endpoint = "/connectors"
         params = {"limit": limit, "skip": offset}
+        if search:
+            params["q"] = search
         return self._paginate(endpoint, params=params, model_class=Connector)
     
     def update(
@@ -166,6 +180,7 @@ class ConnectorsResource(BaseResource):
         port: Optional[int] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
+        password_secret_id: Optional[str] = None,
         database: Optional[str] = None,
         description: Optional[str] = None,
         config: Optional[dict] = None,
@@ -206,6 +221,15 @@ class ConnectorsResource(BaseResource):
         # Get current connector first since API expects complete data
         current_connector = self.get(connector_id)
         
+        # Resolve password_secret_id for non-Snowflake to satisfy API validation without rotating secrets
+        effective_db_type = (db_type or current_connector.db_type or "").lower()
+        resolved_password_secret_id = password_secret_id
+        if not resolved_password_secret_id and not password and effective_db_type != "snowflake":
+            # Try to preserve existing secret by converting name to id (suffix after '/secrets/')
+            existing_secret_name = getattr(current_connector, "password_secret_name", None)
+            if isinstance(existing_secret_name, str) and "/secrets/" in existing_secret_name:
+                resolved_password_secret_id = existing_secret_name.split("/secrets/")[-1] or None
+
         # Use current values as defaults, override with provided values
         update_data = ConnectorCreate(
             name=name if name is not None else current_connector.name,
@@ -215,6 +239,7 @@ class ConnectorsResource(BaseResource):
             port=port if port is not None else current_connector.port,
             username=username if username is not None else current_connector.username,
             password=password if password is not None else current_connector.password,
+            password_secret_id=resolved_password_secret_id,
             database=database if database is not None else current_connector.database,
             config=config if config is not None else current_connector.config,
             **kwargs
@@ -265,12 +290,21 @@ class ConnectorsResource(BaseResource):
             ```
         """
         try:
-            # This would typically be a separate endpoint, but for now we'll use get
-            # In a real implementation, there might be a POST /connectors/{id}/test endpoint
-            connector = self.get(connector_id)
-            return True
+            resp = self._client.post(f"/connectors/{connector_id}/test")
+            return bool(resp.get("ok", False))
         except Exception as e:
             raise ValidationError(f"Connection test failed: {str(e)}")
+
+    def test_connection_detailed(self, connector_id: str) -> dict:
+        """Test a connector and return detailed response (e.g., elapsed_ms).
+        
+        Args:
+            connector_id: The connector ID to test
+            
+        Returns:
+            Dict with fields like { ok: bool, elapsed_ms: int }
+        """
+        return self._client.post(f"/connectors/{connector_id}/test")
     
     def list_by_type(self, db_type: str) -> List[Connector]:
         """List connectors by database type.

@@ -84,7 +84,7 @@ The script provides interactive menus for:
 
 # 1. Connect to services
 drive_manager = DriveManager(bucket)
-sdk_client = Text2EverythingClient(base_url=BASE_URL, api_key=API_KEY)
+sdk_client = Text2EverythingClient(base_url=BASE_URL, access_token=ACCESS_TOKEN, workspace_name=WORKSPACE_NAME)
 
 # 2. Load and prepare data
 project_data = await drive_manager.load_project_data(project_name)

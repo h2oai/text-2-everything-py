@@ -24,14 +24,16 @@ class ConnectorBase(BaseModel):
     host: str
     port: Optional[int] = None
     username: str
-    password: str
+    # Optional: password may be stored in secure store; API may return null
+    password: Optional[str] = None
     database: str
     config: Optional[Dict[str, Any]] = None
 
 
 class ConnectorCreate(ConnectorBase):
     """Model for creating a new connector."""
-    pass
+    # For requests: reference to password secret id in secure store
+    password_secret_id: Optional[str] = None
 
 
 class ConnectorUpdate(BaseModel):
@@ -44,10 +46,12 @@ class ConnectorUpdate(BaseModel):
     port: Optional[int] = None
     username: Optional[str] = None
     password: Optional[str] = None
+    password_secret_id: Optional[str] = None
     database: Optional[str] = None
     config: Optional[Dict[str, Any]] = None
 
 
 class Connector(ConnectorBase, BaseResponse):
     """Complete connector model with all fields."""
-    pass
+    # From API responses: full secure store resource name
+    password_secret_name: Optional[str] = None

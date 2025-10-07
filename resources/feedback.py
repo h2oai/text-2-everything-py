@@ -116,7 +116,7 @@ class FeedbackResource(BaseResource):
         
         return FeedbackResponse(**response_data)
     
-    def list(self, project_id: str, limit: int = 100, offset: int = 0) -> List[FeedbackResponse]:
+    def list(self, project_id: str, limit: int = 100, offset: int = 0, search: Optional[str] = None) -> List[FeedbackResponse]:
         """List feedback for a project.
         
         Args:
@@ -136,7 +136,10 @@ class FeedbackResource(BaseResource):
             ```
         """
         endpoint = f"/projects/{project_id}/feedback"
-        params = {"limit": limit, "offset": offset}
+        # Backend expects skip/limit and supports q
+        params = {"limit": limit, "skip": offset}
+        if search:
+            params["q"] = search
         return self._paginate(endpoint, params=params, model_class=FeedbackResponse)
     
     def update(

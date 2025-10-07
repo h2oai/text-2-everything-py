@@ -4,7 +4,7 @@ title: Troubleshooting & Error Handling
 
 ### Common Exceptions
 
-- AuthenticationError (401): Check `api_key` and `X-API-Key` header.
+- AuthenticationError (401): Ensure `Authorization: Bearer <access_token>` is set and, if required, `X-Workspace-Name` matches your workspace scope.
 - ValidationError (400): Inspect `response_data` for field errors.
 - NotFoundError (404): Verify IDs (`project_id`, `connector_id`, etc.).
 - RateLimitError (429): Respect `retry_after`; reduce concurrency.
