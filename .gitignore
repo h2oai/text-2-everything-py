@@ -1,4 +1,6 @@
 .env
+.env.upload
+
 *.egg-info
 __pycache__
 .venv
@@ -6,5 +8,9 @@ managers/
 jsons_generados_20250828/
 site/
 JSON - tests/
+
 documentation/tmp/
 documentation/node_modules/
+
+h2o_jsons/
+izzi_jsons/
