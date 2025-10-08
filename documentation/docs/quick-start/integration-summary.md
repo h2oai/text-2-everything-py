@@ -66,7 +66,7 @@ contexts = sdk_client.contexts.bulk_create(project_id=project.id, contexts=sdk_r
 **Step 2: Text2Everything → Step 3: Snowflake**
 ```python
 # T2E project connects to Snowflake for SQL execution
-snowflake_connector = sdk_client.connectors.create(...)
+snowflake_connector = sdk_client.connectors.create(project_id=project.id, ...)
 answer_response = sdk_client.chat.chat_to_answer(
     project_id=project.id,
     connector_id=snowflake_connector.id,
