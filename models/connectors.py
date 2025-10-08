@@ -53,5 +53,7 @@ class ConnectorUpdate(BaseModel):
 
 class Connector(ConnectorBase, BaseResponse):
     """Complete connector model with all fields."""
+    # Backward compatibility: older connectors may not have project_id
+    project_id: Optional[str] = None
     # From API responses: full secure store resource name
     password_secret_name: Optional[str] = None

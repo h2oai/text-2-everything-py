@@ -388,6 +388,7 @@ print("🔌 Creating Snowflake connector...")
 
 try:
     snowflake_connector = sdk_client.connectors.create(
+        project_id=project.id,
         name="H2O Drive Analytics Warehouse",
         description="Snowflake data warehouse for H2O Drive analytics and processed data",
         db_type="snowflake",
@@ -407,7 +408,7 @@ try:
     print(f"   Name: {snowflake_connector.name}")
     
     # Test the connection
-    connection_ok = sdk_client.connectors.test_connection(snowflake_connector.id)
+    connection_ok = sdk_client.connectors.test_connection(project.id, snowflake_connector.id)
     if connection_ok:
         print("✅ Snowflake connection test successful!")
     else:
@@ -421,8 +422,8 @@ except Exception as e:
 ### 3.3 List and Manage Connectors
 
 ```python
-# List all connectors
-all_connectors = sdk_client.connectors.list()
+# List all connectors in project
+all_connectors = sdk_client.connectors.list(project.id)
 snowflake_connectors = [c for c in all_connectors if c.db_type.lower() == "snowflake"]
 
 print(f"📋 Found {len(snowflake_connectors)} Snowflake connector(s):")

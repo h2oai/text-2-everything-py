@@ -19,7 +19,7 @@ class FeedbackTestRunner(BaseTestRunner):
             
             # Try to find existing h2o-snowflake-connector
             try:
-                connectors = self.client.connectors.list()
+                connectors = self.client.connectors.list(self.test_project_id)
                 for connector in connectors:
                     if connector.name == "h2o-snowflake-connector":
                         connector_id = connector.id
@@ -40,6 +40,7 @@ class FeedbackTestRunner(BaseTestRunner):
                         os.getenv("SNOWFLAKE_DATABASE")
                     ]):
                         connector_result = self.client.connectors.create(
+                            project_id=self.test_project_id,
                             name="h2o-snowflake-connector",
                             description="H2O AI Snowflake connector for feedback testing",
                             db_type="snowflake",
@@ -59,6 +60,7 @@ class FeedbackTestRunner(BaseTestRunner):
                     else:
                         # Fallback postgres connector for local testing
                         connector_result = self.client.connectors.create(
+                            project_id=self.test_project_id,
                             name="feedback-test-postgres-connector",
                             description="PostgreSQL connector for feedback testing",
                             db_type="postgres",
@@ -110,6 +112,7 @@ class FeedbackTestRunner(BaseTestRunner):
             execution_id = None
             try:
                 execution_response = self.client.executions.execute_sql(
+                    self.test_project_id,
                     connector_id=connector_id,
                     chat_message_id=chat_message_id
                 )

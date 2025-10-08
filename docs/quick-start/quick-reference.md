@@ -77,6 +77,7 @@ print(f"Project ID: {project.id}")
 ### 4. Snowflake Connector
 ```python
 snowflake_connector = sdk_client.connectors.create(
+    project_id=project.id,
     name="Snowflake Warehouse",
     db_type="snowflake",
     host=os.getenv("SNOWFLAKE_ACCOUNT"),
@@ -312,7 +313,7 @@ for p in projects:
     print(f"{p.name} (ID: {p.id})")
 
 # List connectors
-connectors = sdk_client.connectors.list()
+connectors = sdk_client.connectors.list(project.id)
 for c in connectors:
     print(f"{c.name} ({c.db_type}) - ID: {c.id}")
 

@@ -237,6 +237,7 @@ client.custom_tools.delete("tool_id")
 ```python
 # Add database connector
 connector = client.connectors.create(
+    project_id=project.id,
     name="Production DB",
     db_type="postgres",
     host="localhost",
@@ -247,7 +248,7 @@ connector = client.connectors.create(
 )
 
 # Test connection
-result = client.connectors.test_connection(connector.id)
+result = client.connectors.test_connection(project.id, connector.id)
 ```
 
 ## Error Handling
