@@ -29,6 +29,12 @@ def check_and_import_dependencies():
         sys.exit(1)
 
     try:
+        import h2o_authn
+    except ImportError:
+        print("❌ h2o_authn not installed. Install with: pip install h2o-authn")
+        sys.exit(1)
+
+    try:
         from text2everything_sdk import Text2EverythingClient
         from text2everything_sdk.exceptions import (
             AuthenticationError,
@@ -41,7 +47,7 @@ def check_and_import_dependencies():
         print("❌ text2everything_sdk not installed. Install the SDK first.")
         sys.exit(1)
     
-    return h2o_drive, core, Text2EverythingClient, AuthenticationError, ValidationError, NotFoundError, RateLimitError, ServerError
+    return h2o_drive, core, h2o_authn, Text2EverythingClient, AuthenticationError, ValidationError, NotFoundError, RateLimitError, ServerError
 
 
 class DriveManager:
@@ -262,11 +268,14 @@ Examples:
   python drive_to_t2e_integration.py --t2e-base-url "https://custom.api.com" --timeout 120
 
 Environment Variables:
-  T2E_ACCESS_TOKEN             OIDC access token for Text2Everything (required)
-  T2E_WORKSPACE_NAME           Optional workspace scope, e.g., workspaces/dev
-  T2E_BASE_URL                 Text2Everything base URL (optional)
-  H2O_CLOUD_ENVIRONMENT       H2O Cloud environment URL (required for H2O Drive)
-  H2O_CLOUD_CLIENT_PLATFORM_TOKEN  H2O Cloud platform token (required for H2O Drive)
+  H2O_CLOUD_CLIENT_PLATFORM_TOKEN  H2O Cloud platform token (required)
+  H2O_CLOUD_ENVIRONMENT            H2O Cloud environment URL (required)
+  H2O_CLOUD_TOKEN_ENDPOINT_URL     Token endpoint URL (optional, auto-detected from environment)
+  T2E_WORKSPACE_NAME               Optional workspace scope, e.g., workspaces/dev
+  T2E_BASE_URL                     Text2Everything base URL (optional)
+
+Note: The script automatically exchanges the H2O Cloud platform token for an OIDC access token
+      used by Text2Everything using the h2o_authn library.
         """
     )
     
@@ -384,15 +393,56 @@ async def main():
     print("=" * 50)
     
     # Check and import dependencies
-    h2o_drive, core, Text2EverythingClient, AuthenticationError, ValidationError, NotFoundError, RateLimitError, ServerError = check_and_import_dependencies()
+    h2o_drive, core, h2o_authn, Text2EverythingClient, AuthenticationError, ValidationError, NotFoundError, RateLimitError, ServerError = check_and_import_dependencies()
     
     # Configuration
     BASE_URL = args.t2e_base_url or os.getenv("T2E_BASE_URL", "http://text2everything.text2everything.svc.cluster.local:8000")
-    ACCESS_TOKEN = args.access_token or os.getenv("T2E_ACCESS_TOKEN")
     WORKSPACE_NAME = args.workspace_name or os.getenv("T2E_WORKSPACE_NAME")
     
-    if not ACCESS_TOKEN:
-        print("❌ Access token not found. Provide via --access-token or set T2E_ACCESS_TOKEN environment variable")
+    # Get platform token
+    PLATFORM_TOKEN = os.getenv("H2O_CLOUD_CLIENT_PLATFORM_TOKEN")
+    if not PLATFORM_TOKEN:
+        print("❌ H2O Cloud platform token not found")
+        print("Please set the H2O_CLOUD_CLIENT_PLATFORM_TOKEN environment variable")
+        print("Get your token from: https://<your_cloud>.h2o.ai/auth/get-platform-token")
+        sys.exit(1)
+    
+    # Auto-detect token endpoint from H2O_CLOUD_ENVIRONMENT
+    H2O_CLOUD_ENV = os.getenv("H2O_CLOUD_ENVIRONMENT", "")
+    TOKEN_ENDPOINT_URL = os.getenv("H2O_CLOUD_TOKEN_ENDPOINT_URL")
+    
+    if not TOKEN_ENDPOINT_URL and H2O_CLOUD_ENV:
+        # Extract domain from environment URL
+        # e.g., https://cloud.h2o.ai/ -> auth.cloud.h2o.ai
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(H2O_CLOUD_ENV)
+            domain = parsed.netloc
+            # Replace 'cloud' with 'auth' or use the domain as-is
+            auth_domain = domain.replace('cloud.', 'auth.', 1) if 'cloud.' in domain else f"auth.{domain}"
+            TOKEN_ENDPOINT_URL = f"https://{auth_domain}/auth/realms/hac/protocol/openid-connect/token"
+            print(f"🔍 Auto-detected token endpoint: {TOKEN_ENDPOINT_URL}")
+        except Exception as e:
+            print(f"⚠️  Could not auto-detect token endpoint from H2O_CLOUD_ENVIRONMENT: {e}")
+    
+    if not TOKEN_ENDPOINT_URL:
+        print("❌ Token endpoint URL not found")
+        print("Please set H2O_CLOUD_TOKEN_ENDPOINT_URL or H2O_CLOUD_ENVIRONMENT environment variable")
+        sys.exit(1)
+    
+    # Exchange platform token for OIDC access token
+    print("\n🔐 Exchanging platform token for OIDC access token...")
+    try:
+        token_provider = h2o_authn.TokenProvider(
+            refresh_token=PLATFORM_TOKEN,
+            client_id="hac-platform-public",
+            token_endpoint_url=TOKEN_ENDPOINT_URL
+        )
+        ACCESS_TOKEN = token_provider.token()
+        print("✅ Successfully obtained OIDC access token")
+    except Exception as e:
+        print(f"❌ Token exchange failed: {e}")
+        print("Please verify your H2O_CLOUD_CLIENT_PLATFORM_TOKEN and token endpoint URL")
         sys.exit(1)
     
     # Validate project creation requirements

@@ -14,16 +14,28 @@ This script provides a streamlined way to transfer data from H2O Drive to the Te
 
 1. **Install dependencies**:
    ```bash
-   pip install h2o_drive text2everything_sdk
+   pip install h2o_drive h2o-authn
+   pip install ./text2everything_sdk-0.1.2-py3-none-any.whl
    ```
 
 2. **Set environment variables**:
    ```bash
-   export H2OGPTE_API_KEY="your-api-key"
+   # Required: H2O Cloud platform token
+   export H2O_CLOUD_CLIENT_PLATFORM_TOKEN="your-platform-token"
+   # Get your token from: https://<your_cloud>.h2o.ai/auth/get-platform-token
+   
+   # Required: H2O Cloud environment URL
+   export H2O_CLOUD_ENVIRONMENT="https://<your_cloud>.h2o.ai/"
+   
+   # Optional: Workspace scope
+   export T2E_WORKSPACE_NAME="workspaces/your-workspace"
    
    # Optional: Custom base URL
    export T2E_BASE_URL="https://your-t2e-instance.com"
    ```
+
+   **Note**: The script automatically exchanges your H2O Cloud platform token for an OIDC access token
+   used by Text2Everything. You only need to provide the platform token.
 
 3. **Prepare data in H2O Drive** with this structure:
    ```
@@ -111,7 +123,10 @@ The script includes comprehensive error handling for:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `H2OGPTE_API_KEY` | H2O GPT Enterprise API key | Required |
+| `H2O_CLOUD_CLIENT_PLATFORM_TOKEN` | H2O Cloud platform token (required) | Required |
+| `H2O_CLOUD_ENVIRONMENT` | H2O Cloud environment URL (required) | Required |
+| `H2O_CLOUD_TOKEN_ENDPOINT_URL` | Token endpoint URL (optional, auto-detected) | Auto-detected from environment |
+| `T2E_WORKSPACE_NAME` | Optional workspace scope | None |
 | `T2E_BASE_URL` | Text2Everything base URL | `http://text2everything.text2everything.svc.cluster.local:8000` |
 
 ### Optional Configuration
@@ -135,10 +150,17 @@ Copy `config_example.py` to `config.py` and customize:
    pip install ./text2everything_sdk-0.1.2-py3-none-any.whl
    ```
 
-3. **"API key not found"**
+3. **"H2O Cloud platform token not found"**
    ```bash
-   export H2OGPTE_API_KEY="your-api-key"
+   export H2O_CLOUD_CLIENT_PLATFORM_TOKEN="your-platform-token"
+   export H2O_CLOUD_ENVIRONMENT="https://<your_cloud>.h2o.ai/"
    ```
+   Get your platform token from: https://<your_cloud>.h2o.ai/auth/get-platform-token
+
+4. **"Token exchange failed"**
+   - Verify your H2O_CLOUD_CLIENT_PLATFORM_TOKEN is valid
+   - Check that H2O_CLOUD_ENVIRONMENT is set correctly
+   - Ensure network connectivity to the authentication endpoint
 
 4. **"No projects found in Drive"**
    - Ensure your data follows the expected folder structure

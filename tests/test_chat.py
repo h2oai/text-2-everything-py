@@ -60,6 +60,32 @@ class ChatTestRunner(BaseTestRunner):
             except Exception as e:
                 print(f"⚠️  Chat request failed (may require H2OGPTE setup): {e}")
             
+            # Test chat_to_sql with cutoff parameters
+            try:
+                if connector_id:
+                    chat_response_cutoff = self.client.chat.chat_to_sql(
+                        self.test_project_id,
+                        chat_session_id=h2ogpte_session_id,
+                        query="Show me the top customers",
+                        connector_id=connector_id,
+                        contexts_cutoff=0.5,
+                        schema_cutoff=0.7,
+                        feedback_cutoff=0.6,
+                        examples_cutoff=0.5
+                    )
+                    print(f"✅ Chat with cutoff parameters sent successfully")
+                else:
+                    chat_response_cutoff = self.client.chat.chat_to_sql(
+                        self.test_project_id,
+                        chat_session_id=h2ogpte_session_id,
+                        query="Show me the top customers",
+                        contexts_cutoff=0.5,
+                        schema_cutoff=0.7
+                    )
+                    print(f"✅ Chat with cutoff parameters sent successfully")
+            except Exception as e:
+                print(f"⚠️  Chat with cutoff parameters failed (may require H2OGPTE setup): {e}")
+            
             # Test chat to answer request (with connector if available)
             try:
                 if connector_id:
@@ -76,6 +102,26 @@ class ChatTestRunner(BaseTestRunner):
                     print(f"⚠️  Skipping chat to answer test - no connector available")
             except Exception as e:
                 print(f"⚠️  Chat to answer failed (may require H2OGPTE setup): {e}")
+            
+            # Test chat_to_answer with cutoff parameters
+            try:
+                if connector_id:
+                    answer_response_cutoff = self.client.chat.chat_to_answer(
+                        project_id=self.test_project_id,
+                        chat_session_id=h2ogpte_session_id,
+                        query="Show me revenue by customer",
+                        connector_id=connector_id,
+                        contexts_cutoff=0.6,
+                        schema_cutoff=0.8,
+                        feedback_cutoff=0.7,
+                        examples_cutoff=0.6,
+                        auto_add_feedback={"positive": False, "negative": False}
+                    )
+                    print(f"✅ Chat to answer with cutoff parameters completed")
+                else:
+                    print(f"⚠️  Skipping chat to answer cutoff test - no connector available")
+            except Exception as e:
+                print(f"⚠️  Chat to answer with cutoff parameters failed (may require H2OGPTE setup): {e}")
             
             return True
             
