@@ -41,7 +41,8 @@ class Text2EverythingClient:
     Args:
         base_url: The base URL of the Text2Everything API
         access_token: OIDC access token to send as Authorization Bearer
-        workspace_name: Optional workspace scope to include via X-Workspace-Name
+        workspace_name: Required workspace scope header to include via X-Workspace-Name
+            (must start with "workspaces/")
         timeout: Connection timeout in seconds (default: 30)
         max_retries: Maximum number of retries for failed requests (default: 3)
         retry_delay: Initial delay between retries in seconds (default: 1)
@@ -53,7 +54,7 @@ class Text2EverythingClient:
         http2: Enable HTTP/2 support (default: False)
         
     Example:
-        >>> # Standard usage (Bearer + optional workspace)
+        >>> # Standard usage (Bearer + required workspace)
         >>> client = Text2EverythingClient(
         ...     base_url="https://api.text2everything.com",
         ...     access_token="your-oidc-access-token",
@@ -64,6 +65,7 @@ class Text2EverythingClient:
         >>> client = Text2EverythingClient(
         ...     base_url="https://api.text2everything.com",
         ...     access_token="your-oidc-access-token",
+        ...     workspace_name="workspaces/my-workspace",
         ...     read_timeout=300,  # 5 minutes for long requests
         ...     max_connections=100,
         ...     max_keepalive_connections=20
@@ -75,7 +77,7 @@ class Text2EverythingClient:
     def __init__(
         self,
         access_token: str,
-        workspace_name: Optional[str] = None,
+        workspace_name: str,
         base_url: str = "http://text2everything.text2everything.svc.cluster.local:8000",
         timeout: int = 30,
         max_retries: int = 3,
@@ -89,10 +91,14 @@ class Text2EverythingClient:
         **kwargs
     ):
         if not base_url:
-            raise InvalidConfigurationError("base_url is required")
+            raise InvalidConfigurationError("base_url is required and cannot be empty")
         if not access_token:
-            raise InvalidConfigurationError("access_token is required")
-            
+            raise InvalidConfigurationError("access_token is required and cannot be empty")
+        if not workspace_name:
+            raise InvalidConfigurationError("workspace_name is required")
+        if not str(workspace_name).startswith("workspaces/"):
+            raise InvalidConfigurationError("workspace_name must start with 'workspaces/' (e.g., 'workspaces/my-workspace')")
+        
         self.base_url = base_url.rstrip('/')
         self.access_token = access_token
         self.workspace_name = workspace_name
