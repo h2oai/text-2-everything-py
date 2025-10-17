@@ -33,8 +33,9 @@ class ExecutionsTestRunner(BaseTestRunner):
             # Test SQL execution
             try:
                 execution_result = self.client.executions.execute_sql(
-                    sql_query="SELECT 1 as test_column;",
-                    connector_id=connector_id
+                    project_id=self.test_project_id,
+                    connector_id=connector_id,
+                    sql_query="SELECT 1 as test_column;"
                 )
                 print(f"✅ SQL execution completed (execution_id: {execution_result.execution_id})")
             except Exception as e:
@@ -66,6 +67,7 @@ class ExecutionsTestRunner(BaseTestRunner):
                 
                 # Now test execution from the real chat message
                 chat_execution = self.client.executions.execute_from_chat(
+                    project_id=self.test_project_id,
                     connector_id=connector_id,
                     chat_message_id=real_message_id,
                     chat_session_id=chat_session_id

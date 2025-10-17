@@ -25,6 +25,7 @@ class ExecutionsResource(BaseResource):
     
     def execute_sql(
         self,
+        project_id: str,
         connector_id: str,
         chat_message_id: str = None,
         sql_query: str = None,
@@ -34,6 +35,7 @@ class ExecutionsResource(BaseResource):
         """Execute a SQL query using the specified connector.
         
         Args:
+            project_id: The project ID
             connector_id: The database connector ID
             chat_message_id: Optional chat message ID containing SQL query
             sql_query: Optional SQL query to execute directly
@@ -47,6 +49,7 @@ class ExecutionsResource(BaseResource):
             ```python
             # Execute SQL from a chat message
             result = client.executions.execute_sql(
+                project_id="proj-123",
                 connector_id="conn-123",
                 chat_message_id="msg-456"
             )
@@ -55,6 +58,7 @@ class ExecutionsResource(BaseResource):
             
             # Execute SQL directly
             result = client.executions.execute_sql(
+                project_id="proj-123",
                 connector_id="conn-123",
                 sql_query="SELECT COUNT(*) FROM users"
             )
@@ -77,16 +81,17 @@ class ExecutionsResource(BaseResource):
         )
         
         response = self._client.post(
-            "/sql/execute",
+            f"/projects/{project_id}/sql/execute",
             data=request.model_dump(by_alias=True)
         )
         return SQLExecuteResponse(**response)
     
-    def execute_from_chat(self, connector_id: str, chat_message_id: str, 
+    def execute_from_chat(self, project_id: str, connector_id: str, chat_message_id: str, 
                          chat_session_id: str = None) -> SQLExecuteResponse:
         """Execute SQL from a chat message.
         
         Args:
+            project_id: The project ID
             connector_id: The database connector ID
             chat_message_id: The chat message containing the SQL query
             chat_session_id: Optional chat session ID for context
@@ -97,22 +102,25 @@ class ExecutionsResource(BaseResource):
         Example:
             ```python
             result = client.executions.execute_from_chat(
+                project_id="proj-123",
                 connector_id="conn-123",
                 chat_message_id="msg-456"
             )
             ```
         """
         return self.execute_sql(
+            project_id=project_id,
             connector_id=connector_id,
             chat_message_id=chat_message_id,
             chat_session_id=chat_session_id
         )
     
-    def execute_query(self, connector_id: str, sql_query: str,
+    def execute_query(self, project_id: str, connector_id: str, sql_query: str,
                      chat_session_id: str = None) -> SQLExecuteResponse:
         """Execute a SQL query directly.
         
         Args:
+            project_id: The project ID
             connector_id: The database connector ID
             sql_query: The SQL query to execute
             chat_session_id: Optional chat session ID for context
@@ -123,6 +131,7 @@ class ExecutionsResource(BaseResource):
         Example:
             ```python
             result = client.executions.execute_query(
+                project_id="proj-123",
                 connector_id="conn-123",
                 sql_query="SELECT * FROM users WHERE active = true LIMIT 10"
             )
@@ -133,15 +142,17 @@ class ExecutionsResource(BaseResource):
             raise ValidationError("SQL query cannot be empty")
         
         return self.execute_sql(
+            project_id=project_id,
             connector_id=connector_id,
             sql_query=sql_query,
             chat_session_id=chat_session_id
         )
     
-    def get_execution(self, execution_id: str) -> Execution:
+    def get(self, project_id: str, execution_id: str) -> Execution:
         """Get execution details by ID.
         
         Args:
+            project_id: The project ID
             execution_id: The execution ID
             
         Returns:
@@ -149,16 +160,20 @@ class ExecutionsResource(BaseResource):
             
         Example:
             ```python
-            execution = client.executions.get_execution("exec-123")
+            execution = client.executions.get(
+                project_id="proj-123",
+                execution_id="exec-456"
+            )
             print(f"Query: {execution.sql_query}")
             print(f"Time: {execution.execution_time_ms}ms")
             ```
         """
-        response = self._client.get(f"/sql/executions/{execution_id}")
+        response = self._client.get(f"/projects/{project_id}/sql/executions/{execution_id}")
         return Execution(**response)
 
-    def list_executions(
+    def list(
         self,
+        project_id: str,
         skip: int = 0,
         limit: int = 100,
         q: str | None = None,
@@ -168,6 +183,7 @@ class ExecutionsResource(BaseResource):
         """List SQL executions with optional filters.
 
         Args:
+            project_id: The project ID
             skip: Number of items to skip
             limit: Max items to return
             q: Search term
@@ -176,6 +192,22 @@ class ExecutionsResource(BaseResource):
 
         Returns:
             List of execution summary items
+            
+        Example:
+            ```python
+            # List all executions
+            executions = client.executions.list(project_id="proj-123")
+            
+            # List with filters
+            executions = client.executions.list(
+                project_id="proj-123",
+                connector_id="conn-456",
+                limit=50
+            )
+            
+            for execution in executions:
+                print(f"ID: {execution.id}, Time: {execution.execution_time_ms}ms")
+            ```
         """
         params = {"skip": skip, "limit": limit}
         if q is not None:
@@ -185,6 +217,6 @@ class ExecutionsResource(BaseResource):
         if chat_message_id is not None:
             params["chat_message_id"] = chat_message_id
 
-        endpoint = "/sql/executions"
+        endpoint = f"/projects/{project_id}/sql/executions"
         # Use pagination helper to unify response handling
         return self._paginate(endpoint, params=params, model_class=ExecutionListItem)
