@@ -16,6 +16,7 @@ class ConnectorsTestRunner(BaseTestRunner):
         try:
             # Test create PostgreSQL connector
             connector_result = self.client.connectors.create(
+                project_id=self.test_project_id,
                 name="test_postgres_connector",
                 description="PostgreSQL connector for functional testing",
                 db_type="postgres",
@@ -66,6 +67,7 @@ class ConnectorsTestRunner(BaseTestRunner):
                     cfg["private_key_passphrase_secret_name"] = sf_pk_pass_secret_name
 
                 snowflake_keypair = self.client.connectors.create(
+                    project_id=self.test_project_id,
                     name="h2o-snowflake-connector-keypair",
                     description="H2O AI Snowflake connector (key-pair)",
                     db_type="snowflake",
@@ -80,6 +82,7 @@ class ConnectorsTestRunner(BaseTestRunner):
 
             if all([sf_host, sf_user, sf_db]) and (sf_pwd or sf_pwd_secret_id):
                 snowflake_password = self.client.connectors.create(
+                    project_id=self.test_project_id,
                     name="h2o-snowflake-connector-password",
                     description="H2O AI Snowflake connector (password)",
                     db_type="snowflake",
@@ -101,17 +104,21 @@ class ConnectorsTestRunner(BaseTestRunner):
                 print("⚠️  Skipping Snowflake connector creation (missing env vars for both methods)")
             
             # Test list connectors
-            connectors = self.client.connectors.list()
+            connectors = self.client.connectors.list(project_id=self.test_project_id)
             print(f"✅ Listed {len(connectors)} connectors")
             
             # Test get connector
-            retrieved_connector = self.client.connectors.get(connector_result.id)
+            retrieved_connector = self.client.connectors.get(
+                project_id=self.test_project_id,
+                connector_id=connector_result.id
+            )
             print(f"✅ Retrieved connector: {retrieved_connector.name}")
             
             # Test update connector (don't fail suite if this errors)
             try:
                 updated_connector = self.client.connectors.update(
-                    connector_result.id,
+                    project_id=self.test_project_id,
+                    connector_id=connector_result.id,
                     description="Updated PostgreSQL connector description"
                 )
                 print("✅ Updated connector description")
@@ -120,8 +127,14 @@ class ConnectorsTestRunner(BaseTestRunner):
             
             # Test list by type (non-blocking)
             try:
-                postgres_connectors = self.client.connectors.list_by_type("postgres")
-                snowflake_connectors = self.client.connectors.list_by_type("snowflake")
+                postgres_connectors = self.client.connectors.list_by_type(
+                    project_id=self.test_project_id,
+                    db_type="postgres"
+                )
+                snowflake_connectors = self.client.connectors.list_by_type(
+                    project_id=self.test_project_id,
+                    db_type="snowflake"
+                )
                 print(f"✅ Found {len(postgres_connectors)} PostgreSQL and {len(snowflake_connectors)} Snowflake connectors")
             except Exception as e:
                 print(f"⚠️  List by type skipped due to error: {e}")
@@ -142,13 +155,19 @@ class ConnectorsTestRunner(BaseTestRunner):
             for c in created_connectors:
                 # Boolean/ok-style test
                 try:
-                    ok = self.client.connectors.test_connection(c.id)
+                    ok = self.client.connectors.test_connection(
+                        project_id=self.test_project_id,
+                        connector_id=c.id
+                    )
                     print(f"✅ test_connection ok={ok} for {c.name} ({c.id})")
                 except Exception as e:
                     print(f"⚠️  test_connection failed for {c.name} ({c.id}): {e}")
                 # Detailed test
                 try:
-                    detail = self.client.connectors.test_connection_detailed(c.id)
+                    detail = self.client.connectors.test_connection_detailed(
+                        project_id=self.test_project_id,
+                        connector_id=c.id
+                    )
                     elapsed = detail.get('elapsed_ms') if isinstance(detail, dict) else None
                     print(f"✅ test_connection_detailed ok={detail.get('ok', False) if isinstance(detail, dict) else detail} elapsed_ms={elapsed} for {c.name} ({c.id})")
                 except Exception as e:

@@ -97,7 +97,7 @@ class BaseTestRunner:
                     elif resource_type == 'golden_examples':
                         self.client.golden_examples.delete(self.test_project_id, resource_id)
                     elif resource_type == 'connectors':
-                        self.client.connectors.delete(resource_id)
+                        self.client.connectors.delete(self.test_project_id, resource_id, delete_secrets=True)
                     elif resource_type == 'chat_sessions':
                         self.client.chat_sessions.delete(self.test_project_id, resource_id)
                     elif resource_type == 'feedback':
