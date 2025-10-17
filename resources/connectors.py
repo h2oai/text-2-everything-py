@@ -25,6 +25,7 @@ class ConnectorsResource(BaseResource):
     
     def create(
         self,
+        project_id: str,
         name: str,
         db_type: str,
         host: str,
@@ -37,9 +38,10 @@ class ConnectorsResource(BaseResource):
         config: Optional[dict] = None,
         **kwargs
     ) -> Connector:
-        """Create a new database connector.
+        """Create a new database connector for a project.
         
         Args:
+            project_id: The project ID
             name: Connector name
             db_type: Database type (postgres, mysql, sqlserver, snowflake)
             host: Database host
@@ -53,20 +55,6 @@ class ConnectorsResource(BaseResource):
         
         Returns:
             The created connector
-            
-        Example:
-            ```python
-            result = client.connectors.create(
-                name="Production DB",
-                description="Main production database",
-                db_type="postgres",
-                host="db.example.com",
-                port=5432,
-                username="app_user",
-                password="secure_password",
-                database="production"
-            )
-            ```
         """
         # Validate connector type
         if db_type.lower() not in [e.value for e in ConnectorType]:
@@ -124,13 +112,11 @@ class ConnectorsResource(BaseResource):
             **kwargs
         )
         
-        response = self._client.post(
-            "/connectors",
-            data=connector.model_dump()
-        )
+        endpoint = self._build_endpoint("projects", project_id, "connectors")
+        response = self._client.post(endpoint, data=connector.model_dump())
         return Connector(**response)
     
-    def get(self, connector_id: str) -> Connector:
+    def get(self, project_id: str, connector_id: str) -> Connector:
         """Get a connector by ID.
         
         Args:
@@ -141,15 +127,16 @@ class ConnectorsResource(BaseResource):
             
         Example:
             ```python
-            connector = client.connectors.get(connector_id)
+            connector = client.connectors.get(project_id, connector_id)
             print(f"Database: {connector.db_type} at {connector.host}")
             ```
         """
-        response = self._client.get(f"/connectors/{connector_id}")
+        endpoint = self._build_endpoint("projects", project_id, "connectors", connector_id)
+        response = self._client.get(endpoint)
         return Connector(**response)
     
-    def list(self, limit: int = 100, offset: int = 0, search: Optional[str] = None) -> List[Connector]:
-        """List all connectors.
+    def list(self, project_id: str, limit: int = 100, offset: int = 0, search: Optional[str] = None) -> List[Connector]:
+        """List connectors in a project.
         
         Args:
             limit: Maximum number of items to return
@@ -160,18 +147,33 @@ class ConnectorsResource(BaseResource):
             
         Example:
             ```python
-            connectors = client.connectors.list()
+            connectors = client.connectors.list(project_id)
             for connector in connectors:
                 print(f"{connector.name}: {connector.db_type}")
             ```
         """
-        endpoint = "/connectors"
+        endpoint = self._build_endpoint("projects", project_id, "connectors")
         params = {"limit": limit, "skip": offset}
         if search:
             params["q"] = search
         return self._paginate(endpoint, params=params, model_class=Connector)
     
     def update(
+        self,
+        project_id: str,
+        connector_id: str,
+        name: Optional[str] = None,
+        db_type: Optional[str] = None,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        password_secret_id: Optional[str] = None,
+        database: Optional[str] = None,
+        description: Optional[str] = None,
+        config: Optional[dict] = None,
+        **kwargs
+    ) -> Connector:
         self,
         connector_id: str,
         name: Optional[str] = None,
@@ -207,6 +209,7 @@ class ConnectorsResource(BaseResource):
         Example:
             ```python
             result = client.connectors.update(
+                project_id,
                 connector_id,
                 description="Updated production database",
                 port=5433
@@ -219,7 +222,7 @@ class ConnectorsResource(BaseResource):
             raise ValidationError(f"Invalid database type. Supported types are: {valid_types}")
         
         # Get current connector first since API expects complete data
-        current_connector = self.get(connector_id)
+        current_connector = self.get(project_id, connector_id)
         
         # Resolve password_secret_id for non-Snowflake to satisfy API validation without rotating secrets
         effective_db_type = (db_type or current_connector.db_type or "").lower()
@@ -245,13 +248,11 @@ class ConnectorsResource(BaseResource):
             **kwargs
         )
         
-        response = self._client.put(
-            f"/connectors/{connector_id}",
-            data=update_data.model_dump()
-        )
+        endpoint = self._build_endpoint("projects", project_id, "connectors", connector_id)
+        response = self._client.put(endpoint, data=update_data.model_dump())
         return Connector(**response)
     
-    def delete(self, connector_id: str) -> bool:
+    def delete(self, project_id: str, connector_id: str) -> bool:
         """Delete a connector.
         
         Args:
@@ -262,13 +263,14 @@ class ConnectorsResource(BaseResource):
             
         Example:
             ```python
-            success = client.connectors.delete(connector_id)
+            success = client.connectors.delete(project_id, connector_id)
             ```
         """
-        self._client.delete(f"/connectors/{connector_id}")
+        endpoint = self._build_endpoint("projects", project_id, "connectors", connector_id)
+        self._client.delete(endpoint)
         return True
     
-    def test_connection(self, connector_id: str) -> bool:
+    def test_connection(self, project_id: str, connector_id: str) -> bool:
         """Test a connector's database connection.
         
         Args:
@@ -283,19 +285,20 @@ class ConnectorsResource(BaseResource):
         Example:
             ```python
             try:
-                success = client.connectors.test_connection(connector_id)
+                success = client.connectors.test_connection(project_id, connector_id)
                 print("Connection successful!")
             except ValidationError as e:
                 print(f"Connection failed: {e}")
             ```
         """
         try:
-            resp = self._client.post(f"/connectors/{connector_id}/test")
+            endpoint = self._build_endpoint("projects", project_id, "connectors", connector_id, "test")
+            resp = self._client.post(endpoint)
             return bool(resp.get("ok", False))
         except Exception as e:
             raise ValidationError(f"Connection test failed: {str(e)}")
 
-    def test_connection_detailed(self, connector_id: str) -> dict:
+    def test_connection_detailed(self, project_id: str, connector_id: str) -> dict:
         """Test a connector and return detailed response (e.g., elapsed_ms).
         
         Args:
@@ -304,26 +307,27 @@ class ConnectorsResource(BaseResource):
         Returns:
             Dict with fields like { ok: bool, elapsed_ms: int }
         """
-        return self._client.post(f"/connectors/{connector_id}/test")
+        endpoint = self._build_endpoint("projects", project_id, "connectors", connector_id, "test")
+        return self._client.post(endpoint)
     
-    def list_by_type(self, db_type: str) -> List[Connector]:
-        """List connectors by database type.
+    def list_by_type(self, project_id: str, db_type: str) -> List[Connector]:
+        """List connectors by database type for a project.
         
         Args:
+            project_id: The project ID
             db_type: The database type to filter by
             
         Returns:
-            List of connectors of the specified type
+            List of connectors of the specified type within the project
             
         Example:
             ```python
-            postgres_connectors = client.connectors.list_by_type("postgres")
+            postgres_connectors = client.connectors.list_by_type(project_id, "postgres")
             ```
         """
         # Validate db_type
         if db_type.lower() not in [e.value for e in ConnectorType]:
             valid_types = ", ".join([e.value for e in ConnectorType])
             raise ValidationError(f"Invalid database type. Supported types are: {valid_types}")
-        
-        all_connectors = self.list()
+        all_connectors = self.list(project_id)
         return [conn for conn in all_connectors if conn.db_type.lower() == db_type.lower()]

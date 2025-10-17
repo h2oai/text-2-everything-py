@@ -23,6 +23,7 @@ class SQLExecuteResponse(BaseModel):
     """Model for SQL execution response."""
     
     execution_id: str
+    project_id: str
     connector_id: str
     sql_query: str
     result: Dict[str, Any]
@@ -33,6 +34,7 @@ class SQLExecuteResponse(BaseModel):
 class ExecutionBase(BaseModel):
     """Base execution model."""
     
+    project_id: str
     result: Dict[str, Any]
     execution_time_ms: int
     chat_message_id: Optional[str] = None
@@ -48,6 +50,7 @@ class Execution(ExecutionBase, BaseResponse):
 class ExecutionListItem(BaseResponse):
     """Execution summary item for list endpoints (no result payload)."""
 
+    project_id: str
     execution_time_ms: int
     is_successful: bool
     chat_message_id: Optional[str] = None
