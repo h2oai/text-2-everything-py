@@ -28,6 +28,11 @@ class ChatRequest(BaseModel):
     schema_limit: Optional[int] = None
     feedback_limit: Optional[int] = None
     examples_limit: Optional[int] = None
+    # RAG retrieval cutoff thresholds
+    contexts_cutoff: Optional[float] = None
+    schema_cutoff: Optional[float] = None
+    feedback_cutoff: Optional[float] = None
+    examples_cutoff: Optional[float] = None
     # LLM agent parameters
     use_agent: Optional[bool] = None
     agent_accuracy: Optional[str] = None

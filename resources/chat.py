@@ -32,6 +32,10 @@ class ChatResource(BaseResource):
         schema_metadata_id: str = None,
         contexts_limit: int = None,
         examples_limit: int = None,
+        contexts_cutoff: float = None,
+        schema_cutoff: float = None,
+        feedback_cutoff: float = None,
+        examples_cutoff: float = None,
         **kwargs
     ) -> ChatResponse:
         """Convert natural language query to SQL.
@@ -43,6 +47,10 @@ class ChatResource(BaseResource):
             schema_metadata_id: Optional schema metadata ID
             contexts_limit: Optional limit for contexts
             examples_limit: Optional limit for examples
+            contexts_cutoff: Optional similarity cutoff for contexts (0.0-1.0, higher = more restrictive)
+            schema_cutoff: Optional similarity cutoff for schema metadata (0.0-1.0, higher = more restrictive)
+            feedback_cutoff: Optional similarity cutoff for feedback (0.0-1.0, higher = more restrictive)
+            examples_cutoff: Optional similarity cutoff for examples (0.0-1.0, higher = more restrictive)
             **kwargs: Additional chat request fields
         
         Returns:
@@ -56,7 +64,9 @@ class ChatResource(BaseResource):
                 query="How many active users do we have?",
                 schema_metadata_id="schema-456",
                 contexts_limit=5,
-                examples_limit=3
+                examples_limit=3,
+                contexts_cutoff=0.5,
+                schema_cutoff=0.7
             )
             print(f"Generated SQL: {response.sql_query}")
             print(f"Explanation: {response.explanation}")
@@ -75,6 +85,10 @@ class ChatResource(BaseResource):
             schema_metadata_id=schema_metadata_id,
             contexts_limit=contexts_limit,
             examples_limit=examples_limit,
+            contexts_cutoff=contexts_cutoff,
+            schema_cutoff=schema_cutoff,
+            feedback_cutoff=feedback_cutoff,
+            examples_cutoff=examples_cutoff,
             **kwargs
         )
         
@@ -94,6 +108,10 @@ class ChatResource(BaseResource):
         use_agent: bool = False,
         agent_accuracy: str = "medium",
         auto_add_feedback: dict = None,
+        contexts_cutoff: float = None,
+        schema_cutoff: float = None,
+        feedback_cutoff: float = None,
+        examples_cutoff: float = None,
         **kwargs
     ) -> ChatToAnswerResponse:
         """Convert natural language query to SQL and execute it.
@@ -107,6 +125,10 @@ class ChatResource(BaseResource):
             use_agent: Whether to use agent functionality
             agent_accuracy: Agent accuracy level ("low", "medium", "high")
             auto_add_feedback: Optional auto feedback configuration
+            contexts_cutoff: Optional similarity cutoff for contexts (0.0-1.0, higher = more restrictive)
+            schema_cutoff: Optional similarity cutoff for schema metadata (0.0-1.0, higher = more restrictive)
+            feedback_cutoff: Optional similarity cutoff for feedback (0.0-1.0, higher = more restrictive)
+            examples_cutoff: Optional similarity cutoff for examples (0.0-1.0, higher = more restrictive)
             **kwargs: Additional chat to answer request fields
         
         Returns:
@@ -119,7 +141,9 @@ class ChatResource(BaseResource):
                 query="Show me the top 10 customers by revenue",
                 connector_id="conn-789",
                 use_agent=True,
-                agent_accuracy="high"
+                agent_accuracy="high",
+                contexts_cutoff=0.5,
+                schema_cutoff=0.7
             )
             
             if response.execution_result:
@@ -148,6 +172,10 @@ class ChatResource(BaseResource):
             "custom_tool_id": custom_tool_id,
             "use_agent": use_agent,
             "agent_accuracy": agent_accuracy,
+            "contexts_cutoff": contexts_cutoff,
+            "schema_cutoff": schema_cutoff,
+            "feedback_cutoff": feedback_cutoff,
+            "examples_cutoff": examples_cutoff,
             **kwargs
         }
         
