@@ -36,6 +36,7 @@ class ChatResource(BaseResource):
         schema_cutoff: float = None,
         feedback_cutoff: float = None,
         examples_cutoff: float = None,
+        system_prompt: str = None,
         **kwargs
     ) -> ChatResponse:
         """Convert natural language query to SQL.
@@ -89,6 +90,7 @@ class ChatResource(BaseResource):
             schema_cutoff=schema_cutoff,
             feedback_cutoff=feedback_cutoff,
             examples_cutoff=examples_cutoff,
+            system_prompt=system_prompt,
             **kwargs
         )
         
@@ -112,6 +114,7 @@ class ChatResource(BaseResource):
         schema_cutoff: float = None,
         feedback_cutoff: float = None,
         examples_cutoff: float = None,
+        system_prompt: str = None,
         **kwargs
     ) -> ChatToAnswerResponse:
         """Convert natural language query to SQL and execute it.
@@ -176,6 +179,7 @@ class ChatResource(BaseResource):
             "schema_cutoff": schema_cutoff,
             "feedback_cutoff": feedback_cutoff,
             "examples_cutoff": examples_cutoff,
+            "system_prompt": system_prompt,
             **kwargs
         }
         
