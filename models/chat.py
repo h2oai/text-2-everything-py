@@ -36,6 +36,8 @@ class ChatRequest(BaseModel):
     # LLM agent parameters
     use_agent: Optional[bool] = None
     agent_accuracy: Optional[str] = None
+    # System prompt override
+    system_prompt: Optional[str] = None
 
 
 class ChatResponseBase(BaseModel):
