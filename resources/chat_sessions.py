@@ -86,13 +86,14 @@ class ChatSessionsResource(BaseResource):
     #     response = self._client.get(f"/projects/{project_id}/chat-sessions/{session_id}")
     #     return ChatSessionResponse(**response)
     
-    def list(self, project_id: str, offset: int = 0, limit: int = 10) -> List[ChatSessionResponse]:
+    def list(self, project_id: str, skip: int = 0, limit: int = 100, search: Optional[str] = None) -> List[ChatSessionResponse]:
         """List recent H2OGPTE chat sessions for a project.
         
         Args:
             project_id: The project ID
-            offset: Number of sessions to skip
+            skip: Number of sessions to skip
             limit: Maximum number of sessions to return
+            search: Optional search query to filter by session name
             
         Returns:
             List of chat sessions
@@ -102,10 +103,15 @@ class ChatSessionsResource(BaseResource):
             sessions = client.chat_sessions.list(project_id, limit=20)
             for session in sessions:
                 print(f"{session.name}: {session.id}")
+            
+            # Search for sessions
+            sessions = client.chat_sessions.list(project_id, search="analysis")
             ```
         """
         endpoint = f"/projects/{project_id}/chat-sessions"
-        params = {"offset": offset, "limit": limit}
+        params = {"skip": skip, "limit": limit}
+        if search:
+            params["q"] = search
         response = self._client.get(endpoint, params=params)
         return [ChatSessionResponse(**item) for item in response]
     
