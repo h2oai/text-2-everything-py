@@ -4,7 +4,7 @@ Chat resource functional tests.
 
 import os
 from .base_test import BaseTestRunner
-from text2everything_sdk.models.chat import ChatToAnswerRequest, AutoFeedbackConfig
+from models.chat import ChatToAnswerRequest, AutoFeedbackConfig
 
 
 class ChatTestRunner(BaseTestRunner):

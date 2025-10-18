@@ -5,16 +5,16 @@ Custom tools resource for the Text2Everything SDK.
 from __future__ import annotations
 from typing import List, TYPE_CHECKING, BinaryIO, Union
 from pathlib import Path
-from ..models.custom_tools import (
+from models.custom_tools import (
     CustomTool,
     CustomToolCreate,
     CustomToolUpdate
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class CustomToolsResource(BaseResource):
@@ -125,13 +125,13 @@ class CustomToolsResource(BaseResource):
         response = self._client.get(f"/projects/{project_id}/custom-tools/{tool_id}")
         return CustomTool(**response)
     
-    def list(self, project_id: str, limit: int = 100, offset: int = 0) -> List[CustomTool]:
+    def list(self, project_id: str, skip: int = 0, limit: int = 100) -> List[CustomTool]:
         """List all custom tools for a project.
         
         Args:
             project_id: The project ID
+            skip: Number of items to skip
             limit: Maximum number of items to return
-            offset: Number of items to skip
             
         Returns:
             List of custom tools
@@ -144,7 +144,7 @@ class CustomToolsResource(BaseResource):
             ```
         """
         endpoint = f"/projects/{project_id}/custom-tools"
-        params = {"limit": limit, "skip": offset}
+        params = {"limit": limit, "skip": skip}
         return self._paginate(endpoint, params=params, model_class=CustomTool)
     
     def update(self, project_id: str, tool_id: str, name: str = None, 

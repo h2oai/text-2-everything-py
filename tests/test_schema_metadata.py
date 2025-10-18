@@ -4,7 +4,7 @@ Schema metadata resource functional tests.
 
 import time
 from .base_test import BaseTestRunner
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 
 
 class SchemaMetadataTestRunner(BaseTestRunner):

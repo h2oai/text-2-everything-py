@@ -3,7 +3,7 @@ Projects resource functional tests.
 """
 
 from .base_test import BaseTestRunner
-from text2everything_sdk.models.projects import ProjectCreate, ProjectUpdate
+from models.projects import ProjectCreate, ProjectUpdate
 
 
 class ProjectsTestRunner(BaseTestRunner):

@@ -11,11 +11,11 @@ import time
 from typing import Optional, List
 
 # Add the parent directory to the path so we can import the SDK
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from text2everything_sdk import Text2EverythingClient
-from text2everything_sdk.models.projects import ProjectCreate
-from text2everything_sdk.exceptions import (
+from client import Text2EverythingClient
+from models.projects import ProjectCreate
+from exceptions import (
     AuthenticationError,
     ValidationError,
     NotFoundError,

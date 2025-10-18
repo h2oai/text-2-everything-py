@@ -4,18 +4,18 @@ Chat resource for the Text2Everything SDK.
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from ..models.chat import (
+from models.chat import (
     ChatRequest,
     ChatResponse,
     ChatToAnswerRequest,
     ChatToAnswerResponse,
     AutoFeedbackConfig
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class ChatResource(BaseResource):

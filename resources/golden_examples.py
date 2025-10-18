@@ -6,18 +6,18 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
 import httpx
-from ..models.golden_examples import (
+from models.golden_examples import (
     GoldenExample,
     GoldenExampleCreate,
     GoldenExampleUpdate,
     GoldenExampleResponse
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 from .rate_limited_executor import RateLimitedExecutor
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class GoldenExamplesResource(BaseResource):
@@ -119,13 +119,15 @@ class GoldenExamplesResource(BaseResource):
         
         return GoldenExampleResponse(**response_data)
     
-    def list(self, project_id: str, limit: int = 100, offset: int = 0, search: Optional[str] = None, is_always_displayed: Optional[bool] = None) -> List[GoldenExampleResponse]:
+    def list(self, project_id: str, skip: int = 0, limit: int = 100, search: Optional[str] = None, is_always_displayed: Optional[bool] = None) -> List[GoldenExampleResponse]:
         """List golden examples for a project.
         
         Args:
             project_id: The project ID
+            skip: Number of items to skip
             limit: Maximum number of items to return
-            offset: Number of items to skip
+            search: Optional search query
+            is_always_displayed: Optional filter for always displayed items
             
         Returns:
             List of golden examples
@@ -134,12 +136,11 @@ class GoldenExamplesResource(BaseResource):
             ```python
             examples = client.golden_examples.list(project_id)
             for example in examples:
-                print(f"{example.user_query}")
+                print(f"{example.user_message} -> {example.expected_sql}")
             ```
         """
         endpoint = f"/projects/{project_id}/golden-examples"
-        # Backend expects skip/limit and supports q, is_always_displayed
-        params = {"limit": limit, "skip": offset}
+        params = {"limit": limit, "skip": skip}
         if search:
             params["q"] = search
         if is_always_displayed is not None:

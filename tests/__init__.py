@@ -5,22 +5,22 @@ This package contains modularized functional tests for the Text2Everything SDK.
 Each test module focuses on a specific resource type or functionality.
 """
 
-from .base_test import BaseTestRunner
-from .test_projects import ProjectsTestRunner
-from .test_contexts import ContextsTestRunner
-from .test_schema_metadata import SchemaMetadataTestRunner
-from .test_golden_examples import GoldenExamplesTestRunner
-from .test_connectors import ConnectorsTestRunner
-from .test_executions import ExecutionsTestRunner
-from .test_chat import ChatTestRunner
-from .test_chat_sessions import ChatSessionsTestRunner
-from .test_feedback import FeedbackTestRunner
-from .test_custom_tools import CustomToolsTestRunner
-from .test_validation_errors import ValidationErrorsTestRunner
-from .test_high_concurrency import HighConcurrencyTestRunner
-from .test_high_concurrency_schema_metadata import HighConcurrencySchemaMetadataTestRunner
-from .test_high_concurrency_contexts import HighConcurrencyContextsTestRunner
-from .test_high_concurrency_golden_examples import HighConcurrencyGoldenExamplesTestRunner
+from tests.base_test import BaseTestRunner
+from tests.test_projects import ProjectsTestRunner
+from tests.test_contexts import ContextsTestRunner
+from tests.test_schema_metadata import SchemaMetadataTestRunner
+from tests.test_golden_examples import GoldenExamplesTestRunner
+from tests.test_connectors import ConnectorsTestRunner
+from tests.test_executions import ExecutionsTestRunner
+from tests.test_chat import ChatTestRunner
+from tests.test_chat_sessions import ChatSessionsTestRunner
+from tests.test_feedback import FeedbackTestRunner
+from tests.test_custom_tools import CustomToolsTestRunner
+from tests.test_validation_errors import ValidationErrorsTestRunner
+from tests.test_high_concurrency import HighConcurrencyTestRunner
+from tests.test_high_concurrency_schema_metadata import HighConcurrencySchemaMetadataTestRunner
+from tests.test_high_concurrency_contexts import HighConcurrencyContextsTestRunner
+from tests.test_high_concurrency_golden_examples import HighConcurrencyGoldenExamplesTestRunner
 
 __all__ = [
     'BaseTestRunner',

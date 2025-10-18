@@ -5,7 +5,7 @@ Custom tools resource functional tests.
 import tempfile
 import os
 from .base_test import BaseTestRunner
-from text2everything_sdk.models.custom_tools import CustomToolCreate, CustomToolUpdate
+from models.custom_tools import CustomToolCreate, CustomToolUpdate
 
 
 class CustomToolsTestRunner(BaseTestRunner):

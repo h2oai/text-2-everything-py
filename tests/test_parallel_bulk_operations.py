@@ -6,7 +6,7 @@ import time
 import os
 from typing import List, Dict, Any
 from .base_test import BaseTestRunner
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 
 
 class ParallelBulkOperationsTestRunner(BaseTestRunner):

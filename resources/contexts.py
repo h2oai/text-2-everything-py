@@ -7,11 +7,11 @@ import concurrent.futures
 import httpx
 from .base import BaseResource
 from .rate_limited_executor import RateLimitedExecutor
-from ..models.contexts import Context, ContextCreate, ContextUpdate, ContextResponse
-from ..exceptions import ValidationError
+from models.contexts import Context, ContextCreate, ContextUpdate, ContextResponse
+from exceptions import ValidationError
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class ContextsResource(BaseResource):

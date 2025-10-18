@@ -7,7 +7,7 @@ import time
 from typing import Optional, Dict, Any, Union
 from urllib.parse import urljoin
 
-from .exceptions import (
+from exceptions import (
     Text2EverythingError,
     AuthenticationError,
     ValidationError,
@@ -18,16 +18,16 @@ from .exceptions import (
     TimeoutError,
     InvalidConfigurationError
 )
-from .resources.projects import ProjectsResource
-from .resources.contexts import ContextsResource
-from .resources.golden_examples import GoldenExamplesResource
-from .resources.schema_metadata import SchemaMetadataResource
-from .resources.connectors import ConnectorsResource
-from .resources.executions import ExecutionsResource
-from .resources.chat import ChatResource
-from .resources.chat_sessions import ChatSessionsResource
-from .resources.feedback import FeedbackResource
-from .resources.custom_tools import CustomToolsResource
+from resources.projects import ProjectsResource
+from resources.contexts import ContextsResource
+from resources.golden_examples import GoldenExamplesResource
+from resources.schema_metadata import SchemaMetadataResource
+from resources.connectors import ConnectorsResource
+from resources.executions import ExecutionsResource
+from resources.chat import ChatResource
+from resources.chat_sessions import ChatSessionsResource
+from resources.feedback import FeedbackResource
+from resources.custom_tools import CustomToolsResource
 
 
 class Text2EverythingClient:

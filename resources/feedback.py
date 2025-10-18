@@ -4,17 +4,17 @@ Feedback resource for the Text2Everything SDK.
 
 from __future__ import annotations
 from typing import List, Optional, TYPE_CHECKING
-from ..models.feedback import (
+from models.feedback import (
     Feedback,
     FeedbackCreate,
     FeedbackUpdate,
     FeedbackResponse
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class FeedbackResource(BaseResource):
@@ -116,13 +116,14 @@ class FeedbackResource(BaseResource):
         
         return FeedbackResponse(**response_data)
     
-    def list(self, project_id: str, limit: int = 100, offset: int = 0, search: Optional[str] = None) -> List[FeedbackResponse]:
+    def list(self, project_id: str, skip: int = 0, limit: int = 100, search: Optional[str] = None) -> List[FeedbackResponse]:
         """List feedback for a project.
         
         Args:
             project_id: The project ID
+            skip: Number of items to skip
             limit: Maximum number of items to return
-            offset: Number of items to skip
+            search: Optional search query
             
         Returns:
             List of feedback items
@@ -136,8 +137,7 @@ class FeedbackResource(BaseResource):
             ```
         """
         endpoint = f"/projects/{project_id}/feedback"
-        # Backend expects skip/limit and supports q
-        params = {"limit": limit, "skip": offset}
+        params = {"limit": limit, "skip": skip}
         if search:
             params["q"] = search
         return self._paginate(endpoint, params=params, model_class=FeedbackResponse)

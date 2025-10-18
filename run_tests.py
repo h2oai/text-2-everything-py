@@ -25,13 +25,8 @@ except ImportError:
     # dotenv not installed, skip loading
     pass
 
-# Add the parent directory to the path so we can import the SDK
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-#print the added path
-print("Added to sys.path:", sys.path[0])
-
-from text2everything_sdk.tests import (
+# Import from local tests directory
+from tests import (
     BaseTestRunner,
     ProjectsTestRunner,
     ContextsTestRunner,

@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
 import httpx
-from ..models.schema_metadata import (
+from models.schema_metadata import (
     SchemaMetadata,
     SchemaMetadataCreate,
     SchemaMetadataUpdate,
@@ -16,12 +16,12 @@ from ..models.schema_metadata import (
     validate_schema_metadata,
     detect_schema_type
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 from .rate_limited_executor import RateLimitedExecutor
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class SchemaMetadataResource(BaseResource):
@@ -134,13 +134,15 @@ class SchemaMetadataResource(BaseResource):
         
         return SchemaMetadataResponse(**response_data)
     
-    def list(self, project_id: str, limit: int = 100, offset: int = 0, search: Optional[str] = None, is_always_displayed: Optional[bool] = None) -> List[SchemaMetadataResponse]:
+    def list(self, project_id: str, skip: int = 0, limit: int = 100, search: Optional[str] = None, is_always_displayed: Optional[bool] = None) -> List[SchemaMetadataResponse]:
         """List schema metadata for a project.
         
         Args:
             project_id: The project ID
+            skip: Number of items to skip
             limit: Maximum number of items to return
-            offset: Number of items to skip
+            search: Optional search query
+            is_always_displayed: Optional filter for always displayed items
             
         Returns:
             List of schema metadata
@@ -152,8 +154,7 @@ class SchemaMetadataResource(BaseResource):
             ```
         """
         endpoint = f"/projects/{project_id}/schema-metadata"
-        # Backend expects skip/limit and supports q, is_always_displayed
-        params = {"limit": limit, "skip": offset}
+        params = {"limit": limit, "skip": skip}
         if search:
             params["q"] = search
         if is_always_displayed is not None:

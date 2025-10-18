@@ -3,7 +3,7 @@ Validation error handling functional tests.
 """
 
 from .base_test import BaseTestRunner
-from text2everything_sdk.exceptions import ValidationError
+from exceptions import ValidationError
 
 
 class ValidationErrorsTestRunner(BaseTestRunner):
