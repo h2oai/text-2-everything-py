@@ -4,7 +4,7 @@ Projects resource for the Text2Everything SDK.
 
 from typing import List, Optional, Dict, Any, Union
 from .base import BaseResource
-from ..models.projects import Project, ProjectCreate, ProjectUpdate
+from models.projects import Project, ProjectCreate, ProjectUpdate
 
 
 class ProjectsResource(BaseResource):

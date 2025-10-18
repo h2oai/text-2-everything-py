@@ -4,17 +4,17 @@ Feedback resource for the Text2Everything SDK.
 
 from __future__ import annotations
 from typing import List, Optional, TYPE_CHECKING
-from ..models.feedback import (
+from models.feedback import (
     Feedback,
     FeedbackCreate,
     FeedbackUpdate,
     FeedbackResponse
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class FeedbackResource(BaseResource):

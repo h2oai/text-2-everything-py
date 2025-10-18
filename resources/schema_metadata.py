@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
 import httpx
-from ..models.schema_metadata import (
+from models.schema_metadata import (
     SchemaMetadata,
     SchemaMetadataCreate,
     SchemaMetadataUpdate,
@@ -16,12 +16,12 @@ from ..models.schema_metadata import (
     validate_schema_metadata,
     detect_schema_type
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 from .rate_limited_executor import RateLimitedExecutor
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class SchemaMetadataResource(BaseResource):

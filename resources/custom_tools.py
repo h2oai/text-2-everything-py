@@ -5,16 +5,16 @@ Custom tools resource for the Text2Everything SDK.
 from __future__ import annotations
 from typing import List, TYPE_CHECKING, BinaryIO, Union
 from pathlib import Path
-from ..models.custom_tools import (
+from models.custom_tools import (
     CustomTool,
     CustomToolCreate,
     CustomToolUpdate
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class CustomToolsResource(BaseResource):

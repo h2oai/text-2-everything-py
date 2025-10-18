@@ -4,18 +4,18 @@ Chat sessions resource for the Text2Everything SDK.
 
 from __future__ import annotations
 from typing import List, Optional, TYPE_CHECKING
-from ..models.chat_sessions import (
+from models.chat_sessions import (
     ChatSessionCreate,
     ChatSessionResponse,
     ChatSessionUpdateRequest,
     ChatSessionQuestion
 )
-from ..models.custom_tools import CustomTool
-from ..exceptions import ValidationError
+from models.custom_tools import CustomTool
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class ChatSessionsResource(BaseResource):
@@ -113,7 +113,9 @@ class ChatSessionsResource(BaseResource):
         if search:
             params["q"] = search
         response = self._client.get(endpoint, params=params)
-        return [ChatSessionResponse(**item) for item in response]
+        # Handle paginated response structure
+        items = response.get("items", response) if isinstance(response, dict) else response
+        return [ChatSessionResponse(**item) for item in items]
     
     def update_custom_tool(self, project_id: str, session_id: str, 
                           custom_tool_id: str = None) -> ChatSessionResponse:

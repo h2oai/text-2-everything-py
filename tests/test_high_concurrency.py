@@ -8,7 +8,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any, Tuple
 from .base_test import BaseTestRunner
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 
 
 class HighConcurrencyTestRunner(BaseTestRunner):

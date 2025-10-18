@@ -4,8 +4,8 @@ Contexts resource functional tests.
 
 import time
 from .base_test import BaseTestRunner
-from text2everything_sdk.models.contexts import ContextCreate, ContextUpdate
-from ..exceptions import ValidationError
+from models.contexts import ContextCreate, ContextUpdate
+from exceptions import ValidationError
 
 
 class ContextsTestRunner(BaseTestRunner):

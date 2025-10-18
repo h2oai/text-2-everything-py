@@ -4,17 +4,17 @@ SQL Executions resource for the Text2Everything SDK.
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from ..models.executions import (
+from models.executions import (
     SQLExecuteRequest,
     SQLExecuteResponse,
     Execution,
     ExecutionListItem
 )
-from ..exceptions import ValidationError
+from exceptions import ValidationError
 from .base import BaseResource
 
 if TYPE_CHECKING:
-    from ..client import Text2EverythingClient
+    from client import Text2EverythingClient
 
 
 class ExecutionsResource(BaseResource):
