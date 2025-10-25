@@ -191,6 +191,45 @@ class ContextsResource(BaseResource):
         endpoint = self._build_endpoint("projects", project_id, "contexts", context_id)
         return self._client.delete(endpoint)
     
+    def bulk_delete(
+        self,
+        project_id: str,
+        context_ids: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Delete multiple contexts at once.
+        
+        Args:
+            project_id: The project ID
+            context_ids: List of context IDs to delete
+            
+        Returns:
+            Dict with deletion results:
+            - deleted_count: Number of successfully deleted items (int)
+            - failed_ids: List of IDs that failed to delete (List[str])
+            
+        Raises:
+            ValidationError: If context_ids is empty or invalid
+            
+        Example:
+            >>> result = client.contexts.bulk_delete(
+            ...     project_id="proj_123",
+            ...     context_ids=["ctx_1", "ctx_2", "ctx_3"]
+            ... )
+            >>> print(f"Deleted {result['deleted_count']} contexts")
+            >>> if result['failed_ids']:
+            ...     print(f"Failed IDs: {result['failed_ids']}")
+        """
+        if not context_ids:
+            raise ValidationError("context_ids cannot be empty")
+        
+        if not isinstance(context_ids, list):
+            raise ValidationError("context_ids must be a list")
+        
+        payload = {"ids": context_ids}
+        endpoint = self._build_endpoint("projects", project_id, "contexts", "bulk-delete")
+        return self._client.post(endpoint, data=payload)
+    
     def bulk_create(
         self,
         project_id: str,

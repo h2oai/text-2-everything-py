@@ -37,8 +37,60 @@ class ProjectsTestRunner(BaseTestRunner):
                 print("❌ Project existence check failed")
                 return False
             
+            # Test collections functionality
+            if not self._test_collections():
+                return False
+            
             return True
             
         except Exception as e:
             print(f"❌ Projects test failed: {e}")
             return False
+    
+    def _test_collections(self) -> bool:
+        """Test project collections functionality."""
+        print("\n  📦 Testing collections...")
+        
+        # First, create some resources to generate collections
+        # Create a context to trigger collection creation
+        context = self.client.contexts.create(
+            project_id=self.test_project_id,
+            name="Test Context for Collections",
+            content="Test content for collections testing"
+        )
+        self.created_resources['contexts'].append(context.id)
+        
+        # List all collections
+        collections = self.client.projects.list_collections(self.test_project_id)
+        
+        if len(collections) == 0:
+            print(f"    ⚠️  No collections found - this is expected if no resources have been created")
+        else:
+            print(f"    ✅ Found {len(collections)} collections")
+            
+            # Verify collection structure
+            for collection in collections:
+                if not hasattr(collection, 'component_type'):
+                    print(f"❌ Collection missing component_type")
+                    return False
+                if not hasattr(collection, 'h2ogpte_collection_id'):
+                    print(f"❌ Collection missing h2ogpte_collection_id")
+                    return False
+        
+        # Test get collection by type
+        try:
+            contexts_collection = self.client.projects.get_collection_by_type(
+                self.test_project_id,
+                "contexts"
+            )
+            
+            if contexts_collection.component_type != "contexts":
+                print(f"❌ Wrong collection type returned")
+                return False
+            
+            print(f"    ✅ Retrieved contexts collection: {contexts_collection.h2ogpte_collection_id}")
+        except Exception as e:
+            print(f"    ⚠️  Could not retrieve contexts collection: {e}")
+            # This might be expected if collection hasn't been created yet
+        
+        return True

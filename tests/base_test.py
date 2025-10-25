@@ -38,6 +38,7 @@ class BaseTestRunner:
             'schema_metadata': [],
             'golden_examples': [],
             'connectors': [],
+            'chat_presets': [],
             'chat_sessions': [],
             'feedback': [],
             'custom_tools': []
@@ -83,7 +84,8 @@ class BaseTestRunner:
             return
         
         # Clean up in reverse order of dependencies
-        cleanup_order = ['feedback', 'custom_tools', 'chat_sessions', 'connectors', 'golden_examples', 'schema_metadata', 'contexts', 'projects']
+        # chat_presets must be deleted before connectors (they depend on connectors)
+        cleanup_order = ['feedback', 'custom_tools', 'chat_sessions', 'chat_presets', 'connectors', 'golden_examples', 'schema_metadata', 'contexts', 'projects']
         
         for resource_type in cleanup_order:
             for resource_id in self.created_resources[resource_type]:
@@ -98,6 +100,8 @@ class BaseTestRunner:
                         self.client.golden_examples.delete(self.test_project_id, resource_id)
                     elif resource_type == 'connectors':
                         self.client.connectors.delete(self.test_project_id, resource_id, delete_secrets=True)
+                    elif resource_type == 'chat_presets':
+                        self.client.chat_presets.delete(self.test_project_id, resource_id)
                     elif resource_type == 'chat_sessions':
                         self.client.chat_sessions.delete(self.test_project_id, resource_id)
                     elif resource_type == 'feedback':

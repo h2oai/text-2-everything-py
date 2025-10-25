@@ -13,6 +13,7 @@ from tests.test_golden_examples import GoldenExamplesTestRunner
 from tests.test_connectors import ConnectorsTestRunner
 from tests.test_executions import ExecutionsTestRunner
 from tests.test_chat import ChatTestRunner
+from tests.test_chat_presets import ChatPresetsTestRunner
 from tests.test_chat_sessions import ChatSessionsTestRunner
 from tests.test_feedback import FeedbackTestRunner
 from tests.test_custom_tools import CustomToolsTestRunner
@@ -31,6 +32,7 @@ __all__ = [
     'ConnectorsTestRunner',
     'ExecutionsTestRunner',
     'ChatTestRunner',
+    'ChatPresetsTestRunner',
     'ChatSessionsTestRunner',
     'FeedbackTestRunner',
     'CustomToolsTestRunner',

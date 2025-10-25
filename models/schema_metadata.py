@@ -34,6 +34,9 @@ class SchemaMetadata(SchemaMetadataBase, BaseResponse):
     
     project_id: str
     h2ogpte_doc_id: Optional[str] = None
+    split_group_id: Optional[str] = None
+    split_index: Optional[int] = None
+    total_splits: Optional[int] = None
 
 
 class SchemaMetadataResponse(SchemaMetadata):

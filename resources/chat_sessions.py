@@ -239,3 +239,73 @@ class ChatSessionsResource(BaseResource):
             name=name,
             custom_tool_id=custom_tool_id
         )
+    
+    def create_from_preset(
+        self,
+        project_id: str,
+        preset_id: str
+    ) -> ChatSessionResponse:
+        """Create a new chat session from a chat preset.
+        
+        This method creates a chat session using the configuration
+        from an existing chat preset, including its collection,
+        prompt template, and settings.
+        
+        Args:
+            project_id: The project ID
+            preset_id: The chat preset ID to use
+            
+        Returns:
+            The created chat session response
+            
+        Example:
+            ```python
+            # Get available presets
+            presets = client.chat_presets.list(project_id)
+            
+            # Create session from a preset
+            session = client.chat_sessions.create_from_preset(
+                project_id=project_id,
+                preset_id=presets[0].id
+            )
+            print(f"Session created: {session.id}")
+            print(f"Redirect URL: {session.redirect_url}")
+            ```
+        """
+        if not preset_id or not preset_id.strip():
+            raise ValidationError("Preset ID cannot be empty")
+        
+        response = self._client.post(
+            f"/projects/{project_id}/chat-presets/{preset_id}/chat-sessions"
+        )
+        return ChatSessionResponse(**response)
+    
+    def create_from_active_preset(self, project_id: str) -> ChatSessionResponse:
+        """Create a new chat session from the active chat preset.
+        
+        This is a convenience method that creates a session from
+        whichever preset is currently active for the project.
+        
+        Args:
+            project_id: The project ID
+            
+        Returns:
+            The created chat session response
+            
+        Raises:
+            ValidationError: If no active preset is configured
+            
+        Example:
+            ```python
+            # Create session from active preset
+            session = client.chat_sessions.create_from_active_preset(
+                project_id
+            )
+            print(f"Session created from active preset")
+            print(f"Redirect to: {session.redirect_url}")
+            ```
+        """
+        response = self._client.post(
+            f"/projects/{project_id}/chat-presets/active/start"
+        )
+        return ChatSessionResponse(**response)

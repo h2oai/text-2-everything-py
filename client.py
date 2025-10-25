@@ -26,6 +26,7 @@ from resources.connectors import ConnectorsResource
 from resources.executions import ExecutionsResource
 from resources.chat import ChatResource
 from resources.chat_sessions import ChatSessionsResource
+from resources.chat_presets import ChatPresetsResource
 from resources.feedback import FeedbackResource
 from resources.custom_tools import CustomToolsResource
 
@@ -138,6 +139,7 @@ class Text2EverythingClient:
         self.executions = ExecutionsResource(self)
         self.chat = ChatResource(self)
         self.chat_sessions = ChatSessionsResource(self)
+        self.chat_presets = ChatPresetsResource(self)
         self.feedback = FeedbackResource(self)
         self.custom_tools = CustomToolsResource(self)
     

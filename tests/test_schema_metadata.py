@@ -158,6 +158,14 @@ class SchemaMetadataTestRunner(BaseTestRunner):
             if not self._test_parallel_bulk_operations():
                 return False
             
+            # Test bulk delete
+            if not self._test_bulk_delete():
+                return False
+            
+            # Test split groups
+            if not self._test_split_groups():
+                return False
+            
             return True
             
         except Exception as e:
@@ -416,6 +424,168 @@ class SchemaMetadataTestRunner(BaseTestRunner):
         except Exception as e:
             print(f"    ❌ Empty list test failed: {e}")
             return False
+        
+        return True
+    
+    def _test_split_groups(self) -> bool:
+        """Test schema split group functionality."""
+        print("\n  🔀 Testing split groups...")
+        
+        # Create a large table schema that will be split (>8 columns)
+        large_table_schema = {
+            "table": {
+                "name": "large_users_table",
+                "columns": [
+                    {"name": "id", "type": "integer", "description": "User ID"},
+                    {"name": "email", "type": "string", "description": "Email address"},
+                    {"name": "first_name", "type": "string", "description": "First name"},
+                    {"name": "last_name", "type": "string", "description": "Last name"},
+                    {"name": "phone", "type": "string", "description": "Phone number"},
+                    {"name": "address", "type": "string", "description": "Street address"},
+                    {"name": "city", "type": "string", "description": "City"},
+                    {"name": "state", "type": "string", "description": "State"},
+                    {"name": "zip_code", "type": "string", "description": "ZIP code"},
+                    {"name": "country", "type": "string", "description": "Country"},
+                    {"name": "created_at", "type": "timestamp", "description": "Creation date"},
+                    {"name": "updated_at", "type": "timestamp", "description": "Last update"},
+                ]
+            }
+        }
+        
+        # Create the schema metadata (should be auto-split)
+        result = self.client.schema_metadata.create(
+            project_id=self.test_project_id,
+            name="Large Table for Split Test",
+            schema_data=large_table_schema,
+            description="Table with >8 columns to test split functionality"
+        )
+        
+        # The result should have a split_group_id if it was split
+        if hasattr(result, 'split_group_id') and result.split_group_id:
+            split_group_id = result.split_group_id
+            
+            print(f"    ✅ Schema was split into group: {split_group_id}")
+            
+            # Test get_split_group
+            group = self.client.schema_metadata.get_split_group(
+                self.test_project_id,
+                split_group_id
+            )
+            
+            if not group:
+                print(f"❌ Failed to retrieve split group")
+                return False
+            
+            if 'split_group_id' not in group:
+                print(f"❌ Group missing split_group_id")
+                return False
+            
+            if 'parts' not in group:
+                print(f"❌ Group missing parts")
+                return False
+            
+            if 'total_parts' not in group:
+                print(f"❌ Group missing total_parts")
+                return False
+            
+            parts_count = group['total_parts']
+            print(f"    ✅ Retrieved split group with {parts_count} parts")
+            
+            # Verify parts structure
+            for i, part in enumerate(group['parts']):
+                if not hasattr(part, 'id'):
+                    print(f"❌ Part {i} missing ID")
+                    return False
+                if not hasattr(part, 'name'):
+                    print(f"❌ Part {i} missing name")
+                    return False
+            
+            print(f"    ✅ All {parts_count} parts have valid structure")
+            
+            # Track only the first part for cleanup - API cascade-deletes all parts
+            # when deleting any part in a split group
+            self.created_resources['schema_metadata'].append(group['parts'][0].id)
+            
+        else:
+            print(f"    ℹ️  Schema was not split (may have ≤8 columns or split disabled)")
+            self.created_resources['schema_metadata'].append(result.id)
+        
+        return True
+    
+    def _test_bulk_delete(self) -> bool:
+        """Test bulk delete functionality."""
+        print("\n  🗑️  Testing bulk delete...")
+        
+        # Create test items for bulk deletion
+        items_to_delete = []
+        for i in range(5):
+            schema = self.client.schema_metadata.create(
+                project_id=self.test_project_id,
+                name=f"Bulk Delete Test Schema {i}",
+                description=f"Schema {i} to be bulk deleted",
+                schema_data={
+                    "table": {
+                        "name": f"bulk_delete_table_{i}",
+                        "columns": [
+                            {"name": "id", "type": "integer"},
+                            {"name": f"field_{i}", "type": "string"}
+                        ]
+                    }
+                }
+            )
+            items_to_delete.append(schema.id)
+            # Don't add to created_resources - will be bulk deleted
+        
+        # Test bulk delete
+        result = self.client.schema_metadata.bulk_delete(
+            self.test_project_id,
+            items_to_delete
+        )
+        
+        # Verify results
+        if result['deleted_count'] != 5:
+            print(f"❌ Expected 5 deletions, got {result['deleted_count']}")
+            return False
+        
+        if result.get('failed_ids'):
+            print(f"❌ Unexpected failures: {result['failed_ids']}")
+            return False
+        
+        # Verify items are actually deleted
+        remaining = self.client.schema_metadata.list(self.test_project_id)
+        remaining_ids = [item.id for item in remaining]
+        
+        for deleted_id in items_to_delete:
+            if deleted_id in remaining_ids:
+                print(f"❌ Item {deleted_id} still exists after bulk delete")
+                return False
+        
+        print(f"    ✅ Successfully bulk deleted {len(items_to_delete)} items")
+        
+        # Test error handling - try to delete non-existent IDs
+        fake_ids = ["fake_id_1", "fake_id_2"]
+        try:
+            result = self.client.schema_metadata.bulk_delete(
+                self.test_project_id,
+                fake_ids
+            )
+            if result.get('failed_ids'):
+                print("    ✅ Error handling working correctly for invalid IDs")
+            else:
+                print("    ⚠️  API accepted invalid IDs without errors")
+        except Exception as e:
+            print(f"    ✅ Exception raised for invalid IDs: {type(e).__name__}")
+        
+        # Test empty list
+        try:
+            result = self.client.schema_metadata.bulk_delete(
+                self.test_project_id,
+                []
+            )
+            print(f"    ❌ Empty list should raise ValidationError")
+            return False
+        except ValidationError:
+            print("    ✅ Empty list correctly raises ValidationError")
         
         return True
     

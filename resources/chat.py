@@ -9,7 +9,9 @@ from models.chat import (
     ChatResponse,
     ChatToAnswerRequest,
     ChatToAnswerResponse,
-    AutoFeedbackConfig
+    AutoFeedbackConfig,
+    ExecutionCacheLookupRequest,
+    ExecutionCacheLookupResponse
 )
 from exceptions import ValidationError
 from .base import BaseResource
@@ -278,3 +280,81 @@ class ChatResource(BaseResource):
             agent_accuracy=agent_accuracy,
             **kwargs
         )
+    
+    def execution_cache_lookup(
+        self,
+        project_id: str,
+        user_query: str,
+        connector_id: str,
+        max_age_days: int = 30,
+        similarity_threshold: float = 0.65,
+        limit: int = 50,
+        top_n: int = 5,
+        only_positive_feedback: bool = False
+    ) -> ExecutionCacheLookupResponse:
+        """Find recent similar SQL executions to potentially reuse results.
+        
+        This method searches for previously executed SQL queries that are semantically
+        similar to the user's query, allowing you to potentially reuse cached results
+        instead of re-executing the same or similar queries.
+        
+        Args:
+            project_id: The project ID
+            user_query: The natural language query to find similar executions for
+            connector_id: The connector ID to filter executions by
+            max_age_days: Maximum age of executions to consider (default: 30 days)
+            similarity_threshold: Minimum similarity score (0.0-1.0, default: 0.65)
+            limit: Maximum number of candidates to check (default: 50)
+            top_n: Number of top matches to return (default: 5)
+            only_positive_feedback: If True, only return executions with positive feedback
+        
+        Returns:
+            ExecutionCacheLookupResponse with cache hit status and matching executions
+            
+        Example:
+            ```python
+            # Look for similar executions
+            result = client.chat.execution_cache_lookup(
+                project_id="proj-123",
+                user_query="How many active users do we have?",
+                connector_id="conn-456",
+                similarity_threshold=0.7,
+                top_n=3,
+                only_positive_feedback=True
+            )
+            
+            if result.cache_hit:
+                print(f"Found {len(result.matches)} similar executions!")
+                for match in result.matches:
+                    print(f"Similarity: {match.similarity_score:.2f}")
+                    print(f"SQL: {match.execution.get('sql_query')}")
+                    print(f"Results: {match.execution.get('result')}")
+                    if match.has_feedback:
+                        print(f"Feedback: {'👍' if match.feedback_is_positive else '👎'}")
+            else:
+                print("No similar executions found in cache")
+            ```
+        """
+        # Basic validation
+        if not user_query or not user_query.strip():
+            raise ValidationError("User query cannot be empty")
+        
+        if not connector_id or not connector_id.strip():
+            raise ValidationError("Connector ID cannot be empty")
+        
+        # Build the request
+        request = ExecutionCacheLookupRequest(
+            user_query=user_query,
+            connector_id=connector_id,
+            max_age_days=max_age_days,
+            similarity_threshold=similarity_threshold,
+            limit=limit,
+            top_n=top_n,
+            only_positive_feedback=only_positive_feedback
+        )
+        
+        response = self._client.post(
+            f"/projects/{project_id}/execution-cache-lookup",
+            data=request.model_dump()
+        )
+        return ExecutionCacheLookupResponse(**response)

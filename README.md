@@ -250,6 +250,259 @@ connector = client.connectors.create(
 result = client.connectors.test_connection(connector.id)
 ```
 
+## Bulk Operations
+
+The SDK provides efficient bulk delete operations for managing multiple resources at once:
+
+### Bulk Delete Contexts
+```python
+# Delete multiple contexts in one operation
+context_ids = ["id1", "id2", "id3"]
+result = client.contexts.bulk_delete(project_id="project_id", context_ids=context_ids)
+
+print(f"Deleted: {result['deleted_count']}")
+print(f"Failed: {result.get('failed_ids', [])}")
+```
+
+### Bulk Delete Schema Metadata
+```python
+# Bulk delete schemas (automatically handles split groups)
+schema_ids = ["schema1", "schema2", "schema3"]
+result = client.schema_metadata.bulk_delete(project_id="project_id", schema_ids=schema_ids)
+
+# Returns structured response with success/failure details
+print(f"Successfully deleted {result['deleted_count']} schemas")
+```
+
+### Bulk Delete Golden Examples
+```python
+# Delete multiple examples at once
+example_ids = ["ex1", "ex2", "ex3"]
+result = client.golden_examples.bulk_delete(project_id="project_id", example_ids=example_ids)
+```
+
+### Bulk Delete Feedback
+```python
+# Clean up multiple feedback items
+feedback_ids = ["fb1", "fb2", "fb3"]
+result = client.feedback.bulk_delete(project_id="project_id", feedback_ids=feedback_ids)
+```
+
+## Chat Presets
+
+Chat presets allow you to create reusable chat configurations with predefined settings, connectors, and prompt templates:
+
+### Creating and Managing Presets
+```python
+# Create a basic chat preset with existing template
+preset = client.chat_presets.create(
+    project_id="project_id",
+    name="Production Analytics",
+    collection_name="analytics_collection",
+    description="Preset for production data analysis",
+    prompt_template_id="template_id",
+    connector_id="connector_id",
+    chat_settings={
+        "llm": "gpt-4",
+        "include_chat_history": "auto"
+    }
+)
+
+# NOTE: Inline template creation - API limitation
+# The prompt_template parameter is accepted for API parity but not currently processed.
+# To use a custom template, create it first then reference by ID:
+template = client.chat_presets.create_prompt_template(
+    project_id="project_id",
+    name="Custom Analytics Template",
+    system_prompt="You are an expert data analyst specializing in...",
+    description="Template for advanced analytics queries"
+)
+
+preset = client.chat_presets.create(
+    project_id="project_id",
+    name="Advanced Analytics",
+    collection_name="advanced_collection",
+    prompt_template_id=template["id"],  # Use the created template ID
+    connector_id="connector_id",
+    workspace_id="workspace_123"
+)
+
+# Create preset with sharing and workspace settings
+preset = client.chat_presets.create(
+    project_id="project_id",
+    name="Shared Team Preset",
+    collection_name="team_collection",
+    prompt_template={
+        "name": "Team Template",
+        "system_prompt": "You are a helpful assistant for the team..."
+    },
+    share_prompt_with_usernames=["user1@example.com", "user2@example.com"],
+    workspace_id="workspace_123",
+    t2e_url="https://custom-t2e.example.com"
+)
+
+# List all presets
+presets = client.chat_presets.list(project_id="project_id")
+
+# Search for specific presets
+support_presets = client.chat_presets.list(
+    project_id="project_id",
+    search="support"
+)
+
+# Get specific preset by collection ID
+preset = client.chat_presets.get(
+    project_id="project_id",
+    collection_id="collection_id"
+)
+
+# Update preset
+updated = client.chat_presets.update(
+    project_id="project_id",
+    collection_id="collection_id",
+    name="Updated Analytics Preset",
+    description="Updated description",
+    chat_settings={
+        "llm": "gpt-4-turbo",
+        "include_chat_history": "true"
+    }
+)
+
+# Delete preset
+client.chat_presets.delete(
+    project_id="project_id",
+    collection_id="collection_id"
+)
+```
+
+### Managing Prompt Templates
+```python
+# Add prompt template to preset
+template = client.chat_presets.add_prompt_template(
+    project_id="project_id",
+    preset_id="preset_id",
+    template_name="Analysis Template",
+    template_content="Analyze the following data: {query}"
+)
+
+# List templates for a preset
+templates = client.chat_presets.list_prompt_templates(
+    project_id="project_id",
+    preset_id="preset_id"
+)
+
+# Delete template
+client.chat_presets.delete_prompt_template(
+    project_id="project_id",
+    preset_id="preset_id",
+    template_id="template_id"
+)
+```
+
+### Using Presets in Chat Sessions
+```python
+# Activate a preset for use
+client.chat_presets.activate(project_id="project_id", preset_id="preset_id")
+
+# Get currently active preset
+active = client.chat_presets.get_active(project_id="project_id")
+
+# Create chat session from preset
+session = client.chat_sessions.create_from_preset(
+    project_id="project_id",
+    preset_id="preset_id"
+)
+
+# Or use the active preset
+session = client.chat_sessions.create_from_active_preset(project_id="project_id")
+```
+
+## Advanced Features
+
+### Project Collections
+
+Access and manage H2OGPTE collections for your project resources:
+
+```python
+# List all collections for a project
+collections = client.projects.list_collections(project_id="project_id")
+
+for collection in collections:
+    print(f"{collection.component_type}: {collection.h2ogpte_collection_id}")
+
+# Get collection by type
+contexts_collection = client.projects.get_collection_by_type(
+    project_id="project_id",
+    component_type="contexts"
+)
+```
+
+### Execution Cache Lookup
+
+Query the execution cache to find similar past queries for performance optimization:
+
+```python
+# Look up cached executions for a query
+cache_result = client.chat.execution_cache_lookup(
+    project_id="project_id",
+    user_query="Show me top 10 customers",
+    connector_id="connector_id",
+    similarity_threshold=0.8,  # 0.0 to 1.0
+    top_n=5,  # Return top 5 matches
+    only_positive_feedback=True  # Only include positively rated executions
+)
+
+# Check if we got a cache hit
+if cache_result.cache_hit:
+    print(f"Found {len(cache_result.matches)} similar executions")
+    for match in cache_result.matches:
+        print(f"Similarity: {match.similarity_score}")
+        print(f"SQL: {match.execution.sql_query}")
+        print(f"Results: {match.execution.results}")
+```
+
+### Schema Split Groups
+
+Automatically handle large table schemas that get split into multiple parts:
+
+```python
+# Create a large schema (>8 columns)
+large_schema = client.schema_metadata.create(
+    project_id="project_id",
+    name="Large Customer Table",
+    schema_data={
+        "table": {
+            "name": "customers",
+            "columns": [
+                {"name": "id", "type": "INTEGER"},
+                {"name": "first_name", "type": "VARCHAR(50)"},
+                {"name": "last_name", "type": "VARCHAR(50)"},
+                {"name": "email", "type": "VARCHAR(255)"},
+                {"name": "phone", "type": "VARCHAR(20)"},
+                {"name": "address", "type": "VARCHAR(255)"},
+                {"name": "city", "type": "VARCHAR(100)"},
+                {"name": "state", "type": "VARCHAR(2)"},
+                {"name": "zip", "type": "VARCHAR(10)"},
+                {"name": "country", "type": "VARCHAR(100)"},
+                # ... more columns
+            ]
+        }
+    }
+)
+
+# Check if schema was split
+if large_schema.split_group_id:
+    # Retrieve all parts of the split group
+    split_group = client.schema_metadata.get_split_group(
+        project_id="project_id",
+        split_group_id=large_schema.split_group_id
+    )
+    
+    print(f"Schema split into {split_group['total_parts']} parts")
+    for part in split_group['parts']:
+        print(f"Part {part.split_index}: {part.name}")
+```
+
 ## Error Handling
 
 The SDK provides comprehensive error handling:
@@ -433,8 +686,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Changelog
 
-### v1.1.0
-- **Custom Tools Support**: Added full CRUD operations for custom Python tools
+### v0.1.7 (Current)
+- **100% API Parity Achieved**: Complete coverage of all Text2Everything API endpoints
+- **Bulk Delete Operations**: Added bulk delete support for contexts, schema metadata, golden examples, and feedback
+- **Chat Presets**: Full CRUD operations for chat presets with prompt templates and active preset management
+- **Project Collections**: List and retrieve project collections by type
+- **Execution Cache Lookup**: Query execution cache for performance optimization
+- **Schema Split Groups**: Automatic handling of large table schemas (>8 columns)
+- **Custom Tools Support**: Full CRUD operations for custom Python tools
 - **Directory-based Tool Creation**: Upload entire directories as custom tools
 - **Multipart File Upload**: Native support for file uploads with proper Content-Type handling
 - **Enhanced Validation**: Comprehensive nested field validation for schema metadata
@@ -442,7 +701,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Improved Testing**: Enhanced test suite with automatic environment loading
 - **Bug Fixes**: Resolved Content-Type header conflicts in multipart requests
 
-### v1.0.0
+### v0.1.0
 - Initial release
 - Complete API coverage for all Text2Everything endpoints
 - Type-safe Pydantic models

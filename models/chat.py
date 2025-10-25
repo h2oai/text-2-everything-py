@@ -73,3 +73,33 @@ class ChatToAnswerResponse(ChatResponseBase):
     
     execution_result: Optional[SQLExecuteResponse] = None
     feedback: Optional[Dict[str, Any]] = None
+
+
+class ExecutionCacheLookupRequest(BaseModel):
+    """Request to find a recent similar execution."""
+    
+    user_query: str
+    connector_id: str
+    max_age_days: int = 30
+    similarity_threshold: float = 0.65
+    limit: int = 50
+    top_n: int = 5  # Number of top matches to return
+    only_positive_feedback: bool = False  # Optional filter for positive feedback only
+
+
+class CacheMatch(BaseModel):
+    """A single cache match with execution and similarity score."""
+    
+    execution: Dict[str, Any]  # Execution object
+    similarity_score: float
+    has_feedback: bool = False
+    feedback_is_positive: Optional[bool] = None
+    feedback_comment: Optional[str] = None
+
+
+class ExecutionCacheLookupResponse(BaseModel):
+    """Response with cache hit/miss and execution details."""
+    
+    cache_hit: bool
+    matches: list[CacheMatch] = []
+    candidates_checked: int

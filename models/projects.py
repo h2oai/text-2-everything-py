@@ -27,4 +27,15 @@ class ProjectUpdate(BaseModel):
 
 class Project(ProjectBase, BaseResponse):
     """Complete project model with all fields."""
-    pass
+    
+    workspace_id: Optional[str] = None
+    workspace_authz_name: Optional[str] = None
+    active_chat_preset_id: Optional[str] = None
+
+
+class Collection(BaseResponse):
+    """Project collection model."""
+    
+    project_id: str
+    component_type: str
+    h2ogpte_collection_id: str

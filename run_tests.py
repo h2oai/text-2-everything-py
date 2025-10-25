@@ -35,6 +35,7 @@ from tests import (
     ConnectorsTestRunner,
     ExecutionsTestRunner,
     ChatTestRunner,
+    ChatPresetsTestRunner,
     ChatSessionsTestRunner,
     FeedbackTestRunner,
     CustomToolsTestRunner,
@@ -61,6 +62,7 @@ class TestSuiteRunner:
             'schema_metadata': SchemaMetadataTestRunner,
             'golden_examples': GoldenExamplesTestRunner,
             'connectors': ConnectorsTestRunner,  # Creates connectors
+            'chat_presets': ChatPresetsTestRunner,  # Creates presets (depends on connectors)
             'executions': ExecutionsTestRunner,  # Depends on connectors
             'chat': ChatTestRunner,              # May use connectors
             'chat_sessions': ChatSessionsTestRunner,
@@ -73,11 +75,11 @@ class TestSuiteRunner:
         }
         
         # Define the recommended test execution order
-        # Fixed dependency chain: connectors → chat_sessions → chat → executions
+        # Fixed dependency chain: connectors → chat_presets → chat_sessions → chat → executions
         # High concurrency tests run last as they are stress tests
         self.recommended_order = [
             'projects', 'contexts', 'schema_metadata', 'golden_examples',
-            'connectors', 'chat_sessions', 'chat', 'executions', 
+            'connectors', 'chat_presets', 'chat_sessions', 'chat', 'executions', 
             'feedback', 'custom_tools', 'validation_errors',
             'high_concurrency_schema_metadata', 'high_concurrency_contexts', 
             'high_concurrency_golden_examples'
@@ -136,33 +138,39 @@ class TestSuiteRunner:
         for test_name in tests_to_run:
             print(f"🔄 Starting {test_name} test suite...")
             
+            runner = None
             try:
                 # Create and run the test runner
                 runner_class = self.test_runners[test_name]
                 runner = runner_class(self.base_url, self.access_token, self.workspace_name)
                 
                 # Setup the runner
-                if not runner.setup():
+                setup_success = runner.setup()
+                
+                if not setup_success:
                     print(f"❌ {test_name} test suite setup failed")
                     failed_tests.append(test_name)
-                    continue
-                
-                # Run the test
-                try:
-                    success = runner.run_test()
-                    if success:
-                        print(f"✅ {test_name} test suite passed")
-                        passed_tests.append(test_name)
-                    else:
-                        print(f"❌ {test_name} test suite failed")
+                else:
+                    # Run the test only if setup succeeded
+                    try:
+                        success = runner.run_test()
+                        if success:
+                            print(f"✅ {test_name} test suite passed")
+                            passed_tests.append(test_name)
+                        else:
+                            print(f"❌ {test_name} test suite failed")
+                            failed_tests.append(test_name)
+                    except Exception as e:
+                        print(f"❌ {test_name} test suite crashed during execution: {e}")
                         failed_tests.append(test_name)
-                finally:
-                    # Always cleanup
-                    runner.cleanup()
                     
             except Exception as e:
-                print(f"❌ {test_name} test suite crashed: {e}")
+                print(f"❌ {test_name} test suite crashed during setup: {e}")
                 failed_tests.append(test_name)
+            finally:
+                # Always cleanup, even if setup or test failed
+                if runner:
+                    runner.cleanup()
             
             print()  # Add spacing between test suites
         
