@@ -172,8 +172,83 @@ class FeedbackTestRunner(BaseTestRunner):
             else:
                 print("⚠️  No feedback found for test message")
             
+            # Test bulk delete
+            if not self._test_bulk_delete(chat_message_id):
+                return False
+            
             return True
             
         except Exception as e:
             print(f"❌ Feedback test failed: {e}")
             return False
+    
+    def _test_bulk_delete(self, chat_message_id: str) -> bool:
+        """Test bulk delete functionality."""
+        print("\n  🗑️  Testing bulk delete...")
+        
+        from exceptions import ValidationError
+        
+        # Create test items for bulk deletion
+        items_to_delete = []
+        for i in range(5):
+            feedback = self.client.feedback.create(
+                project_id=self.test_project_id,
+                chat_message_id=chat_message_id,
+                feedback=f"Bulk delete test feedback {i}",
+                is_positive=i % 2 == 0
+            )
+            items_to_delete.append(feedback.id)
+            # Don't add to created_resources - will be bulk deleted
+        
+        # Test bulk delete
+        result = self.client.feedback.bulk_delete(
+            self.test_project_id,
+            items_to_delete
+        )
+        
+        # Verify results
+        if result['deleted_count'] != 5:
+            print(f"❌ Expected 5 deletions, got {result['deleted_count']}")
+            return False
+        
+        if result.get('failed_ids'):
+            print(f"❌ Unexpected failures: {result['failed_ids']}")
+            return False
+        
+        # Verify items are actually deleted
+        remaining = self.client.feedback.list(self.test_project_id)
+        remaining_ids = [item.id for item in remaining]
+        
+        for deleted_id in items_to_delete:
+            if deleted_id in remaining_ids:
+                print(f"❌ Item {deleted_id} still exists after bulk delete")
+                return False
+        
+        print(f"    ✅ Successfully bulk deleted {len(items_to_delete)} items")
+        
+        # Test error handling - try to delete non-existent IDs
+        fake_ids = ["fake_id_1", "fake_id_2"]
+        try:
+            result = self.client.feedback.bulk_delete(
+                self.test_project_id,
+                fake_ids
+            )
+            if result.get('failed_ids'):
+                print("    ✅ Error handling working correctly for invalid IDs")
+            else:
+                print("    ⚠️  API accepted invalid IDs without errors")
+        except Exception as e:
+            print(f"    ✅ Exception raised for invalid IDs: {type(e).__name__}")
+        
+        # Test empty list
+        try:
+            result = self.client.feedback.bulk_delete(
+                self.test_project_id,
+                []
+            )
+            print(f"    ❌ Empty list should raise ValidationError")
+            return False
+        except ValidationError:
+            print("    ✅ Empty list correctly raises ValidationError")
+        
+        return True

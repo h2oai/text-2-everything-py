@@ -4,7 +4,7 @@ Projects resource for the Text2Everything SDK.
 
 from typing import List, Optional, Dict, Any, Union
 from .base import BaseResource
-from models.projects import Project, ProjectCreate, ProjectUpdate
+from models.projects import Project, ProjectCreate, ProjectUpdate, Collection
 
 
 class ProjectsResource(BaseResource):
@@ -196,3 +196,51 @@ class ProjectsResource(BaseResource):
             return True
         except Exception:
             return False
+    
+    def list_collections(self, project_id: str) -> List[Collection]:
+        """
+        List all collections for a project.
+        
+        Collections are created automatically when resources (contexts, schema metadata,
+        etc.) are added to a project. Each collection type corresponds to a resource type.
+        
+        Args:
+            project_id: The project ID
+            
+        Returns:
+            List of Collection instances
+            
+        Example:
+            >>> collections = client.projects.list_collections("proj_123")
+            >>> for collection in collections:
+            ...     print(f"{collection.component_type}: {collection.h2ogpte_collection_id}")
+        """
+        endpoint = self._build_endpoint("projects", project_id, "collections")
+        response = self._client.get(endpoint)
+        return [Collection(**item) for item in response]
+    
+    def get_collection_by_type(self, project_id: str, component_type: str) -> Collection:
+        """
+        Get a specific collection by component type.
+        
+        Args:
+            project_id: The project ID
+            component_type: The component type (e.g., 'contexts', 'schema_metadata', 
+                          'examples', 'feedback', 'custom_tools')
+            
+        Returns:
+            Collection instance
+            
+        Raises:
+            NotFoundError: If collection doesn't exist for the specified type
+            
+        Example:
+            >>> collection = client.projects.get_collection_by_type(
+            ...     "proj_123",
+            ...     "contexts"
+            ... )
+            >>> print(f"Contexts collection ID: {collection.h2ogpte_collection_id}")
+        """
+        endpoint = self._build_endpoint("projects", project_id, "collections", component_type)
+        response = self._client.get(endpoint)
+        return Collection(**response)

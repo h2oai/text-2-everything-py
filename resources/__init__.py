@@ -14,6 +14,7 @@ from .connectors import ConnectorsResource
 from .executions import ExecutionsResource
 from .chat import ChatResource
 from .chat_sessions import ChatSessionsResource
+from .chat_presets import ChatPresetsResource
 from .feedback import FeedbackResource
 from .custom_tools import CustomToolsResource
 
@@ -27,6 +28,7 @@ __all__ = [
     "ExecutionsResource",
     "ChatResource",
     "ChatSessionsResource",
+    "ChatPresetsResource",
     "FeedbackResource",
     "CustomToolsResource"
 ]

@@ -3,7 +3,7 @@ Feedback resource for the Text2Everything SDK.
 """
 
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, TYPE_CHECKING
 from models.feedback import (
     Feedback,
     FeedbackCreate,
@@ -221,7 +221,49 @@ class FeedbackResource(BaseResource):
         self._client.delete(f"/projects/{project_id}/feedback/{feedback_id}")
         return True
     
-    def create_positive(self, project_id: str, chat_message_id: str, 
+    def bulk_delete(
+        self,
+        project_id: str,
+        feedback_ids: List[str]
+    ) -> Dict[str, Any]:
+        """Delete multiple feedback entries at once.
+        
+        Args:
+            project_id: The project ID
+            feedback_ids: List of feedback IDs to delete
+            
+        Returns:
+            Dict with deletion results:
+            - deleted_count: Number of successfully deleted items (int)
+            - failed_ids: List of IDs that failed to delete (List[str])
+            
+        Raises:
+            ValidationError: If feedback_ids is empty or invalid
+            
+        Example:
+            ```python
+            result = client.feedback.bulk_delete(
+                project_id="proj_123",
+                feedback_ids=["feedback_1", "feedback_2", "feedback_3"]
+            )
+            print(f"Deleted {result['deleted_count']} feedback entries")
+            if result['failed_ids']:
+                print(f"Failed IDs: {result['failed_ids']}")
+            ```
+        """
+        if not feedback_ids:
+            raise ValidationError("feedback_ids cannot be empty")
+        
+        if not isinstance(feedback_ids, list):
+            raise ValidationError("feedback_ids must be a list")
+        
+        payload = {"ids": feedback_ids}
+        return self._client.post(
+            f"/projects/{project_id}/feedback/bulk-delete",
+            data=payload
+        )
+    
+    def create_positive(self, project_id: str, chat_message_id: str,
                        feedback_text: str, execution_id: str = None) -> FeedbackResponse:
         """Create positive feedback for a chat message.
         

@@ -258,6 +258,48 @@ class SchemaMetadataResource(BaseResource):
         self._client.delete(f"/projects/{project_id}/schema-metadata/{schema_metadata_id}")
         return True
     
+    def bulk_delete(
+        self,
+        project_id: str,
+        schema_metadata_ids: List[str]
+    ) -> Dict[str, Any]:
+        """Delete multiple schema metadata entries at once.
+        
+        Args:
+            project_id: The project ID
+            schema_metadata_ids: List of schema metadata IDs to delete
+            
+        Returns:
+            Dict with deletion results:
+            - deleted_count: Number of successfully deleted items (int)
+            - failed_ids: List of IDs that failed to delete (List[str])
+            
+        Raises:
+            ValidationError: If schema_metadata_ids is empty or invalid
+            
+        Example:
+            ```python
+            result = client.schema_metadata.bulk_delete(
+                project_id="proj_123",
+                schema_metadata_ids=["schema_1", "schema_2", "schema_3"]
+            )
+            print(f"Deleted {result['deleted_count']} schema entries")
+            if result['failed_ids']:
+                print(f"Failed IDs: {result['failed_ids']}")
+            ```
+        """
+        if not schema_metadata_ids:
+            raise ValidationError("schema_metadata_ids cannot be empty")
+        
+        if not isinstance(schema_metadata_ids, list):
+            raise ValidationError("schema_metadata_ids must be a list")
+        
+        payload = {"ids": schema_metadata_ids}
+        return self._client.post(
+            f"/projects/{project_id}/schema-metadata/bulk-delete",
+            data=payload
+        )
+    
     def list_by_type(self, project_id: str, schema_type: str) -> List[SchemaMetadataResponse]:
         """List schema metadata filtered by type.
         
@@ -526,6 +568,48 @@ class SchemaMetadataResource(BaseResource):
                     raise ValidationError("API returned empty list")
             
             return SchemaMetadataResponse(**response_data)
+    
+    def get_split_group(self, project_id: str, split_group_id: str) -> Dict[str, Any]:
+        """Get all parts of a split schema group.
+        
+        When large table schemas (>8 columns) are created, they are automatically
+        split into multiple parts. This method retrieves all parts of a split group.
+        
+        Args:
+            project_id: The project ID
+            split_group_id: The split group ID
+            
+        Returns:
+            Dict containing:
+            - split_group_id: The group identifier
+            - parts: List of SchemaMetadataResponse objects in the group
+            - total_parts: Number of parts in the group
+            
+        Raises:
+            NotFoundError: If split group doesn't exist
+            
+        Example:
+            ```python
+            # Get all parts of a split table schema
+            group = client.schema_metadata.get_split_group(
+                project_id="proj_123",
+                split_group_id="split_abc"
+            )
+            print(f"Found {group['total_parts']} parts")
+            for part in group['parts']:
+                print(f"Part: {part.name}")
+            ```
+        """
+        response = self._client.get(
+            f"/projects/{project_id}/schema-metadata/split-group/{split_group_id}"
+        )
+        # Convert parts to SchemaMetadataResponse objects
+        parts = [SchemaMetadataResponse(**part) for part in response.get('parts', [])]
+        return {
+            "split_group_id": response.get("split_group_id", split_group_id),
+            "parts": parts,
+            "total_parts": response.get("total_parts", len(parts))
+        }
     
     def list_always_displayed(self, project_id: str) -> List[SchemaMetadataResponse]:
         """List schema metadata that are marked as always displayed.

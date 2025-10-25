@@ -233,6 +233,48 @@ class GoldenExamplesResource(BaseResource):
         self._client.delete(f"/projects/{project_id}/golden-examples/{golden_example_id}")
         return True
     
+    def bulk_delete(
+        self,
+        project_id: str,
+        golden_example_ids: List[str]
+    ) -> Dict[str, Any]:
+        """Delete multiple golden examples at once.
+        
+        Args:
+            project_id: The project ID
+            golden_example_ids: List of golden example IDs to delete
+            
+        Returns:
+            Dict with deletion results:
+            - deleted_count: Number of successfully deleted items (int)
+            - failed_ids: List of IDs that failed to delete (List[str])
+            
+        Raises:
+            ValidationError: If golden_example_ids is empty or invalid
+            
+        Example:
+            ```python
+            result = client.golden_examples.bulk_delete(
+                project_id="proj_123",
+                golden_example_ids=["example_1", "example_2", "example_3"]
+            )
+            print(f"Deleted {result['deleted_count']} golden examples")
+            if result['failed_ids']:
+                print(f"Failed IDs: {result['failed_ids']}")
+            ```
+        """
+        if not golden_example_ids:
+            raise ValidationError("golden_example_ids cannot be empty")
+        
+        if not isinstance(golden_example_ids, list):
+            raise ValidationError("golden_example_ids must be a list")
+        
+        payload = {"ids": golden_example_ids}
+        return self._client.post(
+            f"/projects/{project_id}/golden-examples/bulk-delete",
+            data=payload
+        )
+    
     def search_by_query(self, project_id: str, search_term: str) -> List[GoldenExampleResponse]:
         """Search golden examples by user query text.
         
