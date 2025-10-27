@@ -6,18 +6,18 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
 import httpx
-from models.golden_examples import (
+from text2everything_sdk.models.golden_examples import (
     GoldenExample,
     GoldenExampleCreate,
     GoldenExampleUpdate,
     GoldenExampleResponse
 )
-from exceptions import ValidationError
-from .base import BaseResource
-from .rate_limited_executor import RateLimitedExecutor
+from text2everything_sdk.exceptions import ValidationError
+from text2everything_sdk.resources.base import BaseResource
+from text2everything_sdk.resources.rate_limited_executor import RateLimitedExecutor
 
 if TYPE_CHECKING:
-    from client import Text2EverythingClient
+    from text2everything_sdk.client import Text2EverythingClient
 
 
 class GoldenExamplesResource(BaseResource):

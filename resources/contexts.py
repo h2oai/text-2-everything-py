@@ -5,13 +5,13 @@ Contexts resource for the Text2Everything SDK.
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import concurrent.futures
 import httpx
-from .base import BaseResource
-from .rate_limited_executor import RateLimitedExecutor
-from models.contexts import Context, ContextCreate, ContextUpdate, ContextResponse
-from exceptions import ValidationError
+from text2everything_sdk.resources.base import BaseResource
+from text2everything_sdk.resources.rate_limited_executor import RateLimitedExecutor
+from text2everything_sdk.models.contexts import Context, ContextCreate, ContextUpdate, ContextResponse
+from text2everything_sdk.exceptions import ValidationError
 
 if TYPE_CHECKING:
-    from client import Text2EverythingClient
+    from text2everything_sdk.client import Text2EverythingClient
 
 
 class ContextsResource(BaseResource):

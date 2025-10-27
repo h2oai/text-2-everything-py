@@ -16,6 +16,7 @@ import json
 import tempfile
 import asyncio
 import argparse
+import re
 from typing import Dict, List, Any, Tuple, Optional
 from pathlib import Path
 
@@ -211,6 +212,48 @@ def prepare_data_for_sdk(project_data: Dict[str, List[Tuple[str, Any]]]) -> Dict
         sdk_data['golden_examples'] = examples_data
     
     return sdk_data
+
+
+def parse_bulk_create_error(error: Exception) -> Dict[str, Any]:
+    """
+    Parse ValidationError from bulk_create to extract actual success/failure counts.
+    
+    Args:
+        error: The ValidationError exception from a failed bulk_create operation
+        
+    Returns:
+        Dict with keys:
+        - success: Number of successfully created items (int)
+        - total: Total number of items attempted (int)
+        - failed: Number of failed items (int)
+        - error_details: Full error message (str)
+        
+    Example error message:
+        "Bulk create partially failed: 7/10 succeeded. Errors: Item 3 (name): error; Item 5 (name): error"
+    """
+    error_str = str(error)
+    
+    # Try to extract "X/Y succeeded" pattern
+    match = re.search(r'(\d+)/(\d+)\s+succeeded', error_str)
+    
+    if match:
+        success = int(match.group(1))
+        total = int(match.group(2))
+        failed = total - success
+        return {
+            'success': success,
+            'total': total,
+            'failed': failed,
+            'error_details': error_str
+        }
+    else:
+        # Fallback: couldn't parse, assume total failure
+        return {
+            'success': 0,
+            'total': 0,
+            'failed': 0,
+            'error_details': error_str
+        }
 
 
 def select_project_interactive(projects: List[str], project_type: str) -> Optional[str]:
@@ -702,11 +745,25 @@ async def main():
                     project_id=project_id,
                     contexts=sdk_ready_data['contexts']
                 )
-                upload_results['contexts'] = {'success': len(contexts), 'total': len(sdk_ready_data['contexts'])}
+                upload_results['contexts'] = {
+                    'success': len(contexts), 
+                    'total': len(sdk_ready_data['contexts']),
+                    'failed': 0,
+                    'errors': []
+                }
                 print(f"   ✅ {len(contexts)} contexts uploaded successfully")
             except ValidationError as e:
-                print(f"   ⚠️  Contexts upload had validation issues: {e}")
-                upload_results['contexts'] = {'success': 0, 'total': len(sdk_ready_data['contexts'])}
+                error_info = parse_bulk_create_error(e)
+                upload_results['contexts'] = {
+                    'success': error_info['success'],
+                    'total': error_info['total'],
+                    'failed': error_info['failed'],
+                    'errors': [error_info['error_details']]
+                }
+                if error_info['success'] > 0:
+                    print(f"   ⚠️  Contexts upload partially failed: {error_info['success']}/{error_info['total']} succeeded")
+                else:
+                    print(f"   ❌ Contexts upload failed: {error_info['error_details'][:150]}...")
         
         # Upload schema metadata
         if sdk_ready_data.get('schema_metadata'):
@@ -717,11 +774,25 @@ async def main():
                     schema_metadata_list=sdk_ready_data['schema_metadata'],
                     validate=True
                 )
-                upload_results['schema_metadata'] = {'success': len(schemas), 'total': len(sdk_ready_data['schema_metadata'])}
+                upload_results['schema_metadata'] = {
+                    'success': len(schemas), 
+                    'total': len(sdk_ready_data['schema_metadata']),
+                    'failed': 0,
+                    'errors': []
+                }
                 print(f"   ✅ {len(schemas)} schema metadata items uploaded successfully")
             except ValidationError as e:
-                print(f"   ⚠️  Schema metadata upload had validation issues: {e}")
-                upload_results['schema_metadata'] = {'success': 0, 'total': len(sdk_ready_data['schema_metadata'])}
+                error_info = parse_bulk_create_error(e)
+                upload_results['schema_metadata'] = {
+                    'success': error_info['success'],
+                    'total': error_info['total'],
+                    'failed': error_info['failed'],
+                    'errors': [error_info['error_details']]
+                }
+                if error_info['success'] > 0:
+                    print(f"   ⚠️  Schema metadata upload partially failed: {error_info['success']}/{error_info['total']} succeeded")
+                else:
+                    print(f"   ❌ Schema metadata upload failed: {error_info['error_details'][:150]}...")
         
         # Upload golden examples
         if sdk_ready_data.get('golden_examples'):
@@ -731,11 +802,25 @@ async def main():
                     project_id=project_id,
                     golden_examples=sdk_ready_data['golden_examples']
                 )
-                upload_results['golden_examples'] = {'success': len(examples), 'total': len(sdk_ready_data['golden_examples'])}
+                upload_results['golden_examples'] = {
+                    'success': len(examples), 
+                    'total': len(sdk_ready_data['golden_examples']),
+                    'failed': 0,
+                    'errors': []
+                }
                 print(f"   ✅ {len(examples)} golden examples uploaded successfully")
             except ValidationError as e:
-                print(f"   ⚠️  Golden examples upload had validation issues: {e}")
-                upload_results['golden_examples'] = {'success': 0, 'total': len(sdk_ready_data['golden_examples'])}
+                error_info = parse_bulk_create_error(e)
+                upload_results['golden_examples'] = {
+                    'success': error_info['success'],
+                    'total': error_info['total'],
+                    'failed': error_info['failed'],
+                    'errors': [error_info['error_details']]
+                }
+                if error_info['success'] > 0:
+                    print(f"   ⚠️  Golden examples upload partially failed: {error_info['success']}/{error_info['total']} succeeded")
+                else:
+                    print(f"   ❌ Golden examples upload failed: {error_info['error_details'][:150]}...")
         
     except AuthenticationError:
         print("❌ Authentication failed. Check your access token and workspace configuration.")
@@ -749,17 +834,35 @@ async def main():
     
     # Step 8: Summary
     print("\n8️⃣ Upload Summary")
-    print("=" * 30)
+    print("=" * 50)
     
     total_success = sum(r.get('success', 0) for r in upload_results.values())
     total_attempted = sum(r.get('total', 0) for r in upload_results.values())
+    total_failed = sum(r.get('failed', 0) for r in upload_results.values())
     
     print(f"✅ Successfully uploaded: {total_success}/{total_attempted} items")
+    if total_failed > 0:
+        print(f"❌ Failed to upload: {total_failed} items")
     
+    print()
     for data_type, result in upload_results.items():
         success = result.get('success', 0)
         total = result.get('total', 0)
-        print(f"   - {data_type}: {success}/{total}")
+        failed = result.get('failed', 0)
+        
+        status_icon = "✅" if failed == 0 else "⚠️"
+        print(f"   {status_icon} {data_type}: {success}/{total} succeeded", end="")
+        if failed > 0:
+            print(f" ({failed} failed)")
+        else:
+            print()
+        
+        # Show truncated error details if present
+        if result.get('errors'):
+            for error in result['errors']:
+                # Truncate long error messages
+                error_preview = error if len(error) <= 200 else f"{error[:200]}..."
+                print(f"      └─ Error: {error_preview}")
     
     # Cleanup
     sdk_client.close()

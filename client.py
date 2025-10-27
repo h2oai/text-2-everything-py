@@ -7,7 +7,7 @@ import time
 from typing import Optional, Dict, Any, Union
 from urllib.parse import urljoin
 
-from exceptions import (
+from text2everything_sdk.exceptions import (
     Text2EverythingError,
     AuthenticationError,
     ValidationError,
@@ -18,17 +18,17 @@ from exceptions import (
     TimeoutError,
     InvalidConfigurationError
 )
-from resources.projects import ProjectsResource
-from resources.contexts import ContextsResource
-from resources.golden_examples import GoldenExamplesResource
-from resources.schema_metadata import SchemaMetadataResource
-from resources.connectors import ConnectorsResource
-from resources.executions import ExecutionsResource
-from resources.chat import ChatResource
-from resources.chat_sessions import ChatSessionsResource
-from resources.chat_presets import ChatPresetsResource
-from resources.feedback import FeedbackResource
-from resources.custom_tools import CustomToolsResource
+from text2everything_sdk.resources.projects import ProjectsResource
+from text2everything_sdk.resources.contexts import ContextsResource
+from text2everything_sdk.resources.golden_examples import GoldenExamplesResource
+from text2everything_sdk.resources.schema_metadata import SchemaMetadataResource
+from text2everything_sdk.resources.connectors import ConnectorsResource
+from text2everything_sdk.resources.executions import ExecutionsResource
+from text2everything_sdk.resources.chat import ChatResource
+from text2everything_sdk.resources.chat_sessions import ChatSessionsResource
+from text2everything_sdk.resources.chat_presets import ChatPresetsResource
+from text2everything_sdk.resources.feedback import FeedbackResource
+from text2everything_sdk.resources.custom_tools import CustomToolsResource
 
 
 class Text2EverythingClient:
@@ -77,6 +77,7 @@ class Text2EverythingClient:
     
     def __init__(
         self,
+        *,
         access_token: str,
         workspace_name: str,
         base_url: str = "http://text2everything.text2everything.svc.cluster.local:8000",
