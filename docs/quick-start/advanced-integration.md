@@ -4,7 +4,7 @@ A practical, step-by-step guide to get you from zero to a fully functional Text2
 
 ## Table of Contents
 
-1. [Prerequisites & Setup](#prerequisites--setup)
+1. [Prerequisites & Setup](#prerequisites-setup)
 2. [Step 1: Upload Data to H2O Drive](#step-1-upload-data-to-h2o-drive)
 3. [Step 2: Configure Text2Everything API](#step-2-configure-text2everything-api)
 4. [Step 3: Configure Snowflake Connector](#step-3-configure-snowflake-connector)
@@ -45,7 +45,8 @@ H2O_CLOUD_CLIENT_PLATFORM_TOKEN=your-h2o-token-here
 
 # Text2Everything Configuration
 TEXT2EVERYTHING_URL=http://text2everything.text2everything.svc.cluster.local:8000
-H2OGPTE_API_KEY=your-h2ogpte-api-key-here
+T2E_ACCESS_TOKEN=your-access-token-here
+T2E_WORKSPACE_NAME=workspaces/your-workspace
 
 # Snowflake Configuration (optional)
 SNOWFLAKE_ACCOUNT=your-account.snowflakecomputing.com
@@ -256,9 +257,9 @@ print("🔌 Initializing Text2Everything SDK...")
 
 try:
     sdk_client = Text2EverythingClient(
-        base_url=os.getenv("TEXT2EVERYTHING_URL"),
         access_token=os.getenv("T2E_ACCESS_TOKEN"),
         workspace_name=os.getenv("T2E_WORKSPACE_NAME"),
+        base_url=os.getenv("TEXT2EVERYTHING_URL"),
         timeout=200,
         max_retries=1
     )
@@ -734,16 +735,17 @@ except Exception as e:
 
 **Problem**: `Authentication failed`
 ```python
-# Solution: Verify API key and URL
+# Solution: Verify access token and URL
 print("T2E URL:", os.getenv('TEXT2EVERYTHING_URL'))
-print("API Key:", os.getenv('H2OGPTE_API_KEY')[:10] + "..." if os.getenv('H2OGPTE_API_KEY') else "Not set")
+print("Access Token:", os.getenv('T2E_ACCESS_TOKEN')[:10] + "..." if os.getenv('T2E_ACCESS_TOKEN') else "Not set")
+print("Workspace:", os.getenv('T2E_WORKSPACE_NAME'))
 
 # Test basic connection
 try:
     test_client = Text2EverythingClient(
-        base_url=os.getenv('TEXT2EVERYTHING_URL'),
         access_token=os.getenv('T2E_ACCESS_TOKEN'),
-        workspace_name=os.getenv('T2E_WORKSPACE_NAME')
+        workspace_name=os.getenv('T2E_WORKSPACE_NAME'),
+        base_url=os.getenv('TEXT2EVERYTHING_URL')
     )
     projects = test_client.projects.list()
     print(f"✅ API connection successful, {len(projects)} projects found")
@@ -918,9 +920,9 @@ After completing this guide, you should have:
 
 - [Text2Everything SDK Documentation](https://h2oai.github.io/text-2-everything-py/)
 - [H2O Drive Documentation](https://docs.h2o.ai/h2o-drive/)
-- [Snowflake Connector Guide](docs/guides/connectors.md)
-- [Bulk Operations Guide](docs/how-to/bulk_operations.md)
-- [Jupyter Integration Guide](docs/how-to/jupyter.md)
+- [Snowflake Connector Guide](../guides/connectors.md)
+- [Bulk Operations Guide](../how-to/bulk_operations.md)
+- [Jupyter Integration Guide](../how-to/jupyter.md)
 
 ---
 

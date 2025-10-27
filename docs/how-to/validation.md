@@ -18,6 +18,9 @@ Valid examples:
 
 # Metric
 {"table": {"name": "orders", "metric": {"name": "total_revenue", "content": {"aggregation": "sum", "column": "amount"}}}}
+
+# Relationship
+{"relationship": {"from_table": "users", "to_table": "orders", "from_column": "id", "to_column": "user_id", "type": "one_to_many"}}
 ```
 
 Programmatic validation:
