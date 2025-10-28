@@ -1,6 +1,6 @@
 # Text2Everything Quick Reference Guide
 
-A condensed reference for developers who have completed the [Developer Starter Guide](developer-starter-guide.md).
+A condensed cheat sheet for common SDK operations.
 
 ## 🚀 Quick Setup Commands
 
@@ -337,11 +337,11 @@ def batch_upload(items, batch_size=10):
 
 ## 🔗 Quick Links
 
-- [Full Developer Guide](developer-starter-guide.md)
-- [SDK Documentation](https://h2oai.github.io/text-2-everything-py/)
-- [H2O Drive Docs](https://docs.h2o.ai/h2o-drive/)
-- [Snowflake Connector Guide](guides/connectors.md)
-- [Bulk Operations Guide](how-to/bulk_operations.md)
+- [5-Minute Quick Start](5-minute-start.md)
+- [Complete SDK Example](complete-example.md)
+- [Advanced Integration Guide](advanced-integration.md)
+- [Core Guides](../guides/projects.md)
+- [Bulk Operations Guide](../how-to/bulk_operations.md)
 
 ---
 

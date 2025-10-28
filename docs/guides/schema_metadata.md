@@ -53,6 +53,23 @@ metric = client.schema_metadata.create(
 )
 ```
 
+Create relationship:
+```python
+relationship = client.schema_metadata.create(
+    project_id=project.id,
+    name="User Orders Relationship",
+    schema_data={
+        "relationship": {
+            "from_table": "users",
+            "to_table": "orders",
+            "from_column": "id",
+            "to_column": "user_id",
+            "type": "one_to_many"
+        }
+    },
+)
+```
+
 List/get/update/delete:
 ```python
 schemas = client.schema_metadata.list(project_id=project.id)

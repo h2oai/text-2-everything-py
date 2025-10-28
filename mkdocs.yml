@@ -31,37 +31,34 @@ markdown_extensions:
   - pymdownx.superfences
 nav:
   - Overview: index.md
-  - Quickstart: quickstart.md
-  - Quick Start Guides:
-      - Overview: quick-start/README.md
-      - Developer Guide: quick-start/developer-starter-guide.md
-      - Quick Reference: quick-start/quick-reference.md
-      - Integration Summary: quick-start/integration-summary.md
-  - Installation: installation.md
-  - Configuration: configuration.md
+  - Getting Started:
+      - Installation: installation.md
+      - Quickstart: quickstart.md
+      - Configuration: configuration.md
   - Guides:
+      - Overview: quick-start/README.md
+      - 5-Minute Start: quick-start/5-minute-start.md
+      - Complete Example: quick-start/complete-example.md
+      - Quick Reference: quick-start/quick-reference.md
+      - Advanced Integration: quick-start/advanced-integration.md
+  - Core Concepts:
       - Projects: guides/projects.md
+      - Chat Sessions: guides/chat_sessions.md
+      - Chat & Queries: guides/chat.md
+      - Chat Presets: guides/chat_presets.md
+  - Data Management:
       - Contexts: guides/contexts.md
       - Schema Metadata: guides/schema_metadata.md
       - Golden Examples: guides/golden_examples.md
-      - Chat Sessions: guides/chat_sessions.md
-      - Chat: guides/chat.md
+  - Operations:
       - Connectors: guides/connectors.md
-      - Custom Tools: guides/custom_tools.md
       - Executions: guides/executions.md
       - Feedback: guides/feedback.md
-  - How To:
+  - Advanced Topics:
       - Bulk Operations: how-to/bulk_operations.md
       - Validation: how-to/validation.md
-      - Jupyter: how-to/jupyter.md
-  - Performance:
+      - Jupyter Integration: how-to/jupyter.md
       - Concurrency & Performance: guides/concurrency.md
       - High Concurrency Testing: high-concurrency-testing.md
-  - Reference:
-      - Overview: reference/index.md
-      - Client: reference/client.md
-      - Resources: reference/resources.md
-      - Models: reference/models.md
-  - Migrations: migrations.md
+      - Migrations: migrations.md
   - Troubleshooting: troubleshooting.md
-  - Examples: examples.md

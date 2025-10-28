@@ -5,7 +5,8 @@ title: Configuration
 Env vars:
 ```bash
 export TEXT2EVERYTHING_BASE_URL="https://your-api-endpoint.com"
-export TEXT2EVERYTHING_API_KEY="your-api-key"
+export T2E_ACCESS_TOKEN="your-access-token"
+export T2E_WORKSPACE_NAME="workspaces/your-workspace"
 ```
 
 Using env vars:
@@ -16,7 +17,7 @@ from text2everything_sdk import Text2EverythingClient
 client = Text2EverythingClient(
     base_url=os.getenv("TEXT2EVERYTHING_BASE_URL"),
     access_token=os.getenv("T2E_ACCESS_TOKEN"),
-    workspace_name=os.getenv("T2E_WORKSPACE_NAME"),
+    workspace_name=os.getenv("T2E_WORKSPACE_NAME")
 )
 ```
 
