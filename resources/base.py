@@ -3,10 +3,10 @@ Base resource class for the Text2Everything SDK.
 """
 
 from typing import TYPE_CHECKING, Dict, Any, List, Optional, Type, TypeVar
-from models.base import BaseModel, PaginatedResponse
+from text2everything_sdk.models.base import BaseModel, PaginatedResponse
 
 if TYPE_CHECKING:
-    from client import Text2EverythingClient
+    from text2everything_sdk.client import Text2EverythingClient
 
 T = TypeVar('T', bound=BaseModel)
 

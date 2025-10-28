@@ -4,7 +4,7 @@ Chat resource for the Text2Everything SDK.
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from models.chat import (
+from text2everything_sdk.models.chat import (
     ChatRequest,
     ChatResponse,
     ChatToAnswerRequest,
@@ -13,11 +13,11 @@ from models.chat import (
     ExecutionCacheLookupRequest,
     ExecutionCacheLookupResponse
 )
-from exceptions import ValidationError
-from .base import BaseResource
+from text2everything_sdk.exceptions import ValidationError
+from text2everything_sdk.resources.base import BaseResource
 
 if TYPE_CHECKING:
-    from client import Text2EverythingClient
+    from text2everything_sdk.client import Text2EverythingClient
 
 
 class ChatResource(BaseResource):
