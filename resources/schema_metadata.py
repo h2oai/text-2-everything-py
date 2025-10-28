@@ -3,7 +3,7 @@ Schema metadata resource for the Text2Everything SDK.
 """
 
 from __future__ import annotations
-from typing import List, Optional, Dict, Any, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
 import concurrent.futures
 import httpx
 from text2everything_sdk.models.schema_metadata import (
@@ -39,8 +39,12 @@ class SchemaMetadataResource(BaseResource):
         is_always_displayed: bool = False,
         validate: bool = True,
         **kwargs
-    ) -> SchemaMetadataResponse:
+    ) -> Union[SchemaMetadataResponse, List[SchemaMetadataResponse]]:
         """Create new schema metadata with validation.
+        
+        When creating a table schema with more than 8 columns, the API automatically
+        splits it into multiple parts. In this case, this method returns a list of
+        all created parts with the same split_group_id.
         
         Args:
             project_id: The project ID to create schema metadata in
@@ -52,18 +56,18 @@ class SchemaMetadataResource(BaseResource):
             **kwargs: Additional schema metadata fields
         
         Returns:
-            The created schema metadata with response details
+            Single SchemaMetadataResponse for schemas that don't split,
+            or List[SchemaMetadataResponse] for split schemas (>8 columns)
             
         Raises:
             ValidationError: If validation fails and validate=True
             
         Example:
             ```python
-            # Create a table schema
+            # Create a small table schema (returns single schema)
             result = client.schema_metadata.create(
                 project_id=project_id,
                 name="users_table",
-                description="User information table",
                 schema_data={
                     "table": {
                         "name": "users",
@@ -72,9 +76,26 @@ class SchemaMetadataResource(BaseResource):
                             {"name": "email", "type": "string"}
                         ]
                     }
-                },
-                is_always_displayed=True
+                }
             )
+            # result is a single SchemaMetadataResponse
+            
+            # Create a large table (>8 columns, returns list of split parts)
+            result = client.schema_metadata.create(
+                project_id=project_id,
+                name="large_table",
+                schema_data={
+                    "table": {
+                        "name": "orders",
+                        "columns": [...]  # 10 columns
+                    }
+                }
+            )
+            # result is a List[SchemaMetadataResponse] with split parts
+            if isinstance(result, list):
+                print(f"Schema was split into {len(result)} parts")
+                for part in result:
+                    print(f"Part {part.split_index}/{part.total_splits}: {part.id}")
             ```
         """
         # Build the SchemaMetadataCreate object internally
@@ -95,16 +116,25 @@ class SchemaMetadataResource(BaseResource):
             f"/projects/{project_id}/schema-metadata",
             data=schema_metadata.model_dump()
         )
-        # Handle both list and single object responses
-        if isinstance(response, list):
-            if response:
-                response_data = response[0]  # Take first item from list
-            else:
-                raise ValidationError("API returned empty list")
-        else:
-            response_data = response
         
-        return SchemaMetadataResponse(**response_data)
+        # Handle both list (split schemas) and single object responses
+        if isinstance(response, list):
+            if not response:
+                raise ValidationError("API returned empty list")
+            
+            # Convert to SchemaMetadataResponse objects
+            schema_responses = [SchemaMetadataResponse(**item) for item in response]
+            
+            # If list has 1 item and it's not a split schema, return single object
+            # This normalizes the API behavior which always returns a list
+            if len(schema_responses) == 1 and schema_responses[0].split_group_id is None:
+                return schema_responses[0]
+            
+            # Return all parts when schema is split or multiple items
+            return schema_responses
+        else:
+            # Return single schema (fallback for future API changes)
+            return SchemaMetadataResponse(**response)
     
     def get(self, project_id: str, schema_metadata_id: str) -> SchemaMetadataResponse:
         """Get schema metadata by ID.
@@ -380,6 +410,10 @@ class SchemaMetadataResource(BaseResource):
     ) -> List[SchemaMetadataResponse]:
         """Create multiple schema metadata items with validation and optional parallel execution.
         
+        Note: When creating table schemas with more than 8 columns, the API automatically
+        splits them into multiple parts. The returned list will include all parts, so the
+        total count may exceed the input count.
+        
         Args:
             project_id: The project ID
             schema_metadata_list: List of schema metadata dictionaries to create
@@ -390,7 +424,8 @@ class SchemaMetadataResource(BaseResource):
             use_connection_isolation: Use isolated HTTP clients for each request to prevent connection conflicts (default: True)
             
         Returns:
-            List of created schema metadata in the same order as input
+            List of all created schema metadata, including split parts for large tables.
+            The result count may be higher than the input count if schemas were split.
             
         Raises:
             ValidationError: If any validation fails and validate=True, or if any creation fails
@@ -399,24 +434,22 @@ class SchemaMetadataResource(BaseResource):
             ```python
             schemas = [
                 {
-                    "name": "table1", 
-                    "schema_data": {"table": {"columns": []}},
-                    "description": "First table"
+                    "name": "small_table", 
+                    "schema_data": {"table": {"columns": [...5 columns...]}},
                 },
                 {
-                    "name": "dim1", 
-                    "schema_data": {"table": {"dimension": {"content": {}}}},
-                    "is_always_displayed": True
+                    "name": "large_table",
+                    "schema_data": {"table": {"columns": [...10 columns...]}},
                 }
             ]
-            # Parallel execution (default)
+            # Create 2 schemas, but large_table gets split into 2 parts
             results = client.schema_metadata.bulk_create(project_id, schemas)
+            # results will have 3 items: small_table + 2 parts of large_table
             
-            # Sequential execution
-            results = client.schema_metadata.bulk_create(project_id, schemas, parallel=False)
-            
-            # Disable connection isolation for shared connection pool
-            results = client.schema_metadata.bulk_create(project_id, schemas, use_connection_isolation=False)
+            # Check for split schemas
+            for schema in results:
+                if schema.split_group_id:
+                    print(f"Part {schema.split_index}/{schema.total_splits} of {schema.name}")
             ```
         """
         if not schema_metadata_list:
@@ -447,7 +480,11 @@ class SchemaMetadataResource(BaseResource):
                     validate=False,  # Already validated
                     **schema_data
                 )
-                results.append(result)
+                # Handle both single schemas and split groups
+                if isinstance(result, list):
+                    results.extend(result)  # Flatten split parts
+                else:
+                    results.append(result)
             return results
         
         # Create the first item sequentially to avoid race conditions when creating collections
@@ -483,8 +520,8 @@ class SchemaMetadataResource(BaseResource):
                 return index, None, f"Item {index} ({schema_data.get('name', 'unnamed')}): {str(e)}"
         
         # Execute in parallel with rate-limited executor
-        results = [None] * len(schema_metadata_list)
-        results[0] = first_result
+        temp_results = [None] * len(schema_metadata_list)
+        temp_results[0] = first_result
         errors = []
         
         with RateLimitedExecutor(max_workers=max_workers, max_concurrent=max_concurrent) as executor:
@@ -501,19 +538,27 @@ class SchemaMetadataResource(BaseResource):
                 if error:
                     errors.append(error)
                 else:
-                    results[index] = result
+                    temp_results[index] = result
         
         # Check for any errors
         if errors:
-            successful_count = sum(1 for r in results if r is not None)
+            successful_count = sum(1 for r in temp_results if r is not None)
             raise ValidationError(
                 f"Bulk create partially failed: {successful_count}/{len(schema_metadata_list)} succeeded. "
                 f"Errors: {'; '.join(errors)}"
             )
         
+        # Flatten results to handle split schemas
+        results = []
+        for result in temp_results:
+            if isinstance(result, list):
+                results.extend(result)  # Flatten split parts
+            else:
+                results.append(result)
+        
         return results
     
-    def _create_with_isolated_client(self, project_id: str, schema_data: Dict[str, Any]) -> SchemaMetadataResponse:
+    def _create_with_isolated_client(self, project_id: str, schema_data: Dict[str, Any]) -> Union[SchemaMetadataResponse, List[SchemaMetadataResponse]]:
         """
         Create schema metadata using an isolated HTTP client to avoid connection conflicts.
         
@@ -522,7 +567,7 @@ class SchemaMetadataResource(BaseResource):
             schema_data: Schema metadata data dictionary
             
         Returns:
-            Created SchemaMetadataResponse instance
+            Created SchemaMetadataResponse instance or list of instances for split schemas
         """
         # Create isolated HTTP client with same configuration as main client
         timeout_config = httpx.Timeout(
@@ -560,14 +605,15 @@ class SchemaMetadataResource(BaseResource):
             response = isolated_client.post(url, json=schema_metadata.model_dump(), headers=headers)
             response_data = self._client._handle_response(response)
             
-            # Handle both list and single object responses
+            # Handle both list (split schemas) and single object responses
             if isinstance(response_data, list):
-                if response_data:
-                    response_data = response_data[0]  # Take first item from list
-                else:
+                if not response_data:
                     raise ValidationError("API returned empty list")
-            
-            return SchemaMetadataResponse(**response_data)
+                # Return all parts when schema is split
+                return [SchemaMetadataResponse(**item) for item in response_data]
+            else:
+                # Return single schema
+                return SchemaMetadataResponse(**response_data)
     
     def get_split_group(self, project_id: str, split_group_id: str) -> Dict[str, Any]:
         """Get all parts of a split schema group.

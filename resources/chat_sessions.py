@@ -1,0 +1,311 @@
+"""
+Chat sessions resource for the Text2Everything SDK.
+"""
+
+from __future__ import annotations
+from typing import List, Optional, TYPE_CHECKING
+from text2everything_sdk.models.chat_sessions import (
+    ChatSessionCreate,
+    ChatSessionResponse,
+    ChatSessionUpdateRequest,
+    ChatSessionQuestion
+)
+from text2everything_sdk.models.custom_tools import CustomTool
+from text2everything_sdk.exceptions import ValidationError
+from text2everything_sdk.resources.base import BaseResource
+
+if TYPE_CHECKING:
+    from text2everything_sdk.client import Text2EverythingClient
+
+
+class ChatSessionsResource(BaseResource):
+    """Resource for managing H2OGPTE chat sessions."""
+    
+    def __init__(self, client: Text2EverythingClient):
+        super().__init__(client)
+    
+    def create(
+        self,
+        project_id: str,
+        name: Optional[str] = None,
+        custom_tool_id: Optional[str] = None,
+        **kwargs
+    ) -> ChatSessionResponse:
+        """Create a new H2OGPTE chat session.
+        
+        Args:
+            project_id: The project ID
+            name: Optional name for the session
+            custom_tool_id: Optional custom tool to associate
+            **kwargs: Additional session fields
+        
+        Returns:
+            The created chat session
+            
+        Example:
+            ```python
+            result = client.chat_sessions.create(
+                project_id=project_id,
+                name="Data Analysis Session",
+                custom_tool_id="tool-123"
+            )
+            print(f"Session created: {result.id}")
+            ```
+        """
+        # Build the ChatSessionCreate object internally
+        session = ChatSessionCreate(
+            name=name,
+            custom_tool_id=custom_tool_id,
+            **kwargs
+        )
+        
+        response = self._client.post(
+            f"/projects/{project_id}/chat-sessions",
+            data=session.model_dump()
+        )
+        return ChatSessionResponse(**response)
+    
+    # TODO: The get chat session API endpoint is not working properly
+    # def get(self, project_id: str, session_id: str) -> ChatSessionResponse:
+    #     """Get a specific H2OGPTE chat session.
+    #     
+    #     Args:
+    #         project_id: The project ID
+    #         session_id: The chat session ID
+    #         
+    #     Returns:
+    #         The chat session details
+    #         
+    #     Example:
+    #         ```python
+    #         session = client.chat_sessions.get(project_id, session_id)
+    #         print(f"Session: {session.name}")
+    #         print(f"Created: {session.created_at}")
+    #         ```
+    #     """
+    #     response = self._client.get(f"/projects/{project_id}/chat-sessions/{session_id}")
+    #     return ChatSessionResponse(**response)
+    
+    def list(self, project_id: str, skip: int = 0, limit: int = 100, search: Optional[str] = None) -> List[ChatSessionResponse]:
+        """List recent H2OGPTE chat sessions for a project.
+        
+        Args:
+            project_id: The project ID
+            skip: Number of sessions to skip
+            limit: Maximum number of sessions to return
+            search: Optional search query to filter by session name
+            
+        Returns:
+            List of chat sessions
+            
+        Example:
+            ```python
+            sessions = client.chat_sessions.list(project_id, limit=20)
+            for session in sessions:
+                print(f"{session.name}: {session.id}")
+            
+            # Search for sessions
+            sessions = client.chat_sessions.list(project_id, search="analysis")
+            ```
+        """
+        endpoint = f"/projects/{project_id}/chat-sessions"
+        params = {"skip": skip, "limit": limit}
+        if search:
+            params["q"] = search
+        response = self._client.get(endpoint, params=params)
+        # Handle paginated response structure
+        items = response.get("items", response) if isinstance(response, dict) else response
+        return [ChatSessionResponse(**item) for item in items]
+    
+    def update_custom_tool(self, project_id: str, session_id: str, 
+                          custom_tool_id: str = None) -> ChatSessionResponse:
+        """Update the custom tool associated with a chat session.
+        
+        Args:
+            project_id: The project ID
+            session_id: The chat session ID
+            custom_tool_id: The custom tool ID to associate (None to detach)
+            
+        Returns:
+            The updated chat session
+            
+        Example:
+            ```python
+            # Attach a custom tool
+            session = client.chat_sessions.update_custom_tool(
+                project_id, session_id, "tool-456"
+            )
+            
+            # Detach custom tool
+            session = client.chat_sessions.update_custom_tool(
+                project_id, session_id, None
+            )
+            ```
+        """
+        update_request = ChatSessionUpdateRequest(custom_tool_id=custom_tool_id)
+        response = self._client.put(
+            f"/projects/{project_id}/chat-sessions/{session_id}/custom-tool",
+            data=update_request.model_dump()
+        )
+        return ChatSessionResponse(**response)
+    
+    def get_custom_tool(self, project_id: str, session_id: str) -> Optional[CustomTool]:
+        """Get the custom tool associated with a chat session.
+        
+        Args:
+            project_id: The project ID
+            session_id: The chat session ID
+            
+        Returns:
+            The associated custom tool, or None if no tool is associated
+            
+        Example:
+            ```python
+            tool = client.chat_sessions.get_custom_tool(project_id, session_id)
+            if tool:
+                print(f"Associated tool: {tool.name}")
+            else:
+                print("No custom tool associated")
+            ```
+        """
+        response = self._client.get(f"/projects/{project_id}/chat-sessions/{session_id}/custom-tool")
+        return CustomTool(**response) if response else None
+    
+    def get_questions(self, project_id: str, session_id: str, 
+                     limit: int = 10) -> List[ChatSessionQuestion]:
+        """Get suggested questions for a chat session.
+        
+        Args:
+            project_id: The project ID
+            session_id: The chat session ID
+            limit: Maximum number of questions to return
+            
+        Returns:
+            List of suggested questions
+            
+        Example:
+            ```python
+            questions = client.chat_sessions.get_questions(project_id, session_id)
+            for question in questions:
+                print(f"Suggested: {question.question}")
+            ```
+        """
+        endpoint = f"/projects/{project_id}/chat-sessions/{session_id}/questions"
+        params = {"limit": limit}
+        response = self._client.get(endpoint, params=params)
+        return [ChatSessionQuestion(**item) for item in response]
+    
+    def delete(self, project_id: str, session_id: str) -> bool:
+        """Delete a H2OGPTE chat session.
+        
+        Args:
+            project_id: The project ID
+            session_id: The chat session ID to delete
+            
+        Returns:
+            True if deletion was successful
+            
+        Example:
+            ```python
+            success = client.chat_sessions.delete(project_id, session_id)
+            ```
+        """
+        self._client.delete(f"/projects/{project_id}/chat-sessions/{session_id}")
+        return True
+    
+    def create_with_tool(self, project_id: str, name: str = None, 
+                        custom_tool_id: str = None) -> ChatSessionResponse:
+        """Create a new chat session with an optional custom tool.
+        
+        Args:
+            project_id: The project ID
+            name: Optional name for the session
+            custom_tool_id: Optional custom tool to associate
+            
+        Returns:
+            The created chat session
+            
+        Example:
+            ```python
+            session = client.chat_sessions.create_with_tool(
+                project_id="proj-123",
+                name="Analysis Session",
+                custom_tool_id="tool-456"
+            )
+            ```
+        """
+        return self.create(
+            project_id=project_id,
+            name=name,
+            custom_tool_id=custom_tool_id
+        )
+    
+    def create_from_preset(
+        self,
+        project_id: str,
+        preset_id: str
+    ) -> ChatSessionResponse:
+        """Create a new chat session from a chat preset.
+        
+        This method creates a chat session using the configuration
+        from an existing chat preset, including its collection,
+        prompt template, and settings.
+        
+        Args:
+            project_id: The project ID
+            preset_id: The chat preset ID to use
+            
+        Returns:
+            The created chat session response
+            
+        Example:
+            ```python
+            # Get available presets
+            presets = client.chat_presets.list(project_id)
+            
+            # Create session from a preset
+            session = client.chat_sessions.create_from_preset(
+                project_id=project_id,
+                preset_id=presets[0].id
+            )
+            print(f"Session created: {session.id}")
+            print(f"Redirect URL: {session.redirect_url}")
+            ```
+        """
+        if not preset_id or not preset_id.strip():
+            raise ValidationError("Preset ID cannot be empty")
+        
+        response = self._client.post(
+            f"/projects/{project_id}/chat-presets/{preset_id}/chat-sessions"
+        )
+        return ChatSessionResponse(**response)
+    
+    def create_from_active_preset(self, project_id: str) -> ChatSessionResponse:
+        """Create a new chat session from the active chat preset.
+        
+        This is a convenience method that creates a session from
+        whichever preset is currently active for the project.
+        
+        Args:
+            project_id: The project ID
+            
+        Returns:
+            The created chat session response
+            
+        Raises:
+            ValidationError: If no active preset is configured
+            
+        Example:
+            ```python
+            # Create session from active preset
+            session = client.chat_sessions.create_from_active_preset(
+                project_id
+            )
+            print(f"Session created from active preset")
+            print(f"Redirect to: {session.redirect_url}")
+            ```
+        """
+        response = self._client.post(
+            f"/projects/{project_id}/chat-presets/active/start"
+        )
+        return ChatSessionResponse(**response)
