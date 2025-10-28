@@ -42,7 +42,8 @@ from tests import (
     ValidationErrorsTestRunner,
     HighConcurrencySchemaMetadataTestRunner,
     HighConcurrencyContextsTestRunner,
-    HighConcurrencyGoldenExamplesTestRunner
+    HighConcurrencyGoldenExamplesTestRunner,
+    SmallSchemaReturnTypeTestRunner
 )
 
 
@@ -69,6 +70,7 @@ class TestSuiteRunner:
             'feedback': FeedbackTestRunner,
             'custom_tools': CustomToolsTestRunner,
             'validation_errors': ValidationErrorsTestRunner,
+            'small_schema_return_type': SmallSchemaReturnTypeTestRunner,  # Test for SDK normalization fix
             'high_concurrency_schema_metadata': HighConcurrencySchemaMetadataTestRunner,  # 32 schema requests only
             'high_concurrency_contexts': HighConcurrencyContextsTestRunner,  # 32 context requests only
             'high_concurrency_golden_examples': HighConcurrencyGoldenExamplesTestRunner  # 32 golden example requests only
@@ -80,7 +82,7 @@ class TestSuiteRunner:
         self.recommended_order = [
             'projects', 'contexts', 'schema_metadata', 'golden_examples',
             'connectors', 'chat_presets', 'chat_sessions', 'chat', 'executions', 
-            'feedback', 'custom_tools', 'validation_errors',
+            'feedback', 'custom_tools', 'validation_errors', 'small_schema_return_type',
             'high_concurrency_schema_metadata', 'high_concurrency_contexts', 
             'high_concurrency_golden_examples'
         ]

@@ -22,6 +22,7 @@ from tests.test_high_concurrency import HighConcurrencyTestRunner
 from tests.test_high_concurrency_schema_metadata import HighConcurrencySchemaMetadataTestRunner
 from tests.test_high_concurrency_contexts import HighConcurrencyContextsTestRunner
 from tests.test_high_concurrency_golden_examples import HighConcurrencyGoldenExamplesTestRunner
+from tests.test_small_schema_return_type import SmallSchemaReturnTypeTestRunner
 
 __all__ = [
     'BaseTestRunner',
@@ -40,5 +41,6 @@ __all__ = [
     'HighConcurrencyTestRunner',
     'HighConcurrencySchemaMetadataTestRunner',
     'HighConcurrencyContextsTestRunner',
-    'HighConcurrencyGoldenExamplesTestRunner'
+    'HighConcurrencyGoldenExamplesTestRunner',
+    'SmallSchemaReturnTypeTestRunner'
 ]

@@ -461,13 +461,97 @@ if cache_result.cache_hit:
         print(f"Results: {match.execution.results}")
 ```
 
+### Handling Schema Splits (Breaking Change in v0.1.7-rc2)
+
+When creating schemas with more than 8 columns, the API automatically splits them into multiple parts. Starting in **v0.1.7-rc2**, the SDK properly returns all parts to give you complete visibility into split schemas.
+
+#### Breaking Change: create() Return Type
+
+The `create()` method now returns `Union[SchemaMetadataResponse, List[SchemaMetadataResponse]]`:
+
+**For schemas with ≤8 columns:**
+```python
+schema = client.schema_metadata.create(
+    project_id="project_id",
+    name="Small Table",
+    schema_data={
+        "table": {
+            "name": "users",
+            "columns": [
+                {"name": "id", "type": "INTEGER"},
+                {"name": "email", "type": "STRING"}
+            ]
+        }
+    }
+)
+# Returns single SchemaMetadataResponse
+print(f"Created: {schema.id}")
+```
+
+**For schemas with >8 columns:**
+```python
+result = client.schema_metadata.create(
+    project_id="project_id",
+    name="Large Table",
+    schema_data={
+        "table": {
+            "name": "customers",
+            "columns": [
+                # ... 10 columns ...
+            ]
+        }
+    }
+)
+# Returns List[SchemaMetadataResponse] with all parts
+print(f"Created {len(result)} parts")
+for part in result:
+    print(f"  Part {part.split_index}/{part.total_splits}: {part.id}")
+```
+
+#### Safe Pattern for Both Cases
+
+```python
+result = client.schema_metadata.create(
+    project_id="project_id",
+    name="My Table",
+    schema_data=my_schema_data
+)
+
+# Handle both single schema and split schemas
+if isinstance(result, list):
+    # Schema was split
+    print(f"Schema split into {len(result)} parts")
+    split_group_id = result[0].split_group_id
+    for part in result:
+        print(f"  Part {part.split_index}: {part.id}")
+else:
+    # Single schema
+    print(f"Created schema: {result.id}")
+```
+
+#### Bulk Create with Splits
+
+`bulk_create()` automatically flattens split results:
+
+```python
+schemas = [
+    {"name": "Small", "schema_data": {"table": {"columns": [...]}}},  # 5 columns
+    {"name": "Large", "schema_data": {"table": {"columns": [...]}}},  # 12 columns
+]
+
+results = client.schema_metadata.bulk_create(project_id="project_id", schemas=schemas)
+# If "Small" returns 1 part and "Large" returns 2 parts:
+# results will contain 3 SchemaMetadataResponse objects
+print(f"Created {len(results)} schema parts from {len(schemas)} inputs")
+```
+
 ### Schema Split Groups
 
-Automatically handle large table schemas that get split into multiple parts:
+Retrieve complete information about split schemas:
 
 ```python
 # Create a large schema (>8 columns)
-large_schema = client.schema_metadata.create(
+result = client.schema_metadata.create(
     project_id="project_id",
     name="Large Customer Table",
     schema_data={
@@ -491,11 +575,12 @@ large_schema = client.schema_metadata.create(
 )
 
 # Check if schema was split
-if large_schema.split_group_id:
-    # Retrieve all parts of the split group
+if isinstance(result, list):
+    # Schema was split - get the split group
+    split_group_id = result[0].split_group_id
     split_group = client.schema_metadata.get_split_group(
         project_id="project_id",
-        split_group_id=large_schema.split_group_id
+        split_group_id=split_group_id
     )
     
     print(f"Schema split into {split_group['total_parts']} parts")
