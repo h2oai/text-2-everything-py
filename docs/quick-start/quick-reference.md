@@ -7,7 +7,7 @@ A condensed cheat sheet for common SDK operations.
 ### Environment Setup
 ```bash
 # Install packages
-pip install h2o-drive>=4.1.0 text2everything_sdk-0.1.x-py3-none-any.whl python-dotenv tqdm
+pip install h2o-drive>=4.1.0 h2o_text_2_everything-0.1.x-py3-none-any.whl python-dotenv tqdm
 
 # Create .env file
 cat > .env << EOF

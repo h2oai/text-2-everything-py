@@ -29,7 +29,7 @@ A practical, step-by-step guide to get you from zero to a fully functional Text2
 ```bash
 # Install required packages
 pip install h2o-drive>=4.1.0
-pip install text2everything_sdk-0.1.x-py3-none-any.whl
+pip install h2o_text_2_everything-0.1.x-py3-none-any.whl
 pip install python-dotenv
 pip install tqdm
 ```

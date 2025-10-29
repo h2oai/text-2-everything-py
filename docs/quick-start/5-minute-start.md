@@ -10,7 +10,7 @@ Get started with Text2Everything SDK in minutes. This guide shows you the absolu
 ## Installation
 
 ```bash
-pip install text2everything-sdk
+pip install h2o-text-2-everything
 ```
 
 ## Configuration

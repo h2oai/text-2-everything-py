@@ -15,7 +15,7 @@ This script provides a streamlined way to transfer data from H2O Drive to the Te
 1. **Install dependencies**:
    ```bash
    pip install h2o_drive h2o-authn
-   pip install ./text2everything_sdk-0.1.2-py3-none-any.whl
+   pip install ./h2o_text_2_everything-0.1.2-py3-none-any.whl
    ```
 
 2. **Set environment variables**:
@@ -147,7 +147,7 @@ Copy `config_example.py` to `config.py` and customize:
 
 2. **"text2everything_sdk not installed"**
    ```bash
-   pip install ./text2everything_sdk-0.1.2-py3-none-any.whl
+   pip install ./h2o_text_2_everything-0.1.2-py3-none-any.whl
    ```
 
 3. **"H2O Cloud platform token not found"**

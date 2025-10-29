@@ -11,7 +11,7 @@ Prereqs:
 ## Installation
 
 ```bash
-pip install text2everything_sdk-0.1.x-py3-none-any.whl
+pip install h2o_text_2_everything-0.1.x-py3-none-any.whl
 ```
 
 ## Minimal setup and first query
