@@ -73,49 +73,40 @@ jobs:
         echo "Generated checksums:"
         cat checksums.txt
         
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.extract_version.outputs.tag }}
-        release_name: Release ${{ steps.extract_version.outputs.tag }}
-        body: |
-          ## Release ${{ steps.extract_version.outputs.tag }}
-          
-          ### Changes
-          This release was automatically generated from tag `${{ steps.extract_version.outputs.tag }}`.
-          
-          ### Package Information
-          - **Version**: `${{ steps.extract_version.outputs.version }}`
-          - **Python Package**: `text2everything-sdk`
-          - **Build Date**: ${{ github.event.head_commit.timestamp }}
-          
-          ### Installation
-          ```bash
-          pip install text2everything-sdk==${{ steps.extract_version.outputs.version }}
-          ```
-          
-          ### Files
-          - Source distribution (`.tar.gz`)
-          - Wheel distribution (`.whl`)
-          - Checksums (`checksums.txt`)
-          
-          See the assets below for downloadable files.
-        draft: false
-        prerelease: ${{ contains(steps.extract_version.outputs.version, '-') }}
-        
-    - name: Upload Release Assets
+    - name: Create Release and Upload Assets
       run: |
-        # Upload all files from dist/ directory
-        for file in dist/*; do
-          echo "Uploading $file..."
-          gh release upload ${{ steps.extract_version.outputs.tag }} "$file" --clobber
-        done
+        # Determine if this is a prerelease
+        PRERELEASE_FLAG=""
+        if [[ "${{ steps.extract_version.outputs.version }}" == *"-"* ]]; then
+          PRERELEASE_FLAG="--prerelease"
+        fi
         
-        # Upload checksums
-        gh release upload ${{ steps.extract_version.outputs.tag }} dist/checksums.txt --clobber
+        # Create release with all assets
+        gh release create "${{ steps.extract_version.outputs.tag }}" \
+          dist/* \
+          --title "Release ${{ steps.extract_version.outputs.tag }}" \
+          $PRERELEASE_FLAG \
+          --notes "## Release ${{ steps.extract_version.outputs.tag }}
+
+### Changes
+This release was automatically generated from tag \`${{ steps.extract_version.outputs.tag }}\`.
+
+### Package Information
+- **Version**: \`${{ steps.extract_version.outputs.version }}\`
+- **Python Package**: \`text2everything-sdk\`
+- **Build Date**: ${{ github.event.head_commit.timestamp }}
+
+### Installation
+\`\`\`bash
+pip install text2everything-sdk==${{ steps.extract_version.outputs.version }}
+\`\`\`
+
+### Files
+- Source distribution (\`.tar.gz\`)
+- Wheel distribution (\`.whl\`)
+- Checksums (\`checksums.txt\`)
+
+See the assets below for downloadable files."
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
