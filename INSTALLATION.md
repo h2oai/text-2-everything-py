@@ -13,7 +13,7 @@ Since the SDK is not yet published to PyPI, you can install it locally:
 cd text2everything_sdk
 
 # Install in development mode (editable install)
-pip install dist/text2everything_sdk-0.1.2-py3-none-any.whl
+pip install dist/h2o_text_2_everything-0.1.2-py3-none-any.whl
 
 
 ```
@@ -47,7 +47,7 @@ print(f"Created project: {project.id}")
 
 ## Publishing to PyPI (For Maintainers)
 
-To make the SDK available via `pip install text2everything-sdk`, you need to publish it to PyPI:
+To make the SDK available via `pip install h2o-text-2-everything`, you need to publish it to PyPI:
 
 ### Prerequisites
 
@@ -81,7 +81,7 @@ To make the SDK available via `pip install text2everything-sdk`, you need to pub
    python -m twine upload --repository testpypi dist/*
    
    # Test installation from TestPyPI
-   pip install --index-url https://test.pypi.org/simple/ text2everything-sdk
+   pip install --index-url https://test.pypi.org/simple/ h2o-text-2-everything
    ```
 
 4. **Upload to Production PyPI**:
@@ -91,7 +91,7 @@ To make the SDK available via `pip install text2everything-sdk`, you need to pub
 
 5. **Verify Installation**:
    ```bash
-   pip install text2everything-sdk
+   pip install h2o-text-2-everything
    ```
 
 ### PyPI Configuration
@@ -193,4 +193,4 @@ mypy text2everything_sdk/
 
 Once published to PyPI, users will be able to simply run:
 ```bash
-pip install text2everything-sdk
+pip install h2o-text-2-everything

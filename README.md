@@ -38,12 +38,12 @@ pip install -e ".[dev,integrations]"
 Once published, you'll be able to install with:
 
 ```bash
-pip install text2everything-sdk
+pip install h2o-text-2-everything
 
 # With optional dependencies
-pip install text2everything-sdk[integrations]  # pandas, jupyter, h2o-drive
-pip install text2everything-sdk[dev]          # development tools
-pip install text2everything-sdk[docs]         # documentation tools
+pip install h2o-text-2-everything[integrations]  # pandas, jupyter, h2o-drive
+pip install h2o-text-2-everything[dev]          # development tools
+pip install h2o-text-2-everything[docs]         # documentation tools
 ```
 
 ## Quick Start

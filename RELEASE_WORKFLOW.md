@@ -58,8 +58,8 @@ The workflow automatically detects pre-releases based on the version string:
 - **Assets**: All build artifacts and checksums
 
 ### Build Artifacts
-- **Source Distribution**: `text2everything-sdk-1.9.20.tar.gz`
-- **Wheel Distribution**: `text2everything_sdk-1.9.20-py3-none-any.whl`
+- **Source Distribution**: `h2o-text-2-everything-1.9.20.tar.gz`
+- **Wheel Distribution**: `h2o_text_2_everything-1.9.20-py3-none-any.whl`
 - **Checksums**: `checksums.txt` with SHA256 hashes
 
 ## Example Workflow
@@ -80,7 +80,7 @@ git push origin v1.9.20
 #    - Uploads to GitHub Releases
 
 # 4. Users can now install:
-pip install text2everything-sdk==1.9.20
+pip install h2o-text-2-everything==1.9.20
 ```
 
 ## Troubleshooting

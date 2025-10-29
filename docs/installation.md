@@ -9,7 +9,7 @@ Download the latest release from the [GitHub Releases](https://github.com/h2oai/
 ## Install
 
 ```bash
-pip install text2everything_sdk-0.1.x-py3-none-any.whl
+pip install h2o_text_2_everything-0.1.x-py3-none-any.whl
 ```
 
 Replace `0.1.x` with the version number from the release (e.g., `0.1.2`, `0.1.3`, etc.)
@@ -19,7 +19,7 @@ Replace `0.1.x` with the version number from the release (e.g., `0.1.2`, `0.1.3`
 Once published to PyPI, you'll be able to install directly:
 
 ```bash
-pip install text2everything-sdk
+pip install h2o-text-2-everything
 ```
 
 ## Troubleshooting
