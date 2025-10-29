@@ -2,29 +2,24 @@
 
 This guide covers different ways to install and use the Text2Everything SDK.
 
-## Installation Options
+## Installation from PyPI (Recommended)
 
-### Option 1: Local Development Installation (Recommended for now)
-
-Since the SDK is not yet published to PyPI, you can install it locally:
+The SDK is published to PyPI and can be installed with pip:
 
 ```bash
-# Navigate to the SDK directory
-cd text2everything_sdk
+# Install the latest version
+pip install h2o-text-2-everything
 
-# Install in development mode (editable install)
-pip install dist/h2o_text_2_everything-0.1.2-py3-none-any.whl
+# Install with optional dependencies
+pip install h2o-text-2-everything[integrations]  # pandas, jupyter, h2o-drive
+pip install h2o-text-2-everything[dev]          # development tools
+pip install h2o-text-2-everything[docs]         # documentation tools
 
-
+# Install a specific version
+pip install h2o-text-2-everything==0.1.7rc3
 ```
 
-This allows you to:
-- Make changes to the SDK code and see them immediately
-- Run tests and contribute to development
-- Use all the latest features
-
-
-```
+This is the recommended installation method for most users.
 
 ## Quick Start After Installation
 
@@ -45,9 +40,28 @@ project = client.projects.create(name="My Project")
 print(f"Created project: {project.id}")
 ```
 
+## Development Installation
+
+For contributing to the SDK or local development:
+
+```bash
+# Clone the repository
+git clone https://github.com/h2oai/text-2-everything.git
+cd text-2-everything/text2everything_sdk
+
+# Install in development mode with all dependencies
+pip install -e ".[dev,integrations,docs]"
+```
+
+Or install from a local wheel file:
+
+```bash
+pip install dist/h2o_text_2_everything-0.1.2-py3-none-any.whl
+```
+
 ## Publishing to PyPI (For Maintainers)
 
-To make the SDK available via `pip install h2o-text-2-everything`, you need to publish it to PyPI:
+The SDK is published to PyPI using GitHub Actions. To publish manually:
 
 ### Prerequisites
 
@@ -187,10 +201,6 @@ mypy text2everything_sdk/
 
 ## Next Steps
 
-1. **For Users**: Use Option 1 (local installation) for now
-2. **For Production**: Wait for PyPI publication or use Git installation
-3. **For Contributors**: Use development setup with all dependencies
-
-Once published to PyPI, users will be able to simply run:
-```bash
-pip install h2o-text-2-everything
+1. **For Users**: Install from PyPI with `pip install h2o-text-2-everything`
+2. **For Contributors**: Use development installation with all dependencies
+3. **For Maintainers**: Follow the publishing guide above

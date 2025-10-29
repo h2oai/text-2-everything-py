@@ -18,24 +18,7 @@ The official Python SDK for the Text2Everything API, providing easy access to te
 
 ## Installation
 
-**Note**: The SDK is not yet published to PyPI. For now, use local installation:
-
-```bash
-# Navigate to the SDK directory
-cd text2everything_sdk
-
-# Install in development mode
-pip install -e .
-
-# Or with optional dependencies
-pip install -e ".[dev,integrations]"
-```
-
-**For complete installation options**, see [INSTALLATION.md](INSTALLATION.md)
-
-### Future PyPI Installation
-
-Once published, you'll be able to install with:
+Install from PyPI:
 
 ```bash
 pip install h2o-text-2-everything
@@ -45,6 +28,8 @@ pip install h2o-text-2-everything[integrations]  # pandas, jupyter, h2o-drive
 pip install h2o-text-2-everything[dev]          # development tools
 pip install h2o-text-2-everything[docs]         # documentation tools
 ```
+
+**For development installation and other options**, see [INSTALLATION.md](INSTALLATION.md)
 
 ## Quick Start
 
