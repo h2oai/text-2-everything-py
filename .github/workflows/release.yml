@@ -60,6 +60,12 @@ jobs:
         echo "Build completed. Contents of dist/:"
         ls -la dist/
         
+    - name: Upload dist artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+        
     - name: Generate checksums
       run: |
         cd dist
@@ -123,12 +129,6 @@ jobs:
         # Show what was uploaded
         echo "📁 Uploaded files:"
         ls -la dist/
-        
-    - name: Upload dist artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
 
   pypi-publish:
     name: Publish to PyPI
