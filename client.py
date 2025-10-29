@@ -219,6 +219,9 @@ class Text2EverythingClient:
         """
         Make HTTP request with retry logic.
         
+        Only retries safe/idempotent operations (GET, DELETE, HEAD, OPTIONS) to prevent
+        duplicate resources on POST/PUT operations when encountering transient errors.
+        
         Args:
             method: HTTP method (GET, POST, PUT, DELETE)
             endpoint: API endpoint
@@ -240,7 +243,11 @@ class Text2EverythingClient:
         if headers:
             request_headers.update(headers)
         
-        for attempt in range(self.max_retries + 1):
+        # Only retry safe/idempotent operations to prevent duplicates
+        SAFE_METHODS = ["GET", "DELETE", "HEAD", "OPTIONS"]
+        effective_max_retries = self.max_retries if method in SAFE_METHODS else 0
+        
+        for attempt in range(effective_max_retries + 1):
             try:
                 response = self._client.request(
                     method=method,
@@ -323,6 +330,9 @@ class Text2EverythingClient:
         """
         Make HTTP request with multipart form data.
         
+        Only retries safe/idempotent operations (GET, DELETE, HEAD, OPTIONS) to prevent
+        duplicate resources on POST/PUT operations when encountering transient errors.
+        
         Args:
             method: HTTP method (POST, PUT)
             endpoint: API endpoint
@@ -340,8 +350,12 @@ class Text2EverythingClient:
         if "Content-Type" in request_headers:
             request_headers.pop("Content-Type", None)
         
+        # Only retry safe/idempotent operations to prevent duplicates
+        SAFE_METHODS = ["GET", "DELETE", "HEAD", "OPTIONS"]
+        effective_max_retries = self.max_retries if method in SAFE_METHODS else 0
+        
         # Use list of tuples format which works with FastAPI
-        for attempt in range(self.max_retries + 1):
+        for attempt in range(effective_max_retries + 1):
             try:
                 response = self._client.request(
                     method=method,
