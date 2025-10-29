@@ -85,28 +85,7 @@ jobs:
         gh release create "${{ steps.extract_version.outputs.tag }}" \
           dist/* \
           --title "Release ${{ steps.extract_version.outputs.tag }}" \
-          $PRERELEASE_FLAG \
-          --notes "## Release ${{ steps.extract_version.outputs.tag }}
-
-### Changes
-This release was automatically generated from tag \`${{ steps.extract_version.outputs.tag }}\`.
-
-### Package Information
-- **Version**: \`${{ steps.extract_version.outputs.version }}\`
-- **Python Package**: \`text2everything-sdk\`
-- **Build Date**: ${{ github.event.head_commit.timestamp }}
-
-### Installation
-\`\`\`bash
-pip install text2everything-sdk==${{ steps.extract_version.outputs.version }}
-\`\`\`
-
-### Files
-- Source distribution (\`.tar.gz\`)
-- Wheel distribution (\`.whl\`)
-- Checksums (\`checksums.txt\`)
-
-See the assets below for downloadable files."
+          $PRERELEASE_FLAG
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
