@@ -260,36 +260,36 @@ class Text2EverythingClient:
                 return self._handle_response(response)
                 
             except httpx.ConnectError as e:
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise ConnectionError(f"Failed to connect to API: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except httpx.TimeoutException as e:
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise TimeoutError(f"Request timed out: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except httpx.RemoteProtocolError as e:
                 # Handle HTTP protocol errors (like connection drops during high concurrency)
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise ConnectionError(f"HTTP protocol error: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except httpx.ReadError as e:
                 # Handle connection read errors
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise ConnectionError(f"Connection read error: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except RateLimitError as e:
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise
                 # Use retry_after if provided, otherwise exponential backoff
                 delay = e.retry_after or (self.retry_delay * (2 ** attempt))
                 time.sleep(delay)
                 
             except (ServerError, Text2EverythingError) as e:
-                if attempt == self.max_retries or e.status_code < 500:
+                if attempt == effective_max_retries or e.status_code < 500:
                     raise
                 time.sleep(self.retry_delay * (2 ** attempt))
     
@@ -368,23 +368,23 @@ class Text2EverythingClient:
                 return self._handle_response(response)
                 
             except httpx.ConnectError as e:
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise ConnectionError(f"Failed to connect to API: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except httpx.TimeoutException as e:
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise TimeoutError(f"Request timed out: {e}")
                 time.sleep(self.retry_delay * (2 ** attempt))
                 
             except RateLimitError as e:
-                if attempt == self.max_retries:
+                if attempt == effective_max_retries:
                     raise
                 delay = e.retry_after or (self.retry_delay * (2 ** attempt))
                 time.sleep(delay)
                 
             except (ServerError, Text2EverythingError) as e:
-                if attempt == self.max_retries or e.status_code < 500:
+                if attempt == effective_max_retries or e.status_code < 500:
                     raise
                 time.sleep(self.retry_delay * (2 ** attempt))
     
