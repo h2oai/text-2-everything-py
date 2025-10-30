@@ -18,7 +18,7 @@ from text2everything_sdk.exceptions import (
     InvalidConfigurationError
 )
 
-__version__ = "0.1.7-rc5"
+__version__ = "0.1.7"
 __all__ = [
     "Text2EverythingClient",
     "Text2EverythingError",
