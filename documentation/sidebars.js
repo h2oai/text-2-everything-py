@@ -14,6 +14,8 @@ module.exports = {
     {
       "Quick Start Guides": [
         "quick-start/README",
+        "quick-start/five-minute-start",
+        "quick-start/complete-example",
         "quick-start/developer-starter-guide",
         "quick-start/quick-reference",
         "quick-start/integration-summary",
@@ -28,6 +30,7 @@ module.exports = {
         "guides/connectors",
         "guides/chat_sessions",
         "guides/chat",
+        "guides/chat_presets",
         "guides/executions",
         "guides/feedback",
         "guides/custom_tools",
