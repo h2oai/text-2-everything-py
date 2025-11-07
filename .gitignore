@@ -6,7 +6,6 @@ __pycache__
 .venv
 managers/
 jsons_generados_20250828/
-site/
 JSON - tests/
 
 documentation/tmp/
