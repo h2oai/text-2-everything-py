@@ -46,5 +46,3 @@ Helpers:
 always = client.contexts.list_always_displayed(project.id)
 by_name = client.contexts.get_by_name(project.id, "Business Rules")
 ```
-
-

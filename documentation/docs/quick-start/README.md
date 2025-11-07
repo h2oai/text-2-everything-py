@@ -1,132 +1,100 @@
-# Text2Everything Quick Start Guides
+# Quick Start Guides
 
-Welcome to the Text2Everything Quick Start collection! This folder contains comprehensive guides to help developers and data scientists get up and running with the Text2Everything ecosystem quickly and efficiently.
+Welcome to the Text2Everything SDK quick start guides! Choose your path based on your experience level and goals.
 
-## 📚 Available Guides
+## 🚀 Choose Your Path
 
-### 1. [Developer Starter Guide](developer-starter-guide.md)
-**Target Audience**: Developers and data scientists new to Text2Everything  
-**Time to Complete**: 30 min  
-**Difficulty**: Beginner to Intermediate
+**I want to...**
 
-A comprehensive, step-by-step guide that takes you from zero to a fully functional Text2Everything setup. Covers:
+- **Try the SDK quickly** → [5-Minute Quick Start](five-minute-start.md)
+- **Build a real app** → [Complete SDK Example](complete-example.md)
+- **Look up a command** → [Quick Reference](quick-reference.md)
+- **Integrate with H2O Drive** → [Advanced Integration](developer-starter-guide.md)
+- **Understand a feature** → [Core Guides](../guides/projects.md)
+- **Learn advanced topics** → [How-To Guides](../how-to/bulk_operations.md)
 
-- ✅ H2O Drive data upload and organization
-- ✅ Text2Everything API configuration and data integration
-- ✅ Snowflake connector setup for database connectivity
-- ✅ CustomGPT configuration in H2OGPTE UI
-- ✅ Agent environment setup for production use
-- ✅ End-to-end workflow testing and validation
-- ✅ Comprehensive troubleshooting section
 
-### 2. [Quick Reference Guide](quick-reference.md)
-**Target Audience**: Experienced developers who have completed the starter guide  
-**Time to Complete**: 5-10 minutes for lookup  
-**Difficulty**: Intermediate
+### 1. [5-Minute Quick Start](five-minute-start.md)
+**For**: First-time users who want to get started immediately  
+**Time**: 5 minutes  
+**Level**: Beginner
 
-A condensed reference document with essential code snippets and commands. Perfect for:
+Learn the absolute basics:
+- Install and configure the SDK
+- Create your first project
+- Generate SQL from natural language
+- No external dependencies required
 
-- 🔧 Quick setup commands and environment configuration
-- 📋 Data format examples and validation methods
-- 🚨 Common error solutions and diagnostic scripts
-- 📚 Useful commands for daily development work
-
-### 3. [Integration Summary](integration-summary.md)
-**Target Audience**: Technical leads and architects  
-**Time to Complete**: 15-20 minutes  
-**Difficulty**: Intermediate to Advanced
-
-A technical overview that validates the complete integration workflow. Includes:
-
-- 🔧 Technical validation of all components
-- 🎯 End-to-end workflow verification
-- 📋 Configuration checklists and requirements
-- 🔄 Data flow architecture overview
-- 📊 Success metrics and next steps
-
-## 🚀 Getting Started
-
-### For First-Time Users
-1. **Start with**: [Developer Starter Guide](developer-starter-guide.md)
-2. **Follow up with**: [Quick Reference Guide](quick-reference.md) for daily use
-3. **Review**: [Integration Summary](integration-summary.md) for technical validation
-
-### For Experienced Users
-1. **Quick Setup**: Use [Quick Reference Guide](quick-reference.md) for rapid deployment
-2. **Validation**: Check [Integration Summary](integration-summary.md) for completeness
-3. **Reference**: Return to [Developer Starter Guide](developer-starter-guide.md) for detailed explanations
-
-## 📁 Related Resources
-
-### Example Notebooks
-Located in `examples/` folder:
-- `Simple_Drive_Upload.ipynb` - H2O Drive data upload examples
-- `H2O_Drive_to_T2E_End_to_End.ipynb` - Complete integration workflow
-
-### SDK Documentation
-- [Text2Everything SDK Documentation](https://h2oai.github.io/text-2-everything-py/)
-- [H2O Drive Documentation](https://docs.h2o.ai/h2o-drive/)
-- [Connector Guide](../guides/connectors.md)
-- [Bulk Operations Guide](../how-to/bulk_operations.md)
-
-## 🎯 What You'll Achieve
-
-After completing these guides, you'll have:
-
-1. **Data Pipeline**: Seamless flow from local data → H2O Drive → Text2Everything
-2. **Database Integration**: Working Snowflake connector for SQL execution
-3. **AI Assistant**: Configured CustomGPT for natural language to SQL conversion
-4. **Production Setup**: Agent environment with proper authentication
-5. **Validation Tools**: Diagnostic scripts and troubleshooting capabilities
-
-## 🔄 Workflow Overview
-
-```
-Local Data Files
-       ↓
-H2O Drive (organized storage)
-       ↓
-Text2Everything API (via SDK)
-       ↓
-Snowflake Connector (for execution)
-       ↓
-Agent Environment (to enable agent <> API orchestration)
-    ↓
-CustomGPT (for putting all settings together)
-```
-
-## 🛠️ Prerequisites
-
-Before starting, ensure you have:
-
-- **Python 3.9+** installed
-- **H2O Drive access** with valid credentials
-- **Text2Everything API access** with API key
-- **Snowflake account** (optional, for database connectivity)
-- **H2OGPTE UI access** for CustomGPT configuration
-
-## 📞 Support
-
-If you encounter issues:
-
-1. **Check the troubleshooting sections** in each guide
-2. **Run diagnostic scripts** provided in the guides
-3. **Refer to the SDK documentation** for detailed API information
-4. **Contact support** at support@h2o.ai with detailed error messages
-
-## 🔄 Updates and Maintenance
-
-These guides are maintained to reflect the latest SDK features and best practices. Key areas covered:
-
-- ✅ **SDK Validation Methods**: Uses built-in `validate_schema` methods
-- ✅ **Error Handling**: Comprehensive exception handling and diagnostics
-- ✅ **Performance Optimization**: Batch processing and connection pooling
-- ✅ **Production Readiness**: Environment configuration and monitoring
+**Start here if**: You're new to Text2Everything and want to see it in action.
 
 ---
 
-**Ready to get started?** Begin with the [Developer Starter Guide](developer-starter-guide.md) and transform your data into actionable insights! 🚀
+### 2. [Complete SDK Example](complete-example.md)
+**For**: Developers building production applications  
+**Time**: 15 minutes  
+**Level**: Beginner to Intermediate
 
-*These guides are part of the Text2Everything SDK documentation. For the latest updates and additional resources, visit the [official documentation](https://h2oai.github.io/text-2-everything-py/).*
+Build a realistic e-commerce analytics system:
+- Define multi-table schemas
+- Add business context and rules
+- Create golden query examples
+- Generate and execute SQL
+- Implement feedback loops
+- Use execution caching
 
+**Start here if**: You understand the basics and want to build a real application.
 
+---
+
+### 3. [Quick Reference](quick-reference.md)
+**For**: Developers who need a cheat sheet  
+**Time**: 2-5 minutes (lookup)  
+**Level**: Intermediate
+
+Quick command reference:
+- Common SDK operations
+- Code snippets
+- Error solutions
+- Best practices
+
+**Start here if**: You've completed one of the tutorials and need quick reference.
+
+---
+
+### 4. [Advanced Integration](developer-starter-guide.md)
+**For**: Enterprise users integrating with H2O ecosystem  
+**Time**: 30+ minutes  
+**Level**: Advanced
+
+Complete enterprise integration with:
+- H2O Drive data management
+- Snowflake connectors
+- CustomGPT configuration
+- Agent orchestration
+- Production deployment
+
+**Start here if**: You need full H2O ecosystem integration with Drive, GPTE UI, and agents.
+
+## 🚦 Prerequisites
+
+### All Guides
+- Have a Text2Everything API endpoint (default value should work)
+- Have access to your platform / access token token
+- Have an H2OGPTe API Key
+- Have access to a workspace with Workspace Owner permission
+- Python 3.9+
+
+### Advanced Integration Only
+- H2O Drive account
+- H2O GPTE UI access
+- Snowflake database (optional)
+
+## 📞 Need Help?
+
+- **Documentation Issues**: Check the [How-To Guides](../how-to/bulk_operations.md)
+- **API Questions**: Review the [Core Guides](../guides/projects.md)
+- **Support**: Contact support@h2o.ai
+
+---
+
+**Ready to start?** Pick your path above and begin your Text2Everything journey! 🚀

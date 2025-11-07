@@ -29,7 +29,7 @@ A practical, step-by-step guide to get you from zero to a fully functional Text2
 ```bash
 # Install required packages
 pip install h2o-drive>=4.1.0
-pip install text2everything_sdk-0.1.x-py3-none-any.whl
+pip install h2o-text-2-everything
 pip install python-dotenv
 pip install tqdm
 ```
@@ -45,7 +45,8 @@ H2O_CLOUD_CLIENT_PLATFORM_TOKEN=your-h2o-token-here
 
 # Text2Everything Configuration
 TEXT2EVERYTHING_URL=http://text2everything.text2everything.svc.cluster.local:8000
-H2OGPTE_API_KEY=your-h2ogpte-api-key-here
+T2E_ACCESS_TOKEN=your-access-token-here
+T2E_WORKSPACE_NAME=workspaces/your-workspace
 
 # Snowflake Configuration (optional)
 SNOWFLAKE_ACCOUNT=your-account.snowflakecomputing.com
@@ -256,8 +257,9 @@ print("🔌 Initializing Text2Everything SDK...")
 
 try:
     sdk_client = Text2EverythingClient(
+        access_token=os.getenv("T2E_ACCESS_TOKEN"),
+        workspace_name=os.getenv("T2E_WORKSPACE_NAME"),
         base_url=os.getenv("TEXT2EVERYTHING_URL"),
-        api_key=os.getenv("H2OGPTE_API_KEY"),
         timeout=200,
         max_retries=1
     )
@@ -469,7 +471,7 @@ if snowflake_connector:
     base_url = os.getenv("TEXT2EVERYTHING_URL") 
     project_id = os.getenv("TEXT2EVERYTHING_PROJECT_ID")  
     connector_id = os.getenv("TEXT2EVERYTHING_CONNECTOR_ID")  
-    api_key = os.getenv("H2OGPTE_API_KEY")  
+    access_token = os.getenv("T2E_ACCESS_TOKEN")  
 
    Prompt Name: H2O Drive SQL Assistant
    
@@ -495,7 +497,7 @@ if snowflake_connector:
     base_url = os.getenv("TEXT2EVERYTHING_URL") # Already set up
     project_id = os.getenv("TEXT2EVERYTHING_PROJECT_ID")  # Already set up
     connector_id = os.getenv("TEXT2EVERYTHING_CONNECTOR_ID")  # Already set up
-    api_key = os.getenv("H2OGPTE_API_KEY")  # Already set up
+    access_token = os.getenv("T2E_ACCESS_TOKEN")  # Already set up
     ```
 
     ### Headers
@@ -503,7 +505,8 @@ if snowflake_connector:
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
-        "X-API-Key": api_key  # Changed from Authorization Bearer
+        "Authorization": f"Bearer {access_token}",
+        "X-Workspace-Name": os.getenv("T2E_WORKSPACE_NAME", "")
     }
     ```
 
@@ -563,7 +566,7 @@ if snowflake_connector:
    TEXT2EVERYTHING_CONNECTOR_ID = "<your_connector_id>"
    
    # H2OGPTE API Configuration
-   H2OGPTE_API_KEY = "<your_api_key>"
+   T2E_ACCESS_TOKEN = "<your_access_token>"
    ```
 
 3. **Replace Placeholder Values**:
@@ -732,15 +735,17 @@ except Exception as e:
 
 **Problem**: `Authentication failed`
 ```python
-# Solution: Verify API key and URL
+# Solution: Verify access token and URL
 print("T2E URL:", os.getenv('TEXT2EVERYTHING_URL'))
-print("API Key:", os.getenv('H2OGPTE_API_KEY')[:10] + "..." if os.getenv('H2OGPTE_API_KEY') else "Not set")
+print("Access Token:", os.getenv('T2E_ACCESS_TOKEN')[:10] + "..." if os.getenv('T2E_ACCESS_TOKEN') else "Not set")
+print("Workspace:", os.getenv('T2E_WORKSPACE_NAME'))
 
 # Test basic connection
 try:
     test_client = Text2EverythingClient(
-        base_url=os.getenv('TEXT2EVERYTHING_URL'),
-        api_key=os.getenv('H2OGPTE_API_KEY')
+        access_token=os.getenv('T2E_ACCESS_TOKEN'),
+        workspace_name=os.getenv('T2E_WORKSPACE_NAME'),
+        base_url=os.getenv('TEXT2EVERYTHING_URL')
     )
     projects = test_client.projects.list()
     print(f"✅ API connection successful, {len(projects)} projects found")
@@ -915,14 +920,12 @@ After completing this guide, you should have:
 
 - [Text2Everything SDK Documentation](https://h2oai.github.io/text-2-everything-py/)
 - [H2O Drive Documentation](https://docs.h2o.ai/h2o-drive/)
-- [Snowflake Connector Guide](docs/guides/connectors.md)
-- [Bulk Operations Guide](docs/how-to/bulk_operations.md)
-- [Jupyter Integration Guide](docs/how-to/jupyter.md)
+- [Snowflake Connector Guide](../guides/connectors.md)
+- [Bulk Operations Guide](../how-to/bulk_operations.md)
+- [Jupyter Integration Guide](../how-to/jupyter.md)
 
 ---
 
 **Happy coding! 🚀**
 
 *This guide was created to help developers and data scientists quickly get started with the Text2Everything ecosystem. For questions or improvements, please reach out to the H2O.ai team.*
-
-

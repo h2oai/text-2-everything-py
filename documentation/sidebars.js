@@ -18,7 +18,6 @@ module.exports = {
         "quick-start/complete-example",
         "quick-start/developer-starter-guide",
         "quick-start/quick-reference",
-        "quick-start/integration-summary",
       ],
     },
     {
@@ -42,19 +41,6 @@ module.exports = {
         "how-to/bulk_operations",
         "how-to/jupyter",
         "how-to/validation",
-      ],
-    },
-    {
-      "Reference": [
-        "reference/index",
-        "reference/client",
-        "reference/resources",
-        "reference/models",
-      ],
-    },
-    {
-      "Examples": [
-        "examples",
       ],
     },
     {

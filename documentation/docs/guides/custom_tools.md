@@ -34,5 +34,3 @@ updated = client.custom_tools.replace_files(project.id, tool.id, ["new_main.py"]
 
 client.custom_tools.delete(project.id, tool.id)
 ```
-
-

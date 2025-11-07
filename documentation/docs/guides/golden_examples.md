@@ -33,5 +33,3 @@ Helpers:
 always = client.golden_examples.list_always_displayed(project.id)
 search = client.golden_examples.search_by_query(project.id, "user")
 ```
-
-

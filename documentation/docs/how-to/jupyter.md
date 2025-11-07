@@ -2,7 +2,7 @@
 title: Jupyter Usage
 ---
 
-Use the SDK from notebooks. See `examples/` for ready-made notebooks.
+Use the SDK from notebooks. Start from the quick start guides or adapt the cells below.
 
 Minimal cell:
 ```python
@@ -18,5 +18,3 @@ See also:
 - Quickstart
 - Guides → Chat Sessions, Chat
 - How To → Bulk Operations, Validation
-
-

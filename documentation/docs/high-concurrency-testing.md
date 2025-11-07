@@ -265,5 +265,3 @@ client = Text2EverythingClient(
 - **Debugging connection pool behavior**
 
 The Text2Everything SDK's high concurrency features provide enterprise-grade reliability and performance for demanding production environments.
-
-
