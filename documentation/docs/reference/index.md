@@ -2,7 +2,7 @@
 title: API Reference
 ---
 
-This section is generated from docstrings using mkdocstrings. See:
+This section provides detailed API documentation. See:
 
 - Client
 - Resources

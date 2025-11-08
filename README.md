@@ -467,9 +467,6 @@ else:
     print(f"Created single schema: {result.id}")
 ```
 
-**📖 For complete documentation on working with split schemas**, see:
-- [`docs/guides/schema_metadata.md`](docs/guides/schema_metadata.md) - Basic split handling
-- [`docs/how-to/bulk_operations.md`](docs/how-to/bulk_operations.md) - Bulk operations with splits
 
 ## Error Handling
 
