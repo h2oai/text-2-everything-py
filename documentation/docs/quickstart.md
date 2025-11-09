@@ -2,26 +2,22 @@
 title: Quickstart
 ---
 
-This quickstart guide helps you generate your first SQL query using the **Text2Everything** Python SDK.
+This Quickstart gets you from zero to a generated SQL query in ~5 minutes.
 
-This page is for developers who want a fast, working example. You will install the SDK, create minimal project data, and ask a question that the SDK converts to SQL.
+Prereqs:
+- Have a Text2Everything API endpoint (default value should work)
+- Have access to your platform / access token token
+- Have an H2OGPTe API Key
+- Have access to a workspace with Workspace Owner permission
+- Python 3.9+
 
-Estimated time: 5 minutes.
-
-## Prerequisites
-- **Python 3.9+:** The SDK targets CPython 3.9 or newer; earlier versions are unsupported.
-- **Text2Everything API endpoint and API key:** You need network access to your API deployment and a valid key to authenticate requests.
-
-## Step 1: Install the SDK
-Use the prebuilt wheel or see [Installation](./installation.md) for detailed steps.
+## Installation
 
 ```bash
-pip install text2everything_sdk-0.1.x-py3-none-any.whl
+pip install h2o-text-2-everything
 ```
 
-## Step 2: Minimal setup and first query
-In this step you will create a project, add the smallest useful context and schema, provide one golden example, start a chat session, and ask a question that the SDK converts into SQL.
-> **Info:** Replace placeholder values such as `your-api-key` with your actual credentials.
+## Minimal setup and first query
 
 ```python
 from text2everything_sdk import Text2EverythingClient
@@ -81,12 +77,7 @@ resp = client.chat.chat_to_sql(
 print("Generated SQL:", resp.sql_query)
 ```
 
-The output is a SQL string produced by the service. 
-
-## Next steps
-- Improve quality with more [Golden examples](./guides/golden_examples.md)
-- Connect a database and use [Chat → Answer](./guides/chat.md)
-- Explore resource workflows in [Guides](./guides/projects.md)
-- Review client options in [Configuration](./configuration.md) and API details in [Reference](./reference)
-
-
+Next steps:
+- Add golden examples for better quality
+- Connect your database and use Chat to Answer (executes SQL)
+- See Guides for resource-specific tasks

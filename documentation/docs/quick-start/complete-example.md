@@ -154,8 +154,8 @@ example1 = client.golden_examples.create(
     name="Active customer count",
     user_query="How many active customers do we have?",
     sql_query="""
-    SELECT COUNT(DISTINCT customer_id)
-    FROM orders
+    SELECT COUNT(DISTINCT customer_id) 
+    FROM orders 
     WHERE order_date >= CURRENT_DATE - INTERVAL '90 days'
     """,
     description="Count customers with recent orders"
@@ -167,7 +167,7 @@ example2 = client.golden_examples.create(
     name="Revenue by category",
     user_query="What's our revenue by product category?",
     sql_query="""
-    SELECT
+    SELECT 
         p.category,
         SUM(o.total_amount) as revenue
     FROM orders o
@@ -185,7 +185,7 @@ example3 = client.golden_examples.create(
     name="Top customers",
     user_query="Show me our top 10 customers by revenue",
     sql_query="""
-    SELECT
+    SELECT 
         c.name,
         c.email,
         SUM(o.total_amount) as total_revenue
@@ -288,7 +288,7 @@ cache_result = client.chat.execution_cache_lookup(
 
 if cache_result.cache_hit:
     print(f"\n✅ Found {len(cache_result.matches)} similar cached queries!")
-
+    
     best_match = cache_result.matches[0]
     print(f"Similarity: {best_match.similarity_score:.2f}")
     print(f"Cached SQL: {best_match.execution['sql_query']}")
@@ -314,11 +314,11 @@ def query_with_cache(client, project_id, session_id, connector_id, user_query):
         similarity_threshold=0.85,
         only_positive_feedback=True
     )
-
+    
     if cache_result.cache_hit and cache_result.matches:
         print("📦 Using cached result")
         return cache_result.matches[0].execution['result']
-
+    
     # 2. Generate and execute new query
     print("🔄 Generating new query...")
     answer = client.chat.chat_to_answer(
@@ -327,10 +327,10 @@ def query_with_cache(client, project_id, session_id, connector_id, user_query):
         query=user_query,
         connector_id=connector_id
     )
-
+    
     if answer.execution_result:
         print(f"✅ Query executed in {answer.execution_result.execution_time_ms}ms")
-
+        
         # 3. Collect feedback (in production, ask user)
         # For now, we'll add positive feedback automatically
         client.feedback.create_positive(
@@ -339,9 +339,9 @@ def query_with_cache(client, project_id, session_id, connector_id, user_query):
             feedback_text="Query executed successfully",
             execution_id=answer.execution_result.execution_id
         )
-
+        
         return answer.execution_result.result
-
+    
     return None
 
 # Usage
@@ -417,7 +417,7 @@ for query in queries:
 
 ### Enterprise Integration
 For H2O ecosystem integration including H2O Drive, CustomGPT, and agent orchestration, see:
-- [Developer Starter Guide](developer-starter-guide.md)
+- [Advanced Integration Guide](developer-starter-guide.md)
 
 ## Troubleshooting
 
@@ -448,12 +448,12 @@ schemas = client.schema_metadata.bulk_create(
 
 You've built a complete text-to-SQL application! You now know how to:
 
-✅ Define data models with schemas and relationships
-✅ Add business context and rules
-✅ Provide golden examples for guidance
-✅ Generate SQL from natural language
-✅ Execute queries (optional)
-✅ Add feedback to improve results
-✅ Leverage caching for performance
+✅ Define data models with schemas and relationships  
+✅ Add business context and rules  
+✅ Provide golden examples for guidance  
+✅ Generate SQL from natural language  
+✅ Execute queries (optional)  
+✅ Add feedback to improve results  
+✅ Leverage caching for performance  
 
 **Ready for production?** Check out the [Guides](../guides/projects.md) for advanced features and best practices.

@@ -1,13 +1,13 @@
 # Text2Everything Quick Reference Guide
 
-A condensed reference for developers who have completed the [Developer Starter Guide](developer-starter-guide.md).
+A condensed cheat sheet for common SDK operations.
 
 ## 🚀 Quick Setup Commands
 
 ### Environment Setup
 ```bash
 # Install packages
-pip install h2o-drive>=4.1.0 text2everything_sdk-0.1.x-py3-none-any.whl python-dotenv tqdm
+pip install h2o-drive>=4.1.0 h2o-text-2-everything python-dotenv tqdm
 
 # Create .env file
 cat > .env << EOF
@@ -58,7 +58,8 @@ import os
 
 sdk_client = Text2EverythingClient(
     base_url=os.getenv("TEXT2EVERYTHING_URL"),
-    api_key=os.getenv("H2OGPTE_API_KEY"),
+    access_token=os.getenv("T2E_ACCESS_TOKEN"),
+    workspace_name=os.getenv("T2E_WORKSPACE_NAME"),
     timeout=200,
     max_retries=1
 )
@@ -228,7 +229,7 @@ else:
 TEXT2EVERYTHING_URL = "http://text2everything.text2everything.svc.cluster.local:8000"
 TEXT2EVERYTHING_PROJECT_ID = "<your_project_id>"
 TEXT2EVERYTHING_CONNECTOR_ID = "<your_connector_id>"
-H2OGPTE_API_KEY = "<your_api_key>"
+T2E_ACCESS_TOKEN = "<your_access_token>"
 ```
 
 ## 🚨 Common Error Solutions
@@ -257,7 +258,8 @@ print("API Key set:", bool(os.getenv('H2OGPTE_API_KEY')))
 try:
     test_client = Text2EverythingClient(
         base_url=os.getenv('TEXT2EVERYTHING_URL'),
-        api_key=os.getenv('H2OGPTE_API_KEY')
+        access_token=os.getenv('T2E_ACCESS_TOKEN'),
+        workspace_name=os.getenv('T2E_WORKSPACE_NAME')
     )
     projects = test_client.projects.list()
     print(f"✅ Connected, {len(projects)} projects")
@@ -335,14 +337,12 @@ def batch_upload(items, batch_size=10):
 
 ## 🔗 Quick Links
 
-- [Full Developer Guide](developer-starter-guide.md)
-- [SDK Documentation](https://h2oai.github.io/text-2-everything-py/)
-- [H2O Drive Docs](https://docs.h2o.ai/h2o-drive/)
-- [Snowflake Connector Guide](guides/connectors.md)
-- [Bulk Operations Guide](how-to/bulk_operations.md)
+- [5-Minute Quick Start](five-minute-start.md)
+- [Complete SDK Example](complete-example.md)
+- [Advanced Integration Guide](developer-starter-guide.md)
+- [Core Guides](../guides/projects.md)
+- [Bulk Operations Guide](../how-to/bulk_operations.md)
 
 ---
 
 *Keep this reference handy for quick lookups during development! 📖*
-
-
