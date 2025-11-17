@@ -2,14 +2,17 @@
 title: Quickstart
 ---
 
-This Quickstart gets you from zero to a generated SQL query in ~5 minutes.
+This guide demonstrates how to generate SQL queries from natural language using the Text2Everything SDK.
 
-Prereqs:
-- Have a Text2Everything API endpoint (default value should work)
-- Have access to your platform / access token token
-- Have an H2OGPTe API Key
-- Have access to a workspace with Workspace Owner permission
-- Python 3.9+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- A Text2Everything API endpoint (default value works for most installations)
+- Access to your platform and access token
+- An H2OGPTe API Key
+- Workspace Owner permission for your workspace
+- Python 3.9 or higher installed
 
 ## Installation
 
@@ -17,7 +20,7 @@ Prereqs:
 pip install h2o-text-2-everything
 ```
 
-## Minimal setup and first query
+## Generate Your First Query
 
 ```python
 from text2everything_sdk import Text2EverythingClient
@@ -77,7 +80,10 @@ resp = client.chat.chat_to_sql(
 print("Generated SQL:", resp.sql_query)
 ```
 
-Next steps:
-- Add golden examples for better quality
-- Connect your database and use Chat to Answer (executes SQL)
-- See Guides for resource-specific tasks
+## Next Steps
+
+To improve your implementation:
+
+- Add more golden examples to improve SQL generation quality
+- Connect your database using connectors to execute queries with `chat_to_answer`
+- Review the [Guides](guides/projects.md) section for detailed information on each resource type

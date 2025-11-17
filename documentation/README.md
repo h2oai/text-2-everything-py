@@ -17,4 +17,4 @@ npm start
 
 ## More information
 
-Use the Makersaurus docs to earn how to edit docs, deploy the site, set up versioning and more.
+Use the Makersaurus docs to learn how to edit docs, deploy the site, set up versioning and more.

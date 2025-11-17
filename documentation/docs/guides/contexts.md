@@ -2,9 +2,9 @@
 title: Contexts
 ---
 
-Provide business/domain knowledge to improve SQL generation.
+Contexts provide business rules, definitions, and domain knowledge that improve SQL generation quality. They contain information about data semantics, business logic, and guidelines that help the system generate more accurate queries.
 
-List/create/get/update/delete:
+## Basic Operations
 ```python
 from text2everything_sdk import Text2EverythingClient
 
@@ -32,7 +32,7 @@ ctx = client.contexts.update(project.id, ctx.id, content="Updated rules...")
 client.contexts.delete(project.id, ctx.id)
 ```
 
-Bulk create:
+## Bulk Operations
 ```python
 items = [
   {"name": "Rule 1", "content": "..."},
@@ -41,7 +41,7 @@ items = [
 created = client.contexts.bulk_create(project.id, items)
 ```
 
-Helpers:
+## Helper Methods
 ```python
 always = client.contexts.list_always_displayed(project.id)
 by_name = client.contexts.get_by_name(project.id, "Business Rules")

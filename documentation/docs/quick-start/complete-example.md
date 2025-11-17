@@ -1,6 +1,6 @@
 # Complete SDK Example
 
-Build a complete text-to-SQL application using only the Text2Everything SDK. This guide shows all major features in a realistic e-commerce scenario.
+This guide demonstrates how to build a text-to-SQL application using the Text2Everything SDK. The example uses an e-commerce database scenario.
 
 ## Overview
 
@@ -107,7 +107,7 @@ relationship = client.schema_metadata.create(
     }
 )
 
-print("✅ Data model defined")
+print("Data model defined")
 ```
 
 ## Step 2: Add Business Context
@@ -140,7 +140,7 @@ definitions = client.contexts.create(
     is_always_displayed=True
 )
 
-print("✅ Business context added")
+print("Business context added")
 ```
 
 ## Step 3: Add Golden Examples
@@ -199,7 +199,7 @@ example3 = client.golden_examples.create(
     description="Top customers by total delivered order value"
 )
 
-print("✅ Golden examples added")
+print("Golden examples added")
 ```
 
 ## Step 4: Generate SQL
@@ -269,7 +269,7 @@ feedback = client.feedback.create_positive(
     execution_id=answer.execution_result.execution_id
 )
 
-print("✅ Feedback added - this execution is now cached for reuse")
+print("Feedback added - this execution is now cached for reuse")
 ```
 
 ## Step 7: Use Execution Cache
@@ -287,8 +287,8 @@ cache_result = client.chat.execution_cache_lookup(
 )
 
 if cache_result.cache_hit:
-    print(f"\n✅ Found {len(cache_result.matches)} similar cached queries!")
-    
+    print(f"\nFound {len(cache_result.matches)} similar cached queries")
+
     best_match = cache_result.matches[0]
     print(f"Similarity: {best_match.similarity_score:.2f}")
     print(f"Cached SQL: {best_match.execution['sql_query']}")
@@ -316,11 +316,11 @@ def query_with_cache(client, project_id, session_id, connector_id, user_query):
     )
     
     if cache_result.cache_hit and cache_result.matches:
-        print("📦 Using cached result")
+        print("Using cached result")
         return cache_result.matches[0].execution['result']
-    
+
     # 2. Generate and execute new query
-    print("🔄 Generating new query...")
+    print("Generating new query...")
     answer = client.chat.chat_to_answer(
         project_id=project_id,
         chat_session_id=session_id,
@@ -329,8 +329,8 @@ def query_with_cache(client, project_id, session_id, connector_id, user_query):
     )
     
     if answer.execution_result:
-        print(f"✅ Query executed in {answer.execution_result.execution_time_ms}ms")
-        
+        print(f"Query executed in {answer.execution_result.execution_time_ms}ms")
+
         # 3. Collect feedback (in production, ask user)
         # For now, we'll add positive feedback automatically
         client.feedback.create_positive(
@@ -372,7 +372,7 @@ for query in queries:
         chat_session_id=session.id,
         query=query
     )
-    print(f"\n📊 Query: {query}")
+    print(f"\nQuery: {query}")
     print(f"SQL: {response.sql_query[:100]}...")
 ```
 
@@ -446,14 +446,14 @@ schemas = client.schema_metadata.bulk_create(
 
 ## Summary
 
-You've built a complete text-to-SQL application! You now know how to:
+This guide covered the following tasks:
 
-✅ Define data models with schemas and relationships  
-✅ Add business context and rules  
-✅ Provide golden examples for guidance  
-✅ Generate SQL from natural language  
-✅ Execute queries (optional)  
-✅ Add feedback to improve results  
-✅ Leverage caching for performance  
+- Define data models with schemas and relationships
+- Add business context and rules
+- Provide golden examples for guidance
+- Generate SQL from natural language
+- Execute queries (optional)
+- Add feedback to improve results
+- Leverage caching for performance
 
-**Ready for production?** Check out the [Guides](../guides/projects.md) for advanced features and best practices.
+For advanced features and best practices, see the [Guides](../guides/projects.md).

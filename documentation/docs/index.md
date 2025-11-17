@@ -7,7 +7,7 @@ hide_title: true
 description: 'Natural language to SQL for your data'
 ---
 
-Welcome to the Text2Everything Python SDK documentation. This SDK provides a comprehensive Python interface for building intelligent text-to-SQL applications with advanced RAG (Retrieval-Augmented Generation) capabilities.
+The Text2Everything Python SDK provides a Python interface for building text-to-SQL applications with RAG (Retrieval-Augmented Generation) capabilities.
 
 ## What is Text2Everything?
 
@@ -72,10 +72,12 @@ print(f"Results: {answer.execution_result.result}")
 3. **[Configuration](configuration.md)** - Set up authentication and environments
 4. **[Guides](quick-start/README.md)** - Explore tutorials and quick start guides
 
-## Key Features
+## SDK Features
 
-- **High Accuracy**: Leverage schema metadata, business context, and examples for precise SQL
-- **Performance**: Built-in caching and intelligent retrieval for fast responses
-- **Continuous Learning**: Feedback system that improves quality over time
-- **Easy Integration**: Simple Python API with comprehensive error handling
-- **Production Ready**: Bulk operations, validation, and enterprise features
+The SDK includes:
+
+- Schema metadata, business context, and examples for SQL generation
+- Built-in caching and retrieval
+- Feedback system for quality improvement
+- Python API with error handling
+- Bulk operations and validation

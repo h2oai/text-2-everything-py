@@ -4,9 +4,9 @@ title: Migrations
 
 ### 0.1.3
 
-- Renamed parameter `h2ogpte_session_id` to `chat_session_id` across Chat and Executions.
-- Refactored Chat methods to require `chat_session_id`.
-- Cleaned up deprecated parameters and improved consistency.
+- Version 0.1.3 renames the parameter `h2ogpte_session_id` to `chat_session_id` across Chat and Executions.
+- Chat methods now require `chat_session_id`.
+- This version removes deprecated parameters and improves consistency.
 
 Update your calls:
 
