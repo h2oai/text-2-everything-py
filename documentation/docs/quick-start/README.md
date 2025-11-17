@@ -44,7 +44,7 @@ Follow this guide if you know the basics and want to build something real.
 ---
 
 ### [Quick reference](quick-reference.md)
-Audience: Returning users
+- Audience: Returning users
 Time: 2–5 minutes (lookup)
 Level: Intermediate
 
