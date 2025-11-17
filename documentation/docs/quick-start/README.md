@@ -1,100 +1,94 @@
-# Quick Start Guides
+# Quick start guides
 
-Welcome to the Text2Everything SDK quick start guides! Choose your path based on your experience level and goals.
+Use these guides to get productive with the Text2Everything SDK. Pick the path that matches what you need right now.
 
-## 🚀 Choose Your Path
+## Choose a path
 
-**I want to...**
+Pick one of these guides:
 
-- **Try the SDK quickly** → [5-Minute Quick Start](five-minute-start.md)
-- **Build a real app** → [Complete SDK Example](complete-example.md)
-- **Look up a command** → [Quick Reference](quick-reference.md)
-- **Integrate with H2O Drive** → [Advanced Integration](developer-starter-guide.md)
-- **Understand a feature** → [Core Guides](../guides/projects.md)
-- **Learn advanced topics** → [How-To Guides](../how-to/bulk_operations.md)
+* Try the SDK quickly: [5-minute quick start](five-minute-start.md)
+* Build a real app: [Complete SDK example](complete-example.md)
+* Look up a command: [Quick reference](quick-reference.md)
+* Integrate with H2O Drive: [Advanced integration](developer-starter-guide.md)
+* Understand a feature: [Core guides](../guides/projects.md)
+* Learn advanced topics: [How-to guides](../how-to/bulk_operations.md)
 
+### [5-minute quick start](five-minute-start.md)
+- Audience: First-time users
+- Level: Beginner
 
-### 1. [5-Minute Quick Start](five-minute-start.md)
-**For**: First-time users who want to get started immediately  
-**Time**: 5 minutes  
-**Level**: Beginner
+This guide shows you how to:
+* Install and configure the SDK
+* Create a first project
+* Generate SQL from natural language
+* Run everything locally (no external dependencies)
 
-Learn the absolute basics:
-- Install and configure the SDK
-- Create your first project
-- Generate SQL from natural language
-- No external dependencies required
-
-**Start here if**: You're new to Text2Everything and want to see it in action.
+Start here if you are new and want a fast overview.
 
 ---
 
-### 2. [Complete SDK Example](complete-example.md)
-**For**: Developers building production applications  
-**Time**: 15 minutes  
-**Level**: Beginner to Intermediate
+### [Complete SDK example](complete-example.md)
+- Audience: Developers building production apps
+- Level: Beginner–Intermediate
 
-Build a realistic e-commerce analytics system:
-- Define multi-table schemas
-- Add business context and rules
-- Create golden query examples
-- Generate and execute SQL
-- Implement feedback loops
-- Use execution caching
+This guide helps you build a realistic e‑commerce analytics workflow:
+* Define multi-table schemas
+* Add business context and rules
+* Create golden query examples
+* Generate and execute SQL
+* Implement feedback loops
+* Use execution caching
 
-**Start here if**: You understand the basics and want to build a real application.
-
----
-
-### 3. [Quick Reference](quick-reference.md)
-**For**: Developers who need a cheat sheet  
-**Time**: 2-5 minutes (lookup)  
-**Level**: Intermediate
-
-Quick command reference:
-- Common SDK operations
-- Code snippets
-- Error solutions
-- Best practices
-
-**Start here if**: You've completed one of the tutorials and need quick reference.
+Follow this guide if you know the basics and want to build something real.
 
 ---
 
-### 4. [Advanced Integration](developer-starter-guide.md)
-**For**: Enterprise users integrating with H2O ecosystem  
-**Time**: 30+ minutes  
-**Level**: Advanced
+### [Quick reference](quick-reference.md)
+Audience: Returning users
+Time: 2–5 minutes (lookup)
+Level: Intermediate
 
-Complete enterprise integration with:
-- H2O Drive data management
-- Snowflake connectors
-- CustomGPT configuration
-- Agent orchestration
-- Production deployment
+Includes:
+* Common SDK operations
+* Copyable code snippets
+* Frequent error solutions
+* Recommended practices
 
-**Start here if**: You need full H2O ecosystem integration with Drive, GPTE UI, and agents.
-
-## 🚦 Prerequisites
-
-### All Guides
-- Have a Text2Everything API endpoint (default value should work)
-- Have access to your platform / access token token
-- Have an H2OGPTe API Key
-- Have access to a workspace with Workspace Owner permission
-- Python 3.9+
-
-### Advanced Integration Only
-- H2O Drive account
-- H2O GPTE UI access
-- Snowflake database (optional)
-
-## 📞 Need Help?
-
-- **Documentation Issues**: Check the [How-To Guides](../how-to/bulk_operations.md)
-- **API Questions**: Review the [Core Guides](../guides/projects.md)
-- **Support**: Contact support@h2o.ai
+Use after completing a tutorial when you need a quick lookup.
 
 ---
 
-**Ready to start?** Pick your path above and begin your Text2Everything journey! 🚀
+### [Advanced integration](developer-starter-guide.md)
+- Audience: Enterprise / platform teams
+- Level: Advanced
+
+Covers full ecosystem integration:
+* H2O Drive data management
+* Snowflake connectors (optional)
+* Custom GPT configuration
+* Agent orchestration
+* Production deployment patterns
+
+Follow this guide if you need end‑to‑end integration with Drive, GPTe UI, and agents.
+
+## Before you begin
+
+### All guides
+* Text2Everything API endpoint (default usually works)
+* Platform access token
+* H2O GPTe API key
+* Workspace with Workspace Owner permission
+* Python 3.9+
+
+### [Advanced integration only]
+* H2O Drive account
+* H2O GPTe UI access
+* Snowflake database (optional)
+
+## Additional resources
+
+* Troubleshooting: See [How-to guides](../how-to/bulk_operations.md)
+* API details: See [Core guides](../guides/projects.md)
+* Support: Email support@h2o.ai
+
+---
