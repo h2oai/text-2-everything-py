@@ -91,15 +91,14 @@ print("Explanation:", response.explanation)
 
 ## Sample output
 
-```
-Generated SQL: SELECT COUNT(*) FROM customers;
-Explanation: This query counts the total number of customer records in the customers table.
+```text
+SQL: SELECT COUNT(*) FROM customers;
+Explanation: Counts total customer records.
 ```
 
-## Next Steps
+## Optional: execute SQL
 
-### Execute SQL (Optional)
-If you have a database connector:
+If you have a database connector configured:
 
 ```python
 # Execute the generated SQL
@@ -141,16 +140,16 @@ for query in queries:
 
 ## Troubleshooting
 
-### Authentication Error
-Check your environment variables are set correctly:
+### Authentication errors
+Confirm environment variables:
 ```python
 import os
 print(os.getenv('TEXT2EVERYTHING_URL'))
 print(os.getenv('T2E_ACCESS_TOKEN'))
 ```
 
-### Schema Validation Error
-Ensure your schema follows the required format:
+### Schema validation errors
+Ensure schema contains table and columns:
 ```python
 # Table schemas must have 'table' and 'columns'
 schema_data = {
@@ -163,13 +162,11 @@ schema_data = {
 }
 ```
 
-## What's Next?
+## Next steps
 
-You've learned the basics! Now explore:
+* [Complete example](complete-example.md): Build a production-style flow
+* [Schema metadata guide](../guides/schema_metadata.md): Advanced schema definition
+* [Chat guide](../guides/chat.md): Improve SQL generation
+* [Executions guide](../guides/executions.md): Execute and cache queries
 
-1. **[Complete Example](complete-example.md)** - Build a real application
-2. **[Schema Metadata Guide](../guides/schema_metadata.md)** - Advanced schema definition
-3. **[Chat Guide](../guides/chat.md)** - Fine-tune SQL generation
-4. **[Executions Guide](../guides/executions.md)** - Execute and cache queries
-
-**Ready for more?** Check out the [Complete Example](complete-example.md) for a full workflow! 🚀
+For a full walkthrough, see the complete example.
