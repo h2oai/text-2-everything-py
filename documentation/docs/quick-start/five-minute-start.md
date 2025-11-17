@@ -1,25 +1,21 @@
----
-title: 5-Minute Quick Start
----
+# 5-minute quick start
 
-# 5-Minute Quick Start
+Generate SQL from natural language using the Text2Everything SDK. This guide walks through the minimal steps: install, configure, define a small schema, add context, create a chat session, and produce a query.
 
-Get started with Text2Everything SDK in minutes. This guide shows you the absolute basics to generate SQL from natural language.
+## Before you begin
 
-## Prerequisites
+* Python 3.9 or later
+* Text2Everything API endpoint and access token
 
-- Python 3.9 or higher
-- Text2Everything API access
-
-## Installation
+## Install
 
 ```bash
 pip install h2o-text-2-everything
 ```
 
-## Configuration
+## Configure
 
-Set up your environment variables:
+Set environment variables (use your real endpoint, token, and workspace):
 
 ```bash
 export TEXT2EVERYTHING_URL="https://your-api.com"
@@ -27,26 +23,26 @@ export T2E_ACCESS_TOKEN="your-access-token"
 export T2E_WORKSPACE_NAME="workspaces/your-workspace"
 ```
 
-## Quick Start Code
+## Example
 
 ```python
 from text2everything_sdk import Text2EverythingClient
 
-# 1. Initialize client
+# Initialize client
 client = Text2EverythingClient(
     base_url="https://your-api.com",
     access_token="your-token",
     workspace_name="workspaces/prod"
 )
 
-# 2. Create a project
+# Create a project
 project = client.projects.create(
-    name="My First Project",
-    description="Learning Text2Everything"
+    name="quick_start_project",
+    description="Quick start demo"
 )
 
-# 3. Add a simple table schema
-schema = client.schema_metadata.create(
+# Add a table schema
+client.schema_metadata.create(
     project_id=project.id,
     name="customers_table",
     schema_data={
@@ -62,38 +58,38 @@ schema = client.schema_metadata.create(
     }
 )
 
-# 4. Add business context
-context = client.contexts.create(
+# Add business context
+client.contexts.create(
     project_id=project.id,
-    name="Business Rules",
-    content="Customers are users who have registered for an account."
+    name="business_rules",
+    content="Customers are registered users."
 )
 
-# 5. Create a chat session
+# Create a chat session
 session = client.chat_sessions.create(
     project_id=project.id,
-    name="First Session"
+    name="initial_session"
 )
 
-# 6. Generate SQL from natural language!
+# Generate SQL from a natural language question
 response = client.chat.chat_to_sql(
     project_id=project.id,
     chat_session_id=session.id,
     query="How many customers do we have?"
 )
 
-print(f"Generated SQL: {response.sql_query}")
-print(f"Explanation: {response.explanation}")
+print("SQL:", response.sql_query)
+print("Explanation:", response.explanation)
 ```
 
-## What Just Happened?
+## Summary
 
-1. **Created a project** - Organizes all your data
-2. **Defined a schema** - Told the AI about your database structure
-3. **Added context** - Gave the AI business knowledge
-4. **Generated SQL** - Converted natural language to SQL!
+1. Created a project to group related assets.
+2. Added a schema so the system understands table structure.
+3. Added context to supply business meaning.
+4. Generated SQL from a natural language question.
 
-## Sample Output
+## Sample output
 
 ```
 Generated SQL: SELECT COUNT(*) FROM customers;
@@ -117,13 +113,13 @@ answer = client.chat.chat_to_answer(
 print(f"Answer: {answer.execution_result.result}")
 ```
 
-### Learn More
+## Explore more
 
-- **[Complete Example](complete-example.md)** - See a full realistic example
-- **[Core Guides](../guides/projects.md)** - Deep dive into specific features
-- **[Quick Reference](quick-reference.md)** - Common commands cheat sheet
+* [Complete example](complete-example.md): Full workflow
+* [Core guides](../guides/projects.md): Feature details
+* [Quick reference](quick-reference.md): Common operations
 
-### Try Different Queries
+## Try more queries
 
 ```python
 # Ask more complex questions
