@@ -25,7 +25,7 @@ except ValidationError as e:
     print(e.response_data)
 ```
 
-### Chat/Executions gotchas
+### Common Issues with Chat and Executions
 
 - `chat_session_id` is required for chat methods.
 - Executions: provide exactly one of `chat_message_id` or `sql_query`.
