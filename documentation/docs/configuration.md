@@ -2,16 +2,20 @@
 title: Configuration
 ---
 
-Env vars:
+## Environment Variables
 
 ```bash
 export TEXT2EVERYTHING_BASE_URL="https://your-api-endpoint.com" 
 export T2E_ACCESS_TOKEN="your-access-token"
 export T2E_WORKSPACE_NAME="workspaces/your-workspace"
 ```
-Note: On a regular install you shouldn't need to provide a BASE URL
 
-Using env vars:
+:::info note
+On a regular install you do not need to provide a BASE URL.
+:::
+
+
+## Using Environment Variables
 ```python
 import os
 from text2everything_sdk import Text2EverythingClient
@@ -23,7 +27,7 @@ client = Text2EverythingClient(
 )
 ```
 
-Advanced:
+## Advanced Configuration
 ```python
 client = Text2EverythingClient(
     base_url="https://...",
@@ -35,7 +39,7 @@ client = Text2EverythingClient(
 )
 ```
 
-Context manager:
+## Using Context Manager
 ```python
 from text2everything_sdk import Text2EverythingClient
 
