@@ -2,7 +2,7 @@
 
 A condensed cheat sheet for common SDK operations.
 
-## 🚀 Quick Setup Commands
+## Quick Setup Commands
 
 ### Environment Setup
 ```bash
@@ -23,7 +23,7 @@ SNOWFLAKE_WAREHOUSE=COMPUTE_WH
 EOF
 ```
 
-## 📁 Data Structure Template
+## Data Structure Template
 
 ```
 your_project_data/
@@ -38,7 +38,7 @@ your_project_data/
     └── sales_queries.json
 ```
 
-## 🔧 Essential Code Snippets
+## Essential Code Snippets
 
 ### 1. H2O Drive Connection
 ```python
@@ -135,7 +135,7 @@ answer_response = sdk_client.chat.chat_to_answer(
 )
 ```
 
-## 📋 Data Format Examples
+## Data Format Examples
 
 ### Schema Metadata (JSON)
 ```json
@@ -192,7 +192,7 @@ async def quick_test():
     # Snowflake (if configured)
     if snowflake_connector:
         ok = sdk_client.connectors.test_connection(snowflake_connector.id)
-        print(f"Snowflake: {'✅' if ok else '❌'}")
+        print(f"Snowflake: {'OK' if ok else 'FAILED'}")
 
 await quick_test()
 ```
@@ -206,12 +206,12 @@ required_vars = [
 
 missing = [var for var in required_vars if not os.getenv(var)]
 if missing:
-    print(f"❌ Missing: {missing}")
+    print(f"Error: Missing: {missing}")
 else:
-    print("✅ All required variables set")
+    print("All required variables set")
 ```
 
-## 🎯 H2OGPTE UI Configuration
+## H2OGPTE UI Configuration
 
 ### CustomGPT Setup Checklist
 - [ ] Navigate to `https://h2ogpte.your_domain_id.dedicated.h2o.ai/`
@@ -232,7 +232,7 @@ TEXT2EVERYTHING_CONNECTOR_ID = "<your_connector_id>"
 T2E_ACCESS_TOKEN = "<your_access_token>"
 ```
 
-## 🚨 Common Error Solutions
+## Common Error Solutions
 
 ### H2O Drive Connection Failed
 ```python
@@ -243,9 +243,9 @@ print("Token set:", bool(os.getenv('H2O_CLOUD_CLIENT_PLATFORM_TOKEN')))
 # Test discovery
 try:
     discovery = h2o_discovery.discover()
-    print("✅ Discovery successful")
+    print("Discovery successful")
 except Exception as e:
-    print(f"❌ Discovery failed: {e}")
+    print(f"Error: Discovery failed: {e}")
 ```
 
 ### Text2Everything Authentication Failed
@@ -262,9 +262,9 @@ try:
         workspace_name=os.getenv('T2E_WORKSPACE_NAME')
     )
     projects = test_client.projects.list()
-    print(f"✅ Connected, {len(projects)} projects")
+    print(f"Connected, {len(projects)} projects")
 except Exception as e:
-    print(f"❌ Failed: {e}")
+    print(f"Error: Failed: {e}")
 ```
 
 ### Data Upload Validation Errors
@@ -280,9 +280,9 @@ table_schema = {
 # Validate schema before upload
 errors = sdk_client.schema_metadata.validate_schema(table_schema, "table")
 if errors:
-    print(f"❌ Validation errors: {errors}")
+    print(f"Validation errors: {errors}")
 else:
-    print("✅ Schema is valid")
+    print("Schema is valid")
 
 # Validate dimension schema
 dimension_schema = {
@@ -297,12 +297,12 @@ dimension_schema = {
 
 errors = sdk_client.schema_metadata.validate_schema(dimension_schema, "dimension")
 if errors:
-    print(f"❌ Dimension errors: {errors}")
+    print(f"Dimension errors: {errors}")
 else:
-    print("✅ Dimension valid")
+    print("Dimension valid")
 ```
 
-## 📚 Useful Commands
+## Useful Commands
 
 ### List Resources
 ```python
@@ -335,7 +335,7 @@ def batch_upload(items, batch_size=10):
         print(f"Batch {i//batch_size + 1}: {len(result)} uploaded")
 ```
 
-## 🔗 Quick Links
+## Quick Links
 
 - [5-Minute Quick Start](five-minute-start.md)
 - [Complete SDK Example](complete-example.md)
@@ -345,4 +345,4 @@ def batch_upload(items, batch_size=10):
 
 ---
 
-*Keep this reference handy for quick lookups during development! 📖*
+*Keep this reference handy for quick lookups during development.*
