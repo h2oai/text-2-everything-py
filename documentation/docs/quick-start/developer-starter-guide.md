@@ -79,7 +79,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Connect to H2O Drive
-print("🔌 Connecting to H2O Drive...")
+print("Connecting to H2O Drive...")
 
 try:
     # Discover H2O services
@@ -89,14 +89,14 @@ try:
     drive_client = h2o_drive.connect(discovery=discovery)
     bucket = drive_client.user_bucket()
     
-    print("✅ Connected to H2O Drive successfully!")
+    print("Connected to H2O Drive successfully")
     
     # Test connection
     objects = await bucket.list_objects()
-    print(f"📁 Found {len(objects)} objects in your Drive")
+    print(f"Found {len(objects)} objects in your Drive")
     
 except Exception as e:
-    print(f"❌ Failed to connect to H2O Drive: {e}")
+    print(f"Error: Failed to connect to H2O Drive: {e}")
     print("Please check your H2O_CLOUD_ENVIRONMENT and H2O_CLOUD_CLIENT_PLATFORM_TOKEN")
     raise
 ```
@@ -132,7 +132,7 @@ def load_local_project_data(project_path: Path) -> Dict[str, List[Tuple[str, Any
                     data = json.load(f)
                     project_data["schema_metadata"].append((str(json_file), data))
             except Exception as e:
-                print(f"⚠️ Error loading {json_file}: {e}")
+                print(f"Warning: Error loading {json_file}: {e}")
     
     # Load contexts (JSON and TXT files)
     contexts_path = project_path / "contexts"
@@ -144,7 +144,7 @@ def load_local_project_data(project_path: Path) -> Dict[str, List[Tuple[str, Any
                     data = json.load(f)
                     project_data["contexts"].append((str(json_file), data))
             except Exception as e:
-                print(f"⚠️ Error loading {json_file}: {e}")
+                print(f"Warning: Error loading {json_file}: {e}")
         
         # Text files
         for txt_file in contexts_path.glob("**/*.txt"):
@@ -153,7 +153,7 @@ def load_local_project_data(project_path: Path) -> Dict[str, List[Tuple[str, Any
                     data = f.read()
                     project_data["contexts"].append((str(txt_file), data))
             except Exception as e:
-                print(f"⚠️ Error loading {txt_file}: {e}")
+                print(f"Warning: Error loading {txt_file}: {e}")
     
     # Load golden examples
     examples_path = project_path / "golden_examples"
@@ -164,7 +164,7 @@ def load_local_project_data(project_path: Path) -> Dict[str, List[Tuple[str, Any
                     data = json.load(f)
                     project_data["golden_examples"].append((str(json_file), data))
             except Exception as e:
-                print(f"⚠️ Error loading {json_file}: {e}")
+                print(f"Warning: Error loading {json_file}: {e}")
     
     return project_data
 
@@ -172,7 +172,7 @@ def load_local_project_data(project_path: Path) -> Dict[str, List[Tuple[str, Any
 local_data_path = Path("path/to/your/data")  # Update this path
 project_data = load_local_project_data(local_data_path)
 
-print(f"📊 Loaded {sum(len(files) for files in project_data.values())} total files")
+print(f"Loaded {sum(len(files) for files in project_data.values())} total files")
 ```
 
 ### 1.4 Upload to H2O Drive
@@ -192,7 +192,7 @@ async def upload_data_to_drive(bucket, project_data: Dict[str, List[Tuple[str, A
         if not files:
             continue
             
-        print(f"📤 Uploading {len(files)} {data_type} files...")
+        print(f"Uploading {len(files)} {data_type} files...")
         
         for file_path, data in files:
             filename = Path(file_path).name
@@ -214,12 +214,12 @@ async def upload_data_to_drive(bucket, project_data: Dict[str, List[Tuple[str, A
                 os.remove(temp_path)
                 
                 upload_results[data_type]["success"] += 1
-                print(f"  ✅ Uploaded {filename}")
+                print(f"  Uploaded {filename}")
                 
             except Exception as e:
                 upload_results[data_type]["failed"] += 1
                 upload_results[data_type]["errors"].append(f"{filename}: {str(e)}")
-                print(f"  ❌ Failed to upload {filename}: {e}")
+                print(f"  Error: Failed to upload {filename}: {e}")
                 
                 if 'temp_path' in locals() and os.path.exists(temp_path):
                     os.remove(temp_path)
@@ -233,7 +233,7 @@ upload_results = await upload_data_to_drive(bucket, project_data, project_name)
 # Display results
 total_success = sum(r["success"] for r in upload_results.values())
 total_failed = sum(r["failed"] for r in upload_results.values())
-print(f"📈 Upload complete: {total_success} successful, {total_failed} failed")
+print(f"Upload complete: {total_success} successful, {total_failed} failed")
 ```
 
 ---
@@ -253,7 +253,7 @@ from text2everything_sdk.exceptions import (
 )
 
 # Initialize Text2Everything SDK
-print("🔌 Initializing Text2Everything SDK...")
+print("Initializing Text2Everything SDK...")
 
 try:
     sdk_client = Text2EverythingClient(
@@ -263,9 +263,9 @@ try:
         timeout=200,
         max_retries=1
     )
-    print("✅ Text2Everything SDK initialized successfully")
+    print("Text2Everything SDK initialized successfully")
 except Exception as e:
-    print(f"❌ SDK initialization failed: {e}")
+    print(f"Error: SDK initialization failed: {e}")
     raise
 ```
 
@@ -274,14 +274,14 @@ except Exception as e:
 ```python
 # List existing projects
 t2e_projects = sdk_client.projects.list()
-print(f"📋 Found {len(t2e_projects)} existing projects")
+print(f"Found {len(t2e_projects)} existing projects")
 
 # Option 1: Create a new project
 project = sdk_client.projects.create(
     name="H2O Drive Integration Project",
     description="Project created for H2O Drive to Text2Everything integration"
 )
-print(f"✅ Created project: {project.name} (ID: {project.id})")
+print(f"Created project: {project.name} (ID: {project.id})")
 
 # Option 2: Use existing project
 # project = t2e_projects[0]  # Select first existing project
@@ -300,7 +300,7 @@ drive_manager = DriveManager(bucket)
 selected_drive_project = "home/my_uploaded_project"  # Your uploaded project name
 project_data = await drive_manager.load_project_data(selected_drive_project)
 
-print(f"📥 Loaded data from H2O Drive:")
+print("Loaded data from H2O Drive:")
 for data_type, files in project_data.items():
     print(f"   - {data_type}: {len(files)} files")
 ```
@@ -311,7 +311,7 @@ for data_type, files in project_data.items():
 # Prepare data for SDK
 sdk_ready_data = prepare_data_for_sdk(project_data)
 
-print("🔧 Data prepared for Text2Everything:")
+print("Data prepared for Text2Everything:")
 for data_type, items in sdk_ready_data.items():
     print(f"   - {data_type}: {len(items)} items")
 
@@ -321,39 +321,39 @@ upload_results = {}
 try:
     # Upload contexts
     if sdk_ready_data.get('contexts'):
-        print(f"📤 Uploading {len(sdk_ready_data['contexts'])} contexts...")
+        print(f"Uploading {len(sdk_ready_data['contexts'])} contexts...")
         contexts = sdk_client.contexts.bulk_create(
             project_id=project.id,
             contexts=sdk_ready_data['contexts']
         )
         upload_results['contexts'] = len(contexts)
-        print(f"   ✅ {len(contexts)} contexts uploaded")
+        print(f"   {len(contexts)} contexts uploaded")
 
     # Upload schema metadata
     if sdk_ready_data.get('schema_metadata'):
-        print(f"📤 Uploading {len(sdk_ready_data['schema_metadata'])} schema metadata items...")
+        print(f"Uploading {len(sdk_ready_data['schema_metadata'])} schema metadata items...")
         schemas = sdk_client.schema_metadata.bulk_create(
             project_id=project.id,
             schema_metadata_list=sdk_ready_data['schema_metadata'],
             validate=True
         )
         upload_results['schema_metadata'] = len(schemas)
-        print(f"   ✅ {len(schemas)} schema metadata items uploaded")
+        print(f"{len(schemas)} schema metadata items uploaded")
 
     # Upload golden examples
     if sdk_ready_data.get('golden_examples'):
-        print(f"📤 Uploading {len(sdk_ready_data['golden_examples'])} golden examples...")
+        print(f"Uploading {len(sdk_ready_data['golden_examples'])} golden examples...")
         examples = sdk_client.golden_examples.bulk_create(
             project_id=project.id,
             golden_examples=sdk_ready_data['golden_examples']
         )
         upload_results['golden_examples'] = len(examples)
-        print(f"   ✅ {len(examples)} golden examples uploaded")
+        print(f"{len(examples)} golden examples uploaded")
 
-    print("🎉 All data uploaded successfully to Text2Everything!")
+    print("All data uploaded successfully to Text2Everything")
 
 except Exception as e:
-    print(f"❌ Upload failed: {e}")
+    print(f"Error: Upload failed: {e}")
     raise
 ```
 
@@ -375,7 +375,7 @@ SNOWFLAKE_CONFIG = {
     "role": "ANALYST_ROLE"  # Optional: adjust as needed
 }
 
-print("📋 Snowflake Configuration:")
+print("Snowflake Configuration:")
 print(f"   Account: {SNOWFLAKE_CONFIG['account']}")
 print(f"   Database: {SNOWFLAKE_CONFIG['database']}")
 print(f"   Warehouse: {SNOWFLAKE_CONFIG['warehouse']}")
@@ -385,7 +385,7 @@ print(f"   Warehouse: {SNOWFLAKE_CONFIG['warehouse']}")
 
 ```python
 # Create Snowflake connector
-print("🔌 Creating Snowflake connector...")
+print("Creating Snowflake connector...")
 
 try:
     snowflake_connector = sdk_client.connectors.create(
@@ -403,19 +403,19 @@ try:
         }
     )
     
-    print("✅ Snowflake connector created successfully!")
+    print("Snowflake connector created successfully")
     print(f"   Connector ID: {snowflake_connector.id}")
     print(f"   Name: {snowflake_connector.name}")
     
     # Test the connection
     connection_ok = sdk_client.connectors.test_connection(snowflake_connector.id)
     if connection_ok:
-        print("✅ Snowflake connection test successful!")
+        print("Snowflake connection test successful")
     else:
-        print("⚠️ Snowflake connection test failed")
+        print("Warning: Snowflake connection test failed")
     
 except Exception as e:
-    print(f"❌ Failed to create Snowflake connector: {e}")
+    print(f"Error: Failed to create Snowflake connector: {e}")
     snowflake_connector = None
 ```
 
@@ -426,7 +426,7 @@ except Exception as e:
 all_connectors = sdk_client.connectors.list()
 snowflake_connectors = [c for c in all_connectors if c.db_type.lower() == "snowflake"]
 
-print(f"📋 Found {len(snowflake_connectors)} Snowflake connector(s):")
+print(f"Found {len(snowflake_connectors)} Snowflake connector(s):")
 for connector in snowflake_connectors:
     print(f"   • {connector.name} (ID: {connector.id})")
     print(f"     Database: {connector.database}")
@@ -435,7 +435,7 @@ for connector in snowflake_connectors:
 # Store connector ID for future use
 if snowflake_connector:
     SNOWFLAKE_CONNECTOR_ID = snowflake_connector.id
-    print(f"💾 Snowflake Connector ID: {SNOWFLAKE_CONNECTOR_ID}")
+    print(f"Snowflake Connector ID: {SNOWFLAKE_CONNECTOR_ID}")
 ```
 
 ---
@@ -602,26 +602,26 @@ Now that the agent environment is configured, you can test the CustomGPT:
 async def end_to_end_workflow_test():
     """Complete end-to-end workflow test."""
     
-    print("🚀 Starting end-to-end workflow test...")
+    print("Starting end-to-end workflow test...")
     
     # 1. Verify H2O Drive connection
-    print("\n1️⃣ Testing H2O Drive connection...")
+    print("\n1. Testing H2O Drive connection...")
     objects = await bucket.list_objects()
-    print(f"   ✅ H2O Drive: {len(objects)} objects accessible")
+    print(f"H2O Drive: {len(objects)} objects accessible")
     
     # 2. Verify Text2Everything connection
-    print("\n2️⃣ Testing Text2Everything connection...")
+    print("\n2. Testing Text2Everything connection...")
     projects = sdk_client.projects.list()
-    print(f"   ✅ Text2Everything: {len(projects)} projects accessible")
+    print(f"Text2Everything: {len(projects)} projects accessible")
     
     # 3. Test Snowflake connector (if available)
     if snowflake_connector:
-        print("\n3️⃣ Testing Snowflake connector...")
+        print("\n3. Testing Snowflake connector...")
         connection_ok = sdk_client.connectors.test_connection(snowflake_connector.id)
-        print(f"   ✅ Snowflake: Connection {'successful' if connection_ok else 'failed'}")
+        print(f"Snowflake: Connection {'successful' if connection_ok else 'failed'}")
     
     # 4. Test SQL generation
-    print("\n4️⃣ Testing SQL generation...")
+    print("\n4. Testing SQL generation...")
     try:
         # Create a chat session
         session = sdk_client.chat_sessions.create(project_id=project.id)
@@ -633,14 +633,14 @@ async def end_to_end_workflow_test():
             query="Show me a count of all records in the main table"
         )
         
-        print(f"   ✅ Generated SQL: {response.sql_query[:100]}...")
+        print(f"Generated SQL: {response.sql_query[:100]}...")
         
     except Exception as e:
-        print(f"   ❌ SQL generation failed: {e}")
+        print(f"   Error: SQL generation failed: {e}")
     
     # 5. Test with Snowflake execution (if connector available)
     if snowflake_connector:
-        print("\n5️⃣ Testing SQL execution with Snowflake...")
+        print("\n5. Testing SQL execution with Snowflake...")
         try:
             answer_response = sdk_client.chat.chat_to_answer(
                 project_id=project.id,
@@ -648,13 +648,13 @@ async def end_to_end_workflow_test():
                 query="Count the total number of records",
                 connector_id=snowflake_connector.id
             )
-            print(f"   ✅ Query executed successfully")
-            print(f"   📊 Result: {answer_response.answer[:200]}...")
+            print(f"Query executed successfully")
+            print(f"   Result: {answer_response.answer[:200]}...")
             
         except Exception as e:
-            print(f"   ⚠️ SQL execution test skipped: {e}")
+            print(f"   Warning: SQL execution test skipped: {e}")
     
-    print("\n🎉 End-to-end workflow test complete!")
+    print("\nEnd-to-end workflow test complete")
 
 # Run the test
 await end_to_end_workflow_test()
@@ -677,7 +677,7 @@ def production_query_example():
         "What's the average order value by customer segment?"
     ]
     
-    print("📊 Production Query Examples:")
+    print("Production Query Examples:")
     
     for i, query in enumerate(business_queries, 1):
         print(f"\n{i}. Query: {query}")
@@ -703,7 +703,7 @@ def production_query_example():
                 print(f"   Result: {answer_response.answer[:100]}...")
             
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            print(f"   Error: {e}")
 
 # Run production examples
 production_query_example()
@@ -726,9 +726,9 @@ print("H2O Token:", os.getenv('H2O_CLOUD_CLIENT_PLATFORM_TOKEN')[:10] + "..." if
 # Check token validity
 try:
     discovery = h2o_discovery.discover()
-    print("✅ H2O Discovery successful")
+    print("H2O Discovery successful")
 except Exception as e:
-    print(f"❌ H2O Discovery failed: {e}")
+    print(f"Error: H2O Discovery failed: {e}")
 ```
 
 #### 2. Text2Everything API Issues
@@ -748,9 +748,9 @@ try:
         base_url=os.getenv('TEXT2EVERYTHING_URL')
     )
     projects = test_client.projects.list()
-    print(f"✅ API connection successful, {len(projects)} projects found")
+    print(f"API connection successful, {len(projects)} projects found")
 except Exception as e:
-    print(f"❌ API connection failed: {e}")
+    print(f"Error: API connection failed: {e}")
 ```
 
 #### 3. Snowflake Connector Issues
@@ -775,10 +775,10 @@ def debug_snowflake_connection():
             warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
             database=os.getenv('SNOWFLAKE_DATABASE')
         )
-        print("✅ Direct Snowflake connection successful")
+        print("Direct Snowflake connection successful")
         conn.close()
     except Exception as e:
-        print(f"❌ Direct Snowflake connection failed: {e}")
+        print(f"Error: Direct Snowflake connection failed: {e}")
 
 debug_snowflake_connection()
 ```
@@ -800,9 +800,9 @@ table_schema = {
 
 errors = sdk_client.schema_metadata.validate_schema(table_schema, "table")
 if errors:
-    print(f"❌ Validation errors: {errors}")
+    print(f"Validation errors: {errors}")
 else:
-    print("✅ Schema is valid")
+    print("Schema is valid")
 
 # Validate dimension schema
 dimension_schema = {
@@ -820,9 +820,9 @@ dimension_schema = {
 
 errors = sdk_client.schema_metadata.validate_schema(dimension_schema, "dimension")
 if errors:
-    print(f"❌ Dimension validation errors: {errors}")
+    print(f"Dimension validation errors: {errors}")
 else:
-    print("✅ Dimension schema is valid")
+    print("Dimension schema is valid")
 
 # Validate metric schema
 metric_schema = {
@@ -840,9 +840,9 @@ metric_schema = {
 
 errors = sdk_client.schema_metadata.validate_schema(metric_schema, "metric")
 if errors:
-    print(f"❌ Metric validation errors: {errors}")
+    print(f"Metric validation errors: {errors}")
 else:
-    print("✅ Metric schema is valid")
+    print("Metric schema is valid")
 ```
 
 #### 5. Performance Optimization
@@ -857,7 +857,7 @@ async def optimized_upload(sdk_client, project_id, data, batch_size=10):
         if not items:
             continue
             
-        print(f"📤 Uploading {len(items)} {data_type} in batches of {batch_size}")
+        print(f"Uploading {len(items)} {data_type} in batches of {batch_size}")
         
         # Process in batches
         for i in range(0, len(items), batch_size):
@@ -880,10 +880,10 @@ async def optimized_upload(sdk_client, project_id, data, batch_size=10):
                         golden_examples=batch
                     )
                 
-                print(f"   ✅ Batch {i//batch_size + 1}: {len(result)} items uploaded")
+                print(f"Batch {i//batch_size + 1}: {len(result)} items uploaded")
                 
             except Exception as e:
-                print(f"   ❌ Batch {i//batch_size + 1} failed: {e}")
+                print(f"Error: Batch {i//batch_size + 1} failed: {e}")
 
 # Use optimized upload
 # await optimized_upload(sdk_client, project.id, sdk_ready_data)
@@ -903,11 +903,11 @@ If you encounter issues not covered here:
 
 After completing this guide, you should have:
 
-1. ✅ **Data in H2O Drive**: Your project data organized and uploaded
-2. ✅ **Text2Everything Project**: Configured with contexts, schemas, and examples
-3. ✅ **Snowflake Connector**: Database connectivity for SQL execution
-4. ✅ **CustomGPT Setup**: AI assistant configured for your data
-5. ✅ **Agent Environment**: Production-ready environment variables
+1. **Data in H2O Drive**: Your project data organized and uploaded
+2. **Text2Everything Project**: Configured with contexts, schemas, and examples
+3. **Snowflake Connector**: Database connectivity for SQL execution
+4. **CustomGPT Setup**: AI assistant configured for your data
+5. **Agent Environment**: Production-ready environment variables
 
 ### Recommended Next Actions
 
@@ -926,6 +926,5 @@ After completing this guide, you should have:
 
 ---
 
-**Happy coding! 🚀**
 
 *This guide was created to help developers and data scientists quickly get started with the Text2Everything ecosystem. For questions or improvements, please reach out to the H2O.ai team.*
